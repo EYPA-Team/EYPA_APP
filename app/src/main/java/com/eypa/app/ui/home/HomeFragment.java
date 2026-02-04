@@ -11,7 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +49,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar progressBar;
+    private LinearLayout errorLayout;
+    private Button btnRetry;
     private PostsAdapter adapter;
     private List<ContentItem> postList = new ArrayList<>();
     private Map<Integer, String> categoryMap = new HashMap<>();
@@ -93,6 +97,15 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         progressBar = view.findViewById(R.id.progress_bar);
+        errorLayout = view.findViewById(R.id.error_layout);
+        btnRetry = view.findViewById(R.id.btn_retry);
+
+        btnRetry.setOnClickListener(v -> {
+            errorLayout.setVisibility(View.GONE);
+            currentSeed = String.valueOf(System.currentTimeMillis());
+            currentPage = 1;
+            loadPosts();
+        });
 
         TypedValue typedValue = new TypedValue();
         requireContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
@@ -156,6 +169,7 @@ public class HomeFragment extends Fragment {
         if (isFirstLoad) {
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setAlpha(1f);
+            errorLayout.setVisibility(View.GONE);
         }
 
         ApiClient.getApiService().getContentItems(
@@ -219,6 +233,7 @@ public class HomeFragment extends Fragment {
                         recyclerView.animate().alpha(1f).setDuration(300).start();
                         if (isFirstLoad) {
                             recyclerView.setTranslationY(0f);
+                            errorLayout.setVisibility(View.VISIBLE);
                         }
                         Log.e("API_ERROR", "Response unsuccessful: " + response.code());
                     }
@@ -234,6 +249,7 @@ public class HomeFragment extends Fragment {
                     recyclerView.animate().alpha(1f).setDuration(300).start();
                     if (isFirstLoad) {
                         recyclerView.setTranslationY(0f);
+                        errorLayout.setVisibility(View.VISIBLE);
                     }
                     Log.e("API_FAILURE", "API call failed", t);
                 }
