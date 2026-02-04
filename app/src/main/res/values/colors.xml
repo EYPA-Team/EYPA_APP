@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="primary_green">#4CAF50</color>
+    <color name="primary_green_dark">#388E3C</color>
+    <color name="primary_green_light">#C8E6C9</color>
+    <color name="night_status_bar">#121212</color>
+    <color name="night_background">#121212</color>
+    <color name="night_surface">#1E1E1E</color>
+    <color name="night_text_primary">#E0E0E0</color>
+    <color name="night_text_secondary">#9E9E9E</color>
+    <color name="colorPrimary">@color/primary_green</color>
+    <color name="colorPrimaryDark">@color/primary_green_dark</color>
+    <color name="colorAccent">@color/primary_green</color>
+    <color name="darker_gray">#444444</color>
+    <color name="progress_color">#4CAF50</color>
+
+    <!-- 确保这些颜色名称与 themes.xml 中引用的完全一致 -->
+    <color name="light_toolbar_background">#FFFFFF</color>
+    <color name="light_navigation_background">#FFFFFF</color>
+    <color name="light_toolbar_icon_tint">#FF000000</color>
+    <color name="dark_toolbar_background">#121212</color>
+    <color name="dark_navigation_background">#121212</color>
+    <color name="dark_toolbar_icon_tint">#FFFFFFFF</color>
+</resources>

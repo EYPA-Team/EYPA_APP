@@ -1,0 +1,7 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 使用主题颜色，这样可以自适应深色/浅色模式 -->
+    <!-- colorControlHighlight 通常是一个半透明的叠加色，很适合做背景 -->
+    <solid android:color="?attr/colorControlHighlight" />
+    <corners android:radius="8dp" />
+</shape>

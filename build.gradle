@@ -1,0 +1,4 @@
+plugins {
+    // 只保留这一行，明确指定插件ID和版本，移除 alias(...) 那一行。
+    id 'com.android.application' version '8.5.0' apply false
+}

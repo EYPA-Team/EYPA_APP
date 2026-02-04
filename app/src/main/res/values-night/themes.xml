@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 应用的基础夜间主题 -->
+    <style name="Theme.EYPA_APP" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- ... (原有属性) ... -->
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/night_status_bar</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/primary_green</item>
+        <item name="colorSecondaryVariant">@color/primary_green</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="android:statusBarColor">@color/night_status_bar</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="cardBackgroundColor">@color/night_surface</item>
+        <item name="textColorPrimary">@color/night_text_primary</item>
+        <item name="textColorSecondary">@color/night_text_secondary</item>
+        <item name="toolbarBackground">@color/dark_toolbar_background</item>
+        <item name="navigationBackground">@color/dark_navigation_background</item>
+
+        <!-- V V V 关键修改：图标颜色改为白色 V V V -->
+        <item name="toolbarIconTint">@color/white</item>
+
+        <item name="android:textColorPrimary">@color/night_text_primary</item>
+        <item name="android:textColorSecondary">@color/night_text_secondary</item>
+        <item name="android:progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="navigationViewStyle">@style/Widget.App.NavigationView</item>
+        <item name="searchViewStyle">@style/Widget.App.SearchView</item>
+    </style>
+
+    <style name="Theme.Eypa.NoActionBar" parent="Theme.EYPA_APP">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="ActionButtonContainer">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Theme.EYPA_APP.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.EYPA_APP.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Widget.App.SearchView" parent="Widget.AppCompat.SearchView">
+    </style>
+
+    <color name="dialog_divider_bg">#121212</color>
+    <color name="dialog_handle_bg">#424242</color>
+
+</resources>

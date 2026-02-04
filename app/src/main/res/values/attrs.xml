@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      将所有自定义属性 (attr) 声明集中到这里，
+      确保日间和夜间模式都能找到它们的定义。
+    -->
+    <attr name="cardBackgroundColor" format="color|reference" />
+    <attr name="textColorPrimary" format="color|reference" />
+    <attr name="textColorSecondary" format="color|reference" />
+    <attr name="toolbarBackground" format="color|reference" />
+    <attr name="navigationBackground" format="color|reference" />
+    <attr name="toolbarIconTint" format="color|reference" />
+</resources>

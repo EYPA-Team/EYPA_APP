@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 应用的基础日间主题 -->
+    <style name="Theme.EYPA_APP" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- ... (颜色定义保持不变) ... -->
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/primary_green_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/primary_green_light</item>
+        <item name="colorSecondaryVariant">@color/primary_green</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <item name="cardBackgroundColor">@android:color/white</item>
+        <item name="textColorPrimary">@color/black</item>
+        <item name="textColorSecondary">@color/darker_gray</item>
+        <item name="toolbarBackground">@color/white</item> <!-- 确保 Toolbar 背景是白色 -->
+        <item name="navigationBackground">@color/light_navigation_background</item>
+
+        <!-- V V V 关键修改：图标颜色改为黑色 V V V -->
+        <item name="toolbarIconTint">@color/black</item>
+
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/darker_gray</item>
+        <item name="android:progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="navigationViewStyle">@style/Widget.App.NavigationView</item>
+        <item name="searchViewStyle">@style/Widget.App.SearchView</item>
+    </style>
+
+    <!-- ... (其他样式保持不变) ... -->
+    <style name="Theme.Eypa.NoActionBar" parent="Theme.EYPA_APP">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- ... (ProgressBarStyle, NavigationView, ActionButtonContainer 保持不变) ... -->
+    <style name="ProgressBarStyle" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:indeterminateTint">@color/progress_color</item>
+        <item name="android:indeterminateTintMode">src_in</item>
+    </style>
+
+    <style name="Widget.App.NavigationView" parent="Widget.MaterialComponents.NavigationView">
+        <item name="itemTextColor">?attr/textColorPrimary</item>
+        <item name="itemIconTint">?attr/textColorSecondary</item>
+        <item name="android:background">?attr/navigationBackground</item>
+    </style>
+
+    <style name="ActionButtonContainer">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- V V V 关键修复：日间模式下，Toolbar 上的文字应该是深色 V V V -->
+    <style name="Theme.EYPA_APP.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.EYPA_APP.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- V V V 关键修复：移除强制白色设置，让它自动适配 V V V -->
+    <style name="Widget.App.SearchView" parent="Widget.AppCompat.SearchView">
+        <!-- 不需要强制颜色，Light 主题会自动使用黑色文字 -->
+    </style>
+
+    <color name="dialog_divider_bg">#F5F5F5</color>
+    <color name="dialog_handle_bg">#E0E0E0</color>
+
+</resources>

@@ -1,0 +1,12 @@
+<!-- app/src/main/res/layout/item_content_comment_header.xml -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp"
+    android:text="评论"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:textColor="?android:attr/textColorPrimary" />

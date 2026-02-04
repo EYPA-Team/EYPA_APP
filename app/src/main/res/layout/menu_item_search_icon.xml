@@ -1,0 +1,17 @@
+<!-- app/src/main/res/layout/menu_item_search_icon.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_icon_container"
+    android:layout_width="?attr/actionBarSize"
+    android:layout_height="?attr/actionBarSize"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackgroundBorderless">
+
+    <!-- V V V 关键：为共享元素设置 transitionName V V V -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_search"
+        android:transitionName="search_bar_transition"/>
+</FrameLayout>

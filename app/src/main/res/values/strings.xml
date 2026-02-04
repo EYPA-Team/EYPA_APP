@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用名称 -->
+    <string name="app_name">EYPA Reader</string>
+    <string name="categories">分类</string>
+    <string name="tags">标签</string>
+    <string name="no_content_available">暂无内容</string>
+    <!-- 其他字符串 -->
+    <string name="placeholder_image">图片占位符</string>
+
+    <!-- 在这里添加缺失的字符串定义 -->
+    <string name="download">下载</string>
+    <string name="content_image">内容图片</string>
+    <string name="cover_image_or_video_poster">封面图片或视频预览图</string>
+    <string name="exo_controls_play_description">播放</string>
+    <string name="exo_controls_pause_description">暂停</string>
+    <string name="exo_controls_fullscreen_description">进入全屏模式</string>
+    <string name="exo_controls_fullscreen_exit_description">退出全屏模式</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_profile">我的</string>
+
+    <!-- Profile Fragment -->
+    <string name="profile_favorites">收藏</string>
+    <string name="profile_history">历史</string>
+    <string name="profile_settings">设置</string>
+</resources>
