@@ -39,7 +39,7 @@
 
     <!-- ... (ProgressBarStyle, NavigationView, ActionButtonContainer 保持不变) ... -->
     <style name="ProgressBarStyle" parent="Widget.AppCompat.ProgressBar">
-        <item name="android:indeterminateTint">@color/progress_color</item>
+        <item name="android:indeterminateTint">?attr/colorPrimary</item>
         <item name="android:indeterminateTintMode">src_in</item>
     </style>
 
