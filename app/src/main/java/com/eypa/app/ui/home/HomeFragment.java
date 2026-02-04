@@ -116,8 +116,13 @@ public class HomeFragment extends Fragment {
         adapter = new PostsAdapter(postList, categoryMap);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.setAlpha(0f);
-        recyclerView.setTranslationY(100f);
+        if (isFirstLoad) {
+            recyclerView.setAlpha(0f);
+            recyclerView.setTranslationY(100f);
+        } else {
+            recyclerView.setAlpha(1f);
+            recyclerView.setTranslationY(0f);
+        }
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
             currentSeed = String.valueOf(System.currentTimeMillis());
