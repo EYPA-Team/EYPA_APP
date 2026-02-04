@@ -2,6 +2,7 @@ package com.eypa.app.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -56,21 +59,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
             holder.coverImage.setImageResource(R.drawable.placeholder_image);
         }
 
-        int textColorPrimary = getThemeColor(holder.itemView, android.R.attr.textColorPrimary);
-        int textColorSecondary = getThemeColor(holder.itemView, android.R.attr.textColorSecondary);
-        int backgroundColor = getThemeColor(holder.itemView, android.R.attr.colorBackground);
-
         holder.title.setText(post.getTitle());
-        holder.title.setTextColor(textColorPrimary);
-
         holder.date.setText(TimeAgoUtils.getRelativeTime(holder.itemView.getContext(), post.getDate()));
-        holder.date.setTextColor(textColorSecondary);
-
         holder.viewCount.setText(formatCount(post.getViewCount()));
-        holder.viewCount.setTextColor(textColorSecondary);
-
         holder.likeCount.setText(formatCount(post.getLikeCount()));
-        holder.likeCount.setTextColor(textColorSecondary);
 
         if (post.getCategories() != null && !post.getCategories().isEmpty()) {
             int categoryId = post.getCategories().get(0);
@@ -84,10 +76,17 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
             holder.category.setText("");
         }
 
-        int categoryBgColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary);
-        holder.category.setBackgroundColor(categoryBgColor);
-
-        holder.itemView.setBackgroundColor(backgroundColor);
+        TypedValue typedValue = new TypedValue();
+        holder.itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+        
+        Drawable background = holder.category.getBackground();
+        if (background != null) {
+            background = DrawableCompat.wrap(background.mutate());
+            int alphaColor = ColorUtils.setAlphaComponent(colorPrimary, 204);
+            DrawableCompat.setTint(background, alphaColor);
+            holder.category.setBackground(background);
+        }
 
         // 添加点击事件 - 使用公开的 EXTRA_POST_ID
         holder.itemView.setOnClickListener(v -> {
@@ -98,11 +97,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostViewHold
         });
     }
 
-    private int getThemeColor(View view, int attr) {
-        TypedValue typedValue = new TypedValue();
-        view.getContext().getTheme().resolveAttribute(attr, typedValue, true);
-        return ContextCompat.getColor(view.getContext(), typedValue.resourceId);
-    }
 
     private String formatCount(int count) {
         if (count >= 1000) {

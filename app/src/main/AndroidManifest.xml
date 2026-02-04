@@ -26,5 +26,10 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:theme="@style/Theme.Eypa.NoActionBar" />
 
+        <activity
+            android:name=".ui.home.SettingsActivity"
+            android:exported="false"
+            android:label="@string/profile_settings" />
+
     </application>
 </manifest>

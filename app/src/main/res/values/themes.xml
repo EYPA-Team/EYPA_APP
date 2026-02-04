@@ -66,6 +66,30 @@
         <!-- 不需要强制颜色，Light 主题会自动使用黑色文字 -->
     </style>
 
+    <!-- 蓝色主题 -->
+    <style name="Theme.EYPA_APP.Blue" parent="Theme.EYPA_APP">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorPrimaryVariant">@color/primary_blue_dark</item>
+        <item name="colorSecondary">@color/primary_blue_light</item>
+        <item name="colorSecondaryVariant">@color/primary_blue</item>
+    </style>
+
+    <!-- 红色主题 -->
+    <style name="Theme.EYPA_APP.Red" parent="Theme.EYPA_APP">
+        <item name="colorPrimary">@color/primary_red</item>
+        <item name="colorPrimaryVariant">@color/primary_red_dark</item>
+        <item name="colorSecondary">@color/primary_red_light</item>
+        <item name="colorSecondaryVariant">@color/primary_red</item>
+    </style>
+
+    <!-- 紫色主题 -->
+    <style name="Theme.EYPA_APP.Purple" parent="Theme.EYPA_APP">
+        <item name="colorPrimary">@color/primary_purple</item>
+        <item name="colorPrimaryVariant">@color/primary_purple_dark</item>
+        <item name="colorSecondary">@color/primary_purple_light</item>
+        <item name="colorSecondaryVariant">@color/primary_purple</item>
+    </style>
+
     <color name="dialog_divider_bg">#F5F5F5</color>
     <color name="dialog_handle_bg">#E0E0E0</color>
 

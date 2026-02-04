@@ -22,20 +22,20 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
         isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
         setAppTheme(isDarkMode);
+        applyCustomTheme();
+
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
         setupToolbar();
         setupBottomNavigation();
 
-        // Initialize fragments
         homeFragment = new HomeFragment();
         profileFragment = new ProfileFragment();
 
-        // Set default fragment
         if (savedInstanceState == null) {
             loadFragment(homeFragment);
         }
@@ -47,6 +47,11 @@ public class HomeActivity extends AppCompatActivity {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
+    }
+
+    private void applyCustomTheme() {
+        int themeId = sharedPreferences.getInt("ThemeId", R.style.Theme_EYPA_APP);
+        setTheme(themeId);
     }
 
     private void setupToolbar() {

@@ -28,4 +28,19 @@
     <color name="dark_toolbar_background">#121212</color>
     <color name="dark_navigation_background">#121212</color>
     <color name="dark_toolbar_icon_tint">#FFFFFFFF</color>
+
+    <!-- 蓝色主题 -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1976D2</color>
+    <color name="primary_blue_light">#BBDEFB</color>
+
+    <!-- 红色主题 -->
+    <color name="primary_red">#F44336</color>
+    <color name="primary_red_dark">#D32F2F</color>
+    <color name="primary_red_light">#FFCDD2</color>
+
+    <!-- 紫色主题 -->
+    <color name="primary_purple">#9C27B0</color>
+    <color name="primary_purple_dark">#7B1FA2</color>
+    <color name="primary_purple_light">#E1BEE7</color>
 </resources>

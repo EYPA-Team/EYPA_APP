@@ -17,11 +17,11 @@
     <string name="exo_controls_fullscreen_description">进入全屏模式</string>
     <string name="exo_controls_fullscreen_exit_description">退出全屏模式</string>
 
-    <!-- Bottom Navigation -->
+    <!-- 底部导航栏 -->
     <string name="nav_home">首页</string>
     <string name="nav_profile">我的</string>
 
-    <!-- Profile Fragment -->
+    <!-- “我的”页面 -->
     <string name="profile_favorites">收藏</string>
     <string name="profile_history">历史</string>
     <string name="profile_settings">设置</string>

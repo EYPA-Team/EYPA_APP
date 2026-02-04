@@ -1,6 +1,7 @@
 package com.eypa.app.ui.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -85,7 +86,7 @@ public class ProfileFragment extends Fragment {
             toggleDarkMode();
             return true;
         } else if (id == R.id.action_settings) {
-            Toast.makeText(requireContext(), "设置功能待开发", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(requireContext(), SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

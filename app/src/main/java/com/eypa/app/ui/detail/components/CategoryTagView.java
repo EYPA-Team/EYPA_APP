@@ -1,12 +1,16 @@
 package com.eypa.app.ui.detail.components;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.eypa.app.R;
 import com.eypa.app.model.Category;
@@ -66,6 +70,19 @@ public class CategoryTagView extends FlexboxLayout {
                 .inflate(R.layout.view_category_tag, this, false);
         textView.setText(name);
         textView.setBackgroundResource(R.drawable.bg_category_tag);
+
+        TypedValue typedValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+
+        Drawable background = textView.getBackground();
+        if (background != null) {
+            background = DrawableCompat.wrap(background.mutate());
+            int alphaColor = ColorUtils.setAlphaComponent(colorPrimary, 204);
+            DrawableCompat.setTint(background, alphaColor);
+            textView.setBackground(background);
+        }
+
         return textView;
     }
 
