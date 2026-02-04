@@ -1,6 +1,8 @@
 package com.eypa.app.ui.home;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -51,6 +53,8 @@ public class HomeFragment extends Fragment {
     private int currentPage = 1;
     private String currentSeed;
     private boolean isLoading = false;
+    private boolean isFirstLoad = true;
+    private long refreshStartTime = 0;
 
     // 搜索相关
     private FrameLayout searchResultsContainer;
@@ -99,12 +103,14 @@ public class HomeFragment extends Fragment {
         adapter = new PostsAdapter(postList, categoryMap);
         recyclerView.setAdapter(adapter);
 
+        recyclerView.setAlpha(0f);
+        recyclerView.setTranslationY(100f);
+
         swipeRefreshLayout.setOnRefreshListener(() -> {
             currentSeed = String.valueOf(System.currentTimeMillis());
             currentPage = 1;
-            postList.clear();
-            categoryMap.clear();
-            adapter.notifyDataSetChanged();
+            refreshStartTime = System.currentTimeMillis();
+            recyclerView.animate().alpha(0f).setDuration(300).start();
             loadPosts();
         });
 
@@ -147,7 +153,10 @@ public class HomeFragment extends Fragment {
 
     private void loadPosts() {
         isLoading = true;
-        progressBar.setVisibility(View.VISIBLE);
+        if (isFirstLoad) {
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setAlpha(1f);
+        }
 
         ApiClient.getApiService().getContentItems(
                 currentPage, 10, "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
@@ -163,10 +172,54 @@ public class HomeFragment extends Fragment {
                                 .filter(p -> p.getCategories() != null)
                                 .flatMap(p -> p.getCategories().stream())
                                 .collect(Collectors.toSet());
-                        fetchCategories(allCategoryIds);
+                        
+                        if (isFirstLoad) {
+                            isFirstLoad = false;
+                            // 淡出
+                            progressBar.animate()
+                                    .alpha(0f)
+                                    .setDuration(300)
+                                    .withEndAction(() -> progressBar.setVisibility(View.GONE))
+                                    .start();
+
+                            // 滑入
+                            recyclerView.animate()
+                                    .alpha(1f)
+                                    .translationY(0f)
+                                    .setStartDelay(300)
+                                    .setDuration(500)
+                                    .start();
+                            
+                            adapter.notifyDataSetChanged();
+                            fetchCategories(allCategoryIds);
+                        } else {
+                            if (currentPage == 1) {
+                                long elapsedTime = System.currentTimeMillis() - refreshStartTime;
+                                long remainingTime = 300 - elapsedTime;
+                                if (remainingTime < 0) remainingTime = 0;
+
+                                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                    if (isAdded()) {
+                                        postList.clear();
+                                        categoryMap.clear();
+                                        postList.addAll(response.body());
+                                        adapter.notifyDataSetChanged();
+
+                                        recyclerView.animate().alpha(1f).setDuration(300).start();
+                                        fetchCategories(allCategoryIds);
+                                    }
+                                }, remainingTime);
+                            } else {
+                                fetchCategories(allCategoryIds);
+                            }
+                        }
                     } else {
                         isLoading = false;
                         progressBar.setVisibility(View.GONE);
+                        recyclerView.animate().alpha(1f).setDuration(300).start();
+                        if (isFirstLoad) {
+                            recyclerView.setTranslationY(0f);
+                        }
                         Log.e("API_ERROR", "Response unsuccessful: " + response.code());
                     }
                 }
@@ -178,6 +231,10 @@ public class HomeFragment extends Fragment {
                     swipeRefreshLayout.setRefreshing(false);
                     isLoading = false;
                     progressBar.setVisibility(View.GONE);
+                    recyclerView.animate().alpha(1f).setDuration(300).start();
+                    if (isFirstLoad) {
+                        recyclerView.setTranslationY(0f);
+                    }
                     Log.e("API_FAILURE", "API call failed", t);
                 }
             }
@@ -265,7 +322,9 @@ public class HomeFragment extends Fragment {
         if (categoryIds.isEmpty()) {
             adapter.notifyDataSetChanged();
             isLoading = false;
-            progressBar.setVisibility(View.GONE);
+            if (!isFirstLoad && progressBar.getVisibility() == View.VISIBLE && progressBar.getAlpha() == 1f) {
+                progressBar.setVisibility(View.GONE);
+            }
             return;
         }
         String ids = categoryIds.stream().map(String::valueOf).collect(Collectors.joining(","));
@@ -280,14 +339,18 @@ public class HomeFragment extends Fragment {
                     }
                     adapter.notifyDataSetChanged();
                     isLoading = false;
-                    progressBar.setVisibility(View.GONE);
+                    if (progressBar.getVisibility() == View.VISIBLE && progressBar.getAlpha() == 1f) {
+                        progressBar.setVisibility(View.GONE);
+                    }
                 }
             }
             @Override
             public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
                 if (isAdded()) {
                     isLoading = false;
-                    progressBar.setVisibility(View.GONE);
+                    if (progressBar.getVisibility() == View.VISIBLE && progressBar.getAlpha() == 1f) {
+                        progressBar.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -344,9 +407,8 @@ public class HomeFragment extends Fragment {
             currentSeed = String.valueOf(System.currentTimeMillis());
             swipeRefreshLayout.setRefreshing(true);
             currentPage = 1;
-            postList.clear();
-            categoryMap.clear();
-            adapter.notifyDataSetChanged();
+            refreshStartTime = System.currentTimeMillis();
+            recyclerView.animate().alpha(0f).setDuration(300).start();
             loadPosts();
             return true;
         }
