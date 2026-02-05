@@ -15,7 +15,7 @@
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:windowLightStatusBar">true</item>
 
-        <item name="cardBackgroundColor">@android:color/white</item>
+        <item name="cardBackgroundColor">@color/card_background_light</item>
         <item name="textColorPrimary">@color/black</item>
         <item name="textColorSecondary">@color/darker_gray</item>
         <item name="toolbarBackground">@color/white</item> <!-- 确保 Toolbar 背景是白色 -->

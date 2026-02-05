@@ -3,7 +3,9 @@ package com.eypa.app.ui.home;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.util.TypedValue;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +25,8 @@ public class HistoryActivity extends AppCompatActivity {
 
     private HistoryAdapter adapter;
     private List<ContentItem> historyList;
+    private TextView emptyView;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +41,25 @@ public class HistoryActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("历史记录");
         }
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_view);
+        emptyView = findViewById(R.id.tv_empty);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         historyList = HistoryManager.getInstance(this).getHistory();
         adapter = new HistoryAdapter(historyList);
         recyclerView.setAdapter(adapter);
+
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        if (historyList.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -81,6 +98,7 @@ public class HistoryActivity extends AppCompatActivity {
                     HistoryManager.getInstance(this).clearHistory();
                     historyList.clear();
                     adapter.notifyDataSetChanged();
+                    updateEmptyState();
                 })
                 .setNegativeButton("取消", null)
                 .show();
