@@ -205,14 +205,12 @@ public class HomeFragment extends Fragment {
                         
                         if (isFirstLoad) {
                             isFirstLoad = false;
-                            // 淡出
                             progressBar.animate()
                                     .alpha(0f)
                                     .setDuration(300)
                                     .withEndAction(() -> progressBar.setVisibility(View.GONE))
                                     .start();
 
-                            // 滑入
                             recyclerView.animate()
                                     .alpha(1f)
                                     .translationY(0f)

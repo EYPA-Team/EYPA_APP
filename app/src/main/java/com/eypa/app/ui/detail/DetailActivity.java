@@ -194,6 +194,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         viewPager = findViewById(R.id.view_pager);
         appBarLayout = findViewById(R.id.app_bar);
         contentTabsAndPager = findViewById(R.id.content_tabs_and_pager);
+        
+        appBarLayout.setVisibility(View.INVISIBLE);
+        contentTabsAndPager.setVisibility(View.INVISIBLE);
     }
 
     private void setupToolbar() {
@@ -241,8 +244,42 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     }
 
     private void observeViewModel() {
-        viewModel.getIsLoading().observe(this, isLoading ->
-                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE));
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            if (isLoading) {
+                progressBar.setVisibility(View.VISIBLE);
+                progressBar.setAlpha(1f);
+                appBarLayout.setVisibility(View.INVISIBLE);
+                contentTabsAndPager.setVisibility(View.INVISIBLE);
+            } else {
+                if (progressBar.getVisibility() == View.VISIBLE) {
+                    progressBar.animate()
+                            .alpha(0f)
+                            .setDuration(500)
+                            .withEndAction(() -> progressBar.setVisibility(View.GONE))
+                            .start();
+
+                    appBarLayout.setAlpha(0f);
+                    appBarLayout.setVisibility(View.VISIBLE);
+                    appBarLayout.animate()
+                            .alpha(1f)
+                            .setDuration(500)
+                            .start();
+
+                    contentTabsAndPager.setAlpha(0f);
+                    contentTabsAndPager.setVisibility(View.VISIBLE);
+                    contentTabsAndPager.animate()
+                            .alpha(1f)
+                            .setDuration(500)
+                            .start();
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    appBarLayout.setVisibility(View.VISIBLE);
+                    appBarLayout.setAlpha(1f);
+                    contentTabsAndPager.setVisibility(View.VISIBLE);
+                    contentTabsAndPager.setAlpha(1f);
+                }
+            }
+        });
         viewModel.getPostData().observe(this, this::displayHeaderInfo);
     }
 
