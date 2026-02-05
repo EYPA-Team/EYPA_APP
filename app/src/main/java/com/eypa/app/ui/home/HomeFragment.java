@@ -330,6 +330,8 @@ public class HomeFragment extends Fragment {
     private void loadMoreSearchResults() {
         searchPage++;
         isSearching = true;
+        searchAdapter.setLoadingFooterVisible(true);
+        
         ApiClient.getApiService().searchPosts(
                 currentQuery, searchPage, 10,
                 "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
@@ -339,6 +341,8 @@ public class HomeFragment extends Fragment {
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
                     isSearching = false;
+                    searchAdapter.setLoadingFooterVisible(false);
+                    
                     if (response.isSuccessful() && response.body() != null) {
                         List<ContentItem> items = response.body();
                         if (!items.isEmpty()) {
@@ -355,6 +359,7 @@ public class HomeFragment extends Fragment {
             public void onFailure(@NonNull Call<List<ContentItem>> call, @NonNull Throwable t) {
                 if (isAdded()) {
                     isSearching = false;
+                    searchAdapter.setLoadingFooterVisible(false);
                 }
             }
         });
