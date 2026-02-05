@@ -22,7 +22,15 @@ public interface ContentApiService {
             @Query("_fields") String fields,
             @Query("orderby") String orderby,
             @Query("seed") String seed,
-            @Query("_embed") String embed
+            @Query("_embed") String embed,
+            @Query("categories") Integer categoryId
+    );
+
+    @GET("eu-json/wp/v2/categories")
+    Call<List<Category>> getAllCategories(
+            @Query("per_page") int perPage,
+            @Query("orderby") String orderby,
+            @Query("hide_empty") boolean hideEmpty
     );
 
     @GET("eu-json/wp/v2/categories")

@@ -10,8 +10,8 @@
         app:showAsAction="ifRoom|collapseActionView" />
 
     <item
-        android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_refresh"
-        android:title="刷新"
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter"
+        android:title="分区"
         app:showAsAction="ifRoom" />
 </menu>

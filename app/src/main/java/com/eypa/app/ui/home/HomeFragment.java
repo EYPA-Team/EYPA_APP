@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -60,6 +61,7 @@ public class HomeFragment extends Fragment {
     private boolean isFirstLoad = true;
     private long refreshStartTime = 0;
     private int retryCount = 0;
+    private Integer currentCategoryId = null;
 
     // 搜索相关
     private FrameLayout searchResultsContainer;
@@ -187,7 +189,7 @@ public class HomeFragment extends Fragment {
 
         ApiClient.getApiService().getContentItems(
                 currentPage, 10, "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
-                "rand", currentSeed, "wp:featuredmedia"
+                "rand", currentSeed, "wp:featuredmedia", currentCategoryId
         ).enqueue(new Callback<List<ContentItem>>() {
             @Override
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
@@ -476,18 +478,65 @@ public class HomeFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_refresh) {
+        if (id == R.id.action_filter) {
             if (searchResultsContainer.getVisibility() == View.VISIBLE) return true;
-
-            currentSeed = String.valueOf(System.currentTimeMillis());
-            swipeRefreshLayout.setRefreshing(true);
-            currentPage = 1;
-            refreshStartTime = System.currentTimeMillis();
-            recyclerView.animate().alpha(0f).setDuration(300).start();
-            loadPosts();
+            showCategoryFilterDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showCategoryFilterDialog() {
+        Toast.makeText(requireContext(), "请稍后...", Toast.LENGTH_SHORT).show();
+        
+        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
+                if (isAdded() && response.isSuccessful() && response.body() != null) {
+                    List<Category> categories = response.body();
+                    showFilterDialog(categories);
+                } else {
+                    if (isAdded()) {
+                        Toast.makeText(requireContext(), "获取分区失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "网络错误", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void showFilterDialog(List<Category> categories) {
+        String[] items = new String[categories.size() + 1];
+        items[0] = "全部";
+        for (int i = 0; i < categories.size(); i++) {
+            items[i + 1] = categories.get(i).getName();
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("选择分区")
+                .setItems(items, (dialog, which) -> {
+                    if (which == 0) {
+                        currentCategoryId = null;
+                    } else {
+                        currentCategoryId = categories.get(which - 1).getId();
+                    }
+                    
+                    currentSeed = String.valueOf(System.currentTimeMillis());
+                    swipeRefreshLayout.setRefreshing(true);
+                    currentPage = 1;
+                    postList.clear();
+                    adapter.notifyDataSetChanged();
+                    refreshStartTime = System.currentTimeMillis();
+                    recyclerView.animate().alpha(0f).setDuration(300).start();
+                    loadPosts();
+                })
+                .show();
     }
 
     public boolean handleBackPressed() {
