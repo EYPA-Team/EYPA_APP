@@ -93,4 +93,9 @@
     <color name="dialog_divider_bg">#F5F5F5</color>
     <color name="dialog_handle_bg">#E0E0E0</color>
 
+    <style name="RoundedSquare" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
 </resources>

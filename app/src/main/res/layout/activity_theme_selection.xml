@@ -31,7 +31,7 @@
             android:id="@+id/theme_green"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="绿色 (默认)"
+            android:text="绿色"
             android:padding="8dp"/>
 
         <RadioButton
