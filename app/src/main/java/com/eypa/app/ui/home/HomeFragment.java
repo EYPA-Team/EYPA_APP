@@ -148,6 +148,8 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+        
+        recyclerView.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
 
         // --- 搜索视图初始化 ---
         searchResultsContainer = view.findViewById(R.id.search_results_container);
@@ -179,6 +181,8 @@ public class HomeFragment extends Fragment {
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setAlpha(1f);
             errorLayout.setVisibility(View.GONE);
+        } else if (currentPage > 1) {
+            adapter.setLoadingFooterVisible(true);
         }
 
         ApiClient.getApiService().getContentItems(
@@ -189,6 +193,8 @@ public class HomeFragment extends Fragment {
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
                     swipeRefreshLayout.setRefreshing(false);
+                    adapter.setLoadingFooterVisible(false);
+                    
                     if (response.isSuccessful() && response.body() != null) {
                         retryCount = 0;
                         postList.addAll(response.body());
@@ -246,6 +252,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<List<ContentItem>> call, @NonNull Throwable t) {
                 if (isAdded()) {
+                    adapter.setLoadingFooterVisible(false);
                     handleLoadFailure(t.getMessage());
                 }
             }
