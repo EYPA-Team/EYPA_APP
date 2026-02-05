@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    // 基础库 (保留了您使用的最新版本)
+    // 基础库
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'

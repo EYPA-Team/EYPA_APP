@@ -1,21 +1,18 @@
 package com.eypa.app.ui.home;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class GeneralSettingsActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
     private boolean isDarkMode = false;
@@ -28,10 +25,10 @@ public class SettingsActivity extends AppCompatActivity {
         applyCustomTheme();
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_general_settings);
 
         setupToolbar();
-        setupClickListeners();
+        setupViews();
     }
 
     private void setAppTheme(boolean isDarkMode) {
@@ -55,18 +52,14 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private void setupClickListeners() {
-        findViewById(R.id.layout_general_settings).setOnClickListener(v -> {
-            Intent intent = new Intent(this, GeneralSettingsActivity.class);
-            startActivity(intent);
-        });
-        findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
-            Intent intent = new Intent(this, ThemeSelectionActivity.class);
-            startActivity(intent);
-        });
-        findViewById(R.id.layout_about).setOnClickListener(v -> {
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent);
+    private void setupViews() {
+        SwitchCompat switchUpdateDialog = findViewById(R.id.switch_update_dialog);
+        
+        boolean isUpdateEnabled = sharedPreferences.getBoolean("ShowUpdateDialog", true);
+        switchUpdateDialog.setChecked(isUpdateEnabled);
+
+        switchUpdateDialog.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean("ShowUpdateDialog", isChecked).apply();
         });
     }
 

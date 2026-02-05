@@ -5,6 +5,7 @@ import com.eypa.app.model.Category;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.Tag;
+import com.eypa.app.model.UpdateInfo;
 
 import java.util.List;
 
@@ -76,4 +77,11 @@ public interface ContentApiService {
             @Query("_fields") String fields,
             @Query("_embed") String embed
     );
+
+    /**
+     * 检查应用更新
+     * @return 更新信息
+     */
+    @GET("eu-json/app/v1/check-update")
+    Call<UpdateInfo> checkUpdate();
 }

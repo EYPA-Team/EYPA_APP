@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.eypa.app.R;
+import com.eypa.app.utils.UpdateManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
@@ -56,6 +57,11 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         setupBottomNavigation();
+        checkUpdate();
+    }
+
+    private void checkUpdate() {
+        new UpdateManager(this).checkUpdate();
     }
 
     private void setAppTheme(boolean isDarkMode) {
