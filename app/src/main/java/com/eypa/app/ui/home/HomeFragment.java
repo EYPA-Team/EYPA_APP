@@ -59,6 +59,7 @@ public class HomeFragment extends Fragment {
     private boolean isLoading = false;
     private boolean isFirstLoad = true;
     private long refreshStartTime = 0;
+    private int retryCount = 0;
 
     // 搜索相关
     private FrameLayout searchResultsContainer;
@@ -104,6 +105,7 @@ public class HomeFragment extends Fragment {
             errorLayout.setVisibility(View.GONE);
             currentSeed = String.valueOf(System.currentTimeMillis());
             currentPage = 1;
+            retryCount = 0;
             loadPosts();
         });
 
@@ -129,6 +131,7 @@ public class HomeFragment extends Fragment {
             currentPage = 1;
             refreshStartTime = System.currentTimeMillis();
             recyclerView.animate().alpha(0f).setDuration(300).start();
+            retryCount = 0;
             loadPosts();
         });
 
@@ -140,6 +143,7 @@ public class HomeFragment extends Fragment {
                 int lastVisibleItem = Math.max(lastVisibleItems[0], lastVisibleItems[1]);
                 if (!isLoading && lastVisibleItem >= postList.size() - 5) {
                     currentPage++;
+                    retryCount = 0;
                     loadPosts();
                 }
             }
@@ -186,6 +190,7 @@ public class HomeFragment extends Fragment {
                 if (isAdded()) {
                     swipeRefreshLayout.setRefreshing(false);
                     if (response.isSuccessful() && response.body() != null) {
+                        retryCount = 0;
                         postList.addAll(response.body());
                         Set<Integer> allCategoryIds = postList.stream()
                                 .filter(p -> p.getCategories() != null)
@@ -233,14 +238,7 @@ public class HomeFragment extends Fragment {
                             }
                         }
                     } else {
-                        isLoading = false;
-                        progressBar.setVisibility(View.GONE);
-                        recyclerView.animate().alpha(1f).setDuration(300).start();
-                        if (isFirstLoad) {
-                            recyclerView.setTranslationY(0f);
-                            errorLayout.setVisibility(View.VISIBLE);
-                        }
-                        Log.e("API_ERROR", "Response unsuccessful: " + response.code());
+                        handleLoadFailure(response.code() + "");
                     }
                 }
             }
@@ -248,18 +246,28 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<List<ContentItem>> call, @NonNull Throwable t) {
                 if (isAdded()) {
-                    swipeRefreshLayout.setRefreshing(false);
-                    isLoading = false;
-                    progressBar.setVisibility(View.GONE);
-                    recyclerView.animate().alpha(1f).setDuration(300).start();
-                    if (isFirstLoad) {
-                        recyclerView.setTranslationY(0f);
-                        errorLayout.setVisibility(View.VISIBLE);
-                    }
-                    Log.e("API_FAILURE", "API call failed", t);
+                    handleLoadFailure(t.getMessage());
                 }
             }
         });
+    }
+
+    private void handleLoadFailure(String errorMsg) {
+        if (isFirstLoad && retryCount < 3) {
+            retryCount++;
+            Log.d("HomeFragment", "Loading failed, retrying... (" + retryCount + "/3)");
+            new Handler(Looper.getMainLooper()).postDelayed(this::loadPosts, 1000);
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
+            isLoading = false;
+            progressBar.setVisibility(View.GONE);
+            recyclerView.animate().alpha(1f).setDuration(300).start();
+            if (isFirstLoad) {
+                recyclerView.setTranslationY(0f);
+                errorLayout.setVisibility(View.VISIBLE);
+            }
+            Log.e("API_FAILURE", "Load failed: " + errorMsg);
+        }
     }
 
     private void performSearch(String query) {
