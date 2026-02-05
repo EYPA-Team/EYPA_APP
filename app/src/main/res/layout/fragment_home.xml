@@ -23,7 +23,7 @@
         android:id="@+id/search_results_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/cardBackgroundColor"
+        android:background="?android:attr/colorBackground"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone"
