@@ -77,11 +77,16 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         PostViewHolder postHolder = (PostViewHolder) holder;
         ContentItem post = postList.get(position);
 
+        TypedValue typedValue = new TypedValue();
+        postHolder.itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+
         String imageUrl = post.getBestImageUrl();
         if (imageUrl != null) {
             CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(postHolder.itemView.getContext());
             circularProgressDrawable.setStrokeWidth(5f);
             circularProgressDrawable.setCenterRadius(30f);
+            circularProgressDrawable.setColorSchemeColors(colorPrimary);
             circularProgressDrawable.start();
 
             Glide.with(postHolder.itemView.getContext())
@@ -110,10 +115,6 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             postHolder.category.setText("");
         }
 
-        TypedValue typedValue = new TypedValue();
-        postHolder.itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-        int colorPrimary = typedValue.data;
-        
         Drawable background = postHolder.category.getBackground();
         if (background != null) {
             background = DrawableCompat.wrap(background.mutate());
