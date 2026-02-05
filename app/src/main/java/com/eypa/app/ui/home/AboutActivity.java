@@ -14,6 +14,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
 import com.eypa.app.utils.ThemeUtils;
+import com.eypa.app.utils.UpdateManager;
+import com.google.android.material.button.MaterialButton;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -30,6 +32,14 @@ public class AboutActivity extends AppCompatActivity {
 
         setupToolbar();
         displayVersion();
+        setupCheckUpdateButton();
+    }
+
+    private void setupCheckUpdateButton() {
+        MaterialButton btnCheckUpdate = findViewById(R.id.btn_check_update);
+        btnCheckUpdate.setOnClickListener(v -> {
+            new UpdateManager(this).checkUpdate(true);
+        });
     }
 
     private void displayVersion() {

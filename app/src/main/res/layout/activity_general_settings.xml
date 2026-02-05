@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="是否弹出更新窗口"
+            android:text="自动弹出更新窗口"
             android:textSize="16sp"
             android:textColor="?android:attr/textColorPrimary"/>
 
@@ -65,7 +65,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="深色模式是否跟随系统"
+            android:text="深色模式跟随系统"
             android:textSize="16sp"
             android:textColor="?android:attr/textColorPrimary"/>
 

@@ -57,22 +57,34 @@ public class UpdateManager {
     }
 
     public void checkUpdate() {
+        checkUpdate(false);
+    }
+
+    public void checkUpdate(boolean isManual) {
+        if (isManual) {
+            Toast.makeText(context, "正在检查更新...", Toast.LENGTH_SHORT).show();
+        }
         ApiClient.getApiService().checkUpdate().enqueue(new Callback<UpdateInfo>() {
             @Override
             public void onResponse(Call<UpdateInfo> call, Response<UpdateInfo> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    handleUpdateInfo(response.body());
+                    handleUpdateInfo(response.body(), isManual);
+                } else if (isManual) {
+                    Toast.makeText(context, "检查更新失败", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UpdateInfo> call, Throwable t) {
                 Log.e(TAG, "Check update failed", t);
+                if (isManual) {
+                    Toast.makeText(context, "检查更新失败: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void handleUpdateInfo(UpdateInfo updateInfo) {
+    private void handleUpdateInfo(UpdateInfo updateInfo, boolean isManual) {
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             int currentVersionCode = pInfo.versionCode;
@@ -81,9 +93,11 @@ public class UpdateManager {
                 boolean showDialog = sharedPreferences.getBoolean(KEY_SHOW_UPDATE_DIALOG, true);
                 int ignoredVersion = sharedPreferences.getInt(KEY_IGNORE_VERSION_CODE, -1);
 
-                if (updateInfo.isForceUpdate() || (showDialog && updateInfo.getVersionCode() != ignoredVersion)) {
+                if (isManual || updateInfo.isForceUpdate() || (showDialog && updateInfo.getVersionCode() != ignoredVersion)) {
                     showUpdateDialog(updateInfo);
                 }
+            } else if (isManual) {
+                Toast.makeText(context, "当前已是最新版本", Toast.LENGTH_SHORT).show();
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
