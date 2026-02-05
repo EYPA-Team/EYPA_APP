@@ -82,7 +82,8 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int colorPrimary = typedValue.data;
 
         String imageUrl = post.getBestImageUrl();
-        if (imageUrl != null) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            postHolder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
             CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(postHolder.itemView.getContext());
             circularProgressDrawable.setStrokeWidth(5f);
             circularProgressDrawable.setCenterRadius(30f);
@@ -95,6 +96,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .error(R.drawable.placeholder_image)
                     .into(postHolder.coverImage);
         } else {
+            postHolder.coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             postHolder.coverImage.setImageResource(R.drawable.placeholder_image);
         }
 

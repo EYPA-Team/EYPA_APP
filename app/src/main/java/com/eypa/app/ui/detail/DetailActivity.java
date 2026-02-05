@@ -297,7 +297,14 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
         String imageUrl = post.getBestImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(this).load(imageUrl).into(coverImage);
+            coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            Glide.with(this)
+                    .load(imageUrl)
+                    .error(R.drawable.placeholder_image)
+                    .into(coverImage);
+        } else {
+            coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            coverImage.setImageResource(R.drawable.placeholder_image);
         }
 
         if (currentVideoUrl != null && !currentVideoUrl.isEmpty()) {

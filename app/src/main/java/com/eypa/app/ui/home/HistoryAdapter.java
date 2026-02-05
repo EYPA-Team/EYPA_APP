@@ -47,12 +47,14 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
         String imageUrl = item.getBestImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
+            holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
             Glide.with(holder.itemView.getContext())
                     .load(imageUrl)
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
                     .into(holder.coverImage);
         } else {
+            holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             holder.coverImage.setImageResource(R.drawable.placeholder_image);
         }
 
