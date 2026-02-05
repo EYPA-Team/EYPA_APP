@@ -93,6 +93,10 @@ public class HomeActivity extends AppCompatActivity {
     private void switchFragment(Fragment targetFragment, String tag) {
         if (activeFragment == targetFragment) return;
 
+        if (activeFragment instanceof HomeFragment) {
+            ((HomeFragment) activeFragment).closeSearch();
+        }
+
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
 

@@ -157,7 +157,7 @@ public class HomeFragment extends Fragment {
         searchProgressBar = view.findViewById(R.id.search_progress_bar);
         searchEmptyView = view.findViewById(R.id.search_empty_view);
 
-        searchAdapter = new PostsAdapter(searchResults, new HashMap<>());
+        searchAdapter = new PostsAdapter(searchResults, categoryMap);
         StaggeredGridLayoutManager searchLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         searchRecyclerView.setLayoutManager(searchLayoutManager);
         searchRecyclerView.setAdapter(searchAdapter);
@@ -302,6 +302,7 @@ public class HomeFragment extends Fragment {
                         } else {
                             searchResults.addAll(items);
                             searchAdapter.notifyDataSetChanged();
+                            fetchCategoriesForSearch(items);
                         }
                     } else {
                         Toast.makeText(requireContext(), "搜索失败", Toast.LENGTH_SHORT).show();
@@ -338,6 +339,7 @@ public class HomeFragment extends Fragment {
                             int start = searchResults.size();
                             searchResults.addAll(items);
                             searchAdapter.notifyItemRangeInserted(start, items.size());
+                            fetchCategoriesForSearch(items);
                         }
                     }
                 }
@@ -386,6 +388,45 @@ public class HomeFragment extends Fragment {
                         progressBar.setVisibility(View.GONE);
                     }
                 }
+            }
+        });
+    }
+
+    private void fetchCategoriesForSearch(List<ContentItem> items) {
+        Set<Integer> categoryIds = items.stream()
+                .filter(p -> p.getCategories() != null)
+                .flatMap(p -> p.getCategories().stream())
+                .collect(Collectors.toSet());
+
+        if (categoryIds.isEmpty()) return;
+
+        Set<Integer> missingIds = categoryIds.stream()
+                .filter(id -> !categoryMap.containsKey(id))
+                .collect(Collectors.toSet());
+
+        if (missingIds.isEmpty()) {
+            searchAdapter.notifyDataSetChanged();
+            return;
+        }
+
+        String ids = missingIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        ApiClient.getApiService().getCategoriesByIds(ids, missingIds.size()).enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
+                if (isAdded()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        for (Category category : response.body()) {
+                            categoryMap.put(category.getId(), category.getName());
+                        }
+                        searchAdapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
+                // 不做处理
             }
         });
     }
@@ -451,9 +492,27 @@ public class HomeFragment extends Fragment {
 
     public boolean handleBackPressed() {
         if (mSearchView != null && !mSearchView.isIconified()) {
-            mSearchView.setIconified(true);
+            closeSearch();
             return true;
         }
         return false;
+    }
+
+    public void closeSearch() {
+        if (mSearchView != null && !mSearchView.isIconified()) {
+            mSearchView.setQuery("", false);
+            mSearchView.setIconified(true);
+        }
+        
+        if (searchResultsContainer != null) {
+            searchResultsContainer.setVisibility(View.GONE);
+        }
+        
+        if (searchResults != null) {
+            searchResults.clear();
+            if (searchAdapter != null) {
+                searchAdapter.notifyDataSetChanged();
+            }
+        }
     }
 }
