@@ -3,6 +3,7 @@ package com.eypa.app.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -21,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.eypa.app.R;
+import com.eypa.app.utils.ThemeUtils;
 
 public class ProfileFragment extends Fragment {
 
@@ -63,9 +65,12 @@ public class ProfileFragment extends Fragment {
         requireActivity().getTheme().resolveAttribute(R.attr.toolbarIconTint, typedValue, true);
         int iconColor = typedValue.data;
 
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNightMode = currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+
         MenuItem darkModeItem = menu.findItem(R.id.action_dark_mode);
         if (darkModeItem != null) {
-            darkModeItem.setIcon(isDarkMode ? R.drawable.ic_light_mode : R.drawable.ic_dark_mode);
+            darkModeItem.setIcon(isNightMode ? R.drawable.ic_light_mode : R.drawable.ic_dark_mode);
             if (darkModeItem.getIcon() != null) {
                 darkModeItem.getIcon().setTint(iconColor);
             }
@@ -93,13 +98,18 @@ public class ProfileFragment extends Fragment {
     }
 
     private void toggleDarkMode() {
-        boolean newDarkModeState = !isDarkMode;
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNightMode = currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+        
+        boolean newDarkModeState = !isNightMode;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("DarkMode", newDarkModeState);
+        editor.putBoolean("DarkModeFollowSystem", false);
         editor.apply();
 
-        AppCompatDelegate.setDefaultNightMode(newDarkModeState ?
-                AppCompatDelegate.MODE_NIGHT_YES :
-                AppCompatDelegate.MODE_NIGHT_NO);
+        isDarkMode = newDarkModeState;
+        requireActivity().invalidateOptionsMenu();
+
+        ThemeUtils.applyTheme(requireContext());
     }
 }

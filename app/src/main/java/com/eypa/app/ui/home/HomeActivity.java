@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.eypa.app.R;
+import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UpdateManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -25,9 +26,9 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
         sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
         isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
-        setAppTheme(isDarkMode);
         applyCustomTheme();
 
         super.onCreate(savedInstanceState);
@@ -62,14 +63,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private void checkUpdate() {
         new UpdateManager(this).checkUpdate();
-    }
-
-    private void setAppTheme(boolean isDarkMode) {
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
     }
 
     private void applyCustomTheme() {

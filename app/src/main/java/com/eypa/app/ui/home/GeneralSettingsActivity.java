@@ -12,17 +12,16 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
+import com.eypa.app.utils.ThemeUtils;
 
 public class GeneralSettingsActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
-    private boolean isDarkMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
         sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
-        isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
-        setAppTheme(isDarkMode);
         applyCustomTheme();
 
         super.onCreate(savedInstanceState);
@@ -30,14 +29,6 @@ public class GeneralSettingsActivity extends AppCompatActivity {
 
         setupToolbar();
         setupViews();
-    }
-
-    private void setAppTheme(boolean isDarkMode) {
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
     }
 
     private void applyCustomTheme() {
@@ -61,6 +52,16 @@ public class GeneralSettingsActivity extends AppCompatActivity {
 
         switchUpdateDialog.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("ShowUpdateDialog", isChecked).apply();
+        });
+
+        SwitchCompat switchDarkModeFollowSystem = findViewById(R.id.switch_dark_mode_follow_system);
+        boolean isFollowSystem = sharedPreferences.getBoolean("DarkModeFollowSystem", true);
+        switchDarkModeFollowSystem.setChecked(isFollowSystem);
+
+        switchDarkModeFollowSystem.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean("DarkModeFollowSystem", isChecked).apply();
+            ThemeUtils.applyTheme(this);
+            getDelegate().applyDayNight();
         });
 
         findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
