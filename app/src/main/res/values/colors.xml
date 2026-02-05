@@ -20,6 +20,7 @@
     <color name="colorAccent">@color/primary_green</color>
     <color name="darker_gray">#444444</color>
     <color name="progress_color">#4CAF50</color>
+    <color name="placeholder_color">#CCCCCC</color>
 
     <!-- 确保这些颜色名称与 themes.xml 中引用的完全一致 -->
     <color name="light_toolbar_background">#FFFFFF</color>
