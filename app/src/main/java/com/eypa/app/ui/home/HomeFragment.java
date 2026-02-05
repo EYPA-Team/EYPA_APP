@@ -261,7 +261,11 @@ public class HomeFragment extends Fragment {
         if (isFirstLoad && retryCount < 3) {
             retryCount++;
             Log.d("HomeFragment", "Loading failed, retrying... (" + retryCount + "/3)");
-            new Handler(Looper.getMainLooper()).postDelayed(this::loadPosts, 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isAdded()) {
+                    loadPosts();
+                }
+            }, 2000);
         } else {
             swipeRefreshLayout.setRefreshing(false);
             isLoading = false;

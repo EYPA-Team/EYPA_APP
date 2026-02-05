@@ -45,9 +45,9 @@ public class ApiClient {
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .sslSocketFactory(createSSLSocketFactory(), new TrustAllCerts())
                     .hostnameVerifier((hostname, session) -> true) // 信任所有主机名 (注意：仅限开发环境)
