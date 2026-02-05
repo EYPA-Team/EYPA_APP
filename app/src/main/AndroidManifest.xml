@@ -31,5 +31,15 @@
             android:exported="false"
             android:label="@string/profile_settings" />
 
+        <activity
+            android:name=".ui.home.ThemeSelectionActivity"
+            android:exported="false"
+            android:label="选择主题色" />
+
+        <activity
+            android:name=".ui.home.AboutActivity"
+            android:exported="false"
+            android:label="关于应用" />
+
     </application>
 </manifest>

@@ -1,21 +1,17 @@
 package com.eypa.app.ui.home;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class AboutActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
     private boolean isDarkMode = false;
@@ -28,10 +24,9 @@ public class SettingsActivity extends AppCompatActivity {
         applyCustomTheme();
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_about);
 
         setupToolbar();
-        setupClickListeners();
     }
 
     private void setAppTheme(boolean isDarkMode) {
@@ -53,17 +48,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-    }
-
-    private void setupClickListeners() {
-        findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
-            Intent intent = new Intent(this, ThemeSelectionActivity.class);
-            startActivity(intent);
-        });
-        findViewById(R.id.layout_about).setOnClickListener(v -> {
-            Intent intent = new Intent(this, AboutActivity.class);
-            startActivity(intent);
-        });
     }
 
     @Override
