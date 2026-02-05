@@ -126,6 +126,7 @@ public class ContentItem {
         @SerializedName("rendered")
         private String rendered;
         public String getRendered() { return rendered; }
+        public void setRendered(String rendered) { this.rendered = rendered; }
     }
     public static class Content {
         @SerializedName("rendered")
@@ -170,12 +171,28 @@ public class ContentItem {
     }
 
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
     public String getTitle() { return title != null ? title.getRendered() : ""; }
+    public void setTitle(String titleStr) {
+        if (this.title == null) {
+            this.title = new Title();
+        }
+        this.title.setRendered(titleStr);
+    }
     public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
     public List<Integer> getCategories() { return categories; }
     public List<Integer> getTags() { return tags; }
     public int getViewCount() { return viewCount; }
+    public void setViewCount(int viewCount) { this.viewCount = viewCount; }
     public int getLikeCount() { return likeCount; }
+    public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+    public void setCoverImage(String url) {
+        if (this.zibOtherData == null) {
+            this.zibOtherData = new ZibOtherData();
+        }
+        this.zibOtherData.coverImage = url;
+    }
     public Content getContent() { return content; }
     public Excerpt getExcerpt() { return excerpt; }
     public Author getAuthor() {

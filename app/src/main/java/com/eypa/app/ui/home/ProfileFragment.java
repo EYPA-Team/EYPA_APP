@@ -52,7 +52,7 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.card_history).setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "历史功能待开发", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(requireContext(), HistoryActivity.class));
         });
     }
 

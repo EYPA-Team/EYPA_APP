@@ -281,6 +281,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
     private void displayHeaderInfo(ContentItem post) {
         if (post == null) return;
+
+        com.eypa.app.db.HistoryManager.getInstance(this).addHistory(post);
+
         postTitle = HtmlCompat.fromHtml(post.getTitle(), HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
 
         currentEpisodes.clear();
