@@ -123,10 +123,8 @@ public class HomeFragment extends Fragment {
 
         if (isFirstLoad) {
             recyclerView.setAlpha(0f);
-            recyclerView.setTranslationY(100f);
         } else {
             recyclerView.setAlpha(1f);
-            recyclerView.setTranslationY(0f);
         }
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -216,7 +214,6 @@ public class HomeFragment extends Fragment {
 
                             recyclerView.animate()
                                     .alpha(1f)
-                                    .translationY(0f)
                                     .setStartDelay(300)
                                     .setDuration(300)
                                     .start();
@@ -271,7 +268,6 @@ public class HomeFragment extends Fragment {
             progressBar.setVisibility(View.GONE);
             recyclerView.animate().alpha(1f).setDuration(300).start();
             if (isFirstLoad) {
-                recyclerView.setTranslationY(0f);
                 errorLayout.setVisibility(View.VISIBLE);
             }
             Log.e("API_FAILURE", "Load failed: " + errorMsg);
@@ -287,6 +283,8 @@ public class HomeFragment extends Fragment {
 
         isSearching = true;
         searchProgressBar.setVisibility(View.VISIBLE);
+        
+        searchRecyclerView.setAlpha(0f);
 
         ApiClient.getApiService().searchPosts(
                 currentQuery, searchPage, 10,
@@ -306,6 +304,11 @@ public class HomeFragment extends Fragment {
                             searchResults.addAll(items);
                             searchAdapter.notifyDataSetChanged();
                             fetchCategoriesForSearch(items);
+                            
+                            searchRecyclerView.animate()
+                                    .alpha(1f)
+                                    .setDuration(300)
+                                    .start();
                         }
                     } else {
                         Toast.makeText(requireContext(), "搜索失败", Toast.LENGTH_SHORT).show();
