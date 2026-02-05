@@ -74,6 +74,7 @@ public class HomeFragment extends Fragment {
     private boolean isSearching = false;
     private String currentQuery = "";
     private SearchView mSearchView;
+    private MenuItem filterItem;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -437,6 +438,8 @@ public class HomeFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.home_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
+        filterItem = menu.findItem(R.id.action_filter);
+        
         mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint("搜索文章...");
 
@@ -444,6 +447,9 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemActionExpand(@NonNull MenuItem item) {
                 searchResultsContainer.setVisibility(View.VISIBLE);
+                if (filterItem != null) {
+                    filterItem.setVisible(false);
+                }
                 return true;
             }
 
@@ -452,6 +458,9 @@ public class HomeFragment extends Fragment {
                 searchResultsContainer.setVisibility(View.GONE);
                 searchResults.clear();
                 searchAdapter.notifyDataSetChanged();
+                if (filterItem != null) {
+                    filterItem.setVisible(true);
+                }
                 return true;
             }
         });
