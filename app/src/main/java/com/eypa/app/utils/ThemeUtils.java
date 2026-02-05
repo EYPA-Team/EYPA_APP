@@ -10,14 +10,21 @@ public class ThemeUtils {
         boolean followSystem = sharedPreferences.getBoolean("DarkModeFollowSystem", true);
         boolean isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
 
+        int currentMode = AppCompatDelegate.getDefaultNightMode();
+        int newMode;
+
         if (followSystem) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            newMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
         } else {
             if (isDarkMode) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                newMode = AppCompatDelegate.MODE_NIGHT_YES;
             } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                newMode = AppCompatDelegate.MODE_NIGHT_NO;
             }
+        }
+
+        if (currentMode != newMode) {
+            AppCompatDelegate.setDefaultNightMode(newMode);
         }
     }
 }

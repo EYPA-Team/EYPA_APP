@@ -13,17 +13,16 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
+import com.eypa.app.utils.ThemeUtils;
 
 public class AboutActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
-    private boolean isDarkMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
         sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
-        isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
-        setAppTheme(isDarkMode);
         applyCustomTheme();
 
         super.onCreate(savedInstanceState);
@@ -41,14 +40,6 @@ public class AboutActivity extends AppCompatActivity {
             tvVersion.setText("v" + version);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void setAppTheme(boolean isDarkMode) {
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
     }
 

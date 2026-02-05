@@ -37,6 +37,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
+import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.model.ContentItem;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -83,13 +84,8 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
         SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
-        boolean isDarkMode = sharedPreferences.getBoolean("DarkMode", false);
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
         int themeId = sharedPreferences.getInt("ThemeId", R.style.Theme_EYPA_APP);
         setTheme(themeId);
 
