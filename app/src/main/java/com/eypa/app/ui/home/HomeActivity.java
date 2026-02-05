@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.eypa.app.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -19,6 +20,7 @@ public class HomeActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
     private ProfileFragment profileFragment;
+    private Fragment activeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +33,29 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         setupToolbar();
-        setupBottomNavigation();
 
-        homeFragment = new HomeFragment();
-        profileFragment = new ProfileFragment();
+        if (savedInstanceState != null) {
+            homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
+            profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentByTag("PROFILE");
+        }
+
+        if (homeFragment == null) homeFragment = new HomeFragment();
+        if (profileFragment == null) profileFragment = new ProfileFragment();
 
         if (savedInstanceState == null) {
-            loadFragment(homeFragment);
+            activeFragment = homeFragment;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.nav_host_fragment, homeFragment, "HOME")
+                    .commit();
+        } else {
+            Fragment home = getSupportFragmentManager().findFragmentByTag("HOME");
+            Fragment profile = getSupportFragmentManager().findFragmentByTag("PROFILE");
+            if (home != null && !home.isHidden()) activeFragment = home;
+            else if (profile != null && !profile.isHidden()) activeFragment = profile;
+            else activeFragment = homeFragment;
         }
+
+        setupBottomNavigation();
     }
 
     private void setAppTheme(boolean isDarkMode) {
@@ -64,22 +81,32 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_home) {
-                loadFragment(homeFragment);
+                switchFragment(homeFragment, "HOME");
                 return true;
             } else if (itemId == R.id.navigation_profile) {
-                loadFragment(profileFragment);
+                switchFragment(profileFragment, "PROFILE");
                 return true;
             }
             return false;
         });
     }
 
-    private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-                .replace(R.id.nav_host_fragment, fragment)
-                .commit();
+    private void switchFragment(Fragment targetFragment, String tag) {
+        if (activeFragment == targetFragment) return;
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+
+        if (!targetFragment.isAdded()) {
+            transaction.add(R.id.nav_host_fragment, targetFragment, tag);
+        }
+
+        if (activeFragment != null) {
+            transaction.hide(activeFragment);
+        }
+
+        transaction.show(targetFragment).commit();
+        activeFragment = targetFragment;
     }
 
     @Override
