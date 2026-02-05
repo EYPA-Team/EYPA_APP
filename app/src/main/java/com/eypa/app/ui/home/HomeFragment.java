@@ -450,6 +450,9 @@ public class HomeFragment extends Fragment {
                 if (filterItem != null) {
                     filterItem.setVisible(false);
                 }
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).setBottomNavigationVisibility(View.GONE);
+                }
                 return true;
             }
 
@@ -461,6 +464,10 @@ public class HomeFragment extends Fragment {
                 if (filterItem != null) {
                     filterItem.setVisible(true);
                 }
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).setBottomNavigationVisibility(View.VISIBLE);
+                }
+                requireActivity().invalidateOptionsMenu();
                 return true;
             }
         });

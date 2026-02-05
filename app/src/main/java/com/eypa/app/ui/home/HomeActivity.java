@@ -122,4 +122,10 @@ public class HomeActivity extends AppCompatActivity {
         }
         super.onBackPressed();
     }
+
+    public void setBottomNavigationVisibility(int visibility) {
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setVisibility(visibility);
+        }
+    }
 }
