@@ -60,10 +60,6 @@ public class SettingsActivity extends AppCompatActivity {
             Intent intent = new Intent(this, GeneralSettingsActivity.class);
             startActivity(intent);
         });
-        findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
-            Intent intent = new Intent(this, ThemeSelectionActivity.class);
-            startActivity(intent);
-        });
         findViewById(R.id.layout_about).setOnClickListener(v -> {
             Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);

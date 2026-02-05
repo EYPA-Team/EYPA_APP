@@ -1,5 +1,6 @@
 package com.eypa.app.ui.home;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -60,6 +61,11 @@ public class GeneralSettingsActivity extends AppCompatActivity {
 
         switchUpdateDialog.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("ShowUpdateDialog", isChecked).apply();
+        });
+
+        findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ThemeSelectionActivity.class);
+            startActivity(intent);
         });
     }
 
