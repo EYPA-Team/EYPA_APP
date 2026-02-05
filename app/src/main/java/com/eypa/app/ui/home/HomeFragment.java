@@ -207,7 +207,7 @@ public class HomeFragment extends Fragment {
                             isFirstLoad = false;
                             progressBar.animate()
                                     .alpha(0f)
-                                    .setDuration(300)
+                                    .setDuration(200)
                                     .withEndAction(() -> progressBar.setVisibility(View.GONE))
                                     .start();
 
@@ -215,7 +215,7 @@ public class HomeFragment extends Fragment {
                                     .alpha(1f)
                                     .translationY(0f)
                                     .setStartDelay(300)
-                                    .setDuration(500)
+                                    .setDuration(300)
                                     .start();
                             
                             adapter.notifyDataSetChanged();
