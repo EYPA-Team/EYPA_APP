@@ -206,15 +206,15 @@ public class ContentItem {
     }
 
     public String getBestImageUrl() {
-        if (zibOtherData != null && zibOtherData.coverImage != null && !zibOtherData.coverImage.isEmpty()) {
+        if (zibOtherData != null && zibOtherData.coverImage != null && !zibOtherData.coverImage.trim().isEmpty()) {
             return ensureHttps(zibOtherData.coverImage);
         }
-        if (zibOtherData != null && zibOtherData.thumbnailUrl != null && !zibOtherData.thumbnailUrl.isEmpty()) {
+        if (zibOtherData != null && zibOtherData.thumbnailUrl != null && !zibOtherData.thumbnailUrl.trim().isEmpty()) {
             return ensureHttps(zibOtherData.thumbnailUrl);
         }
         if (embedded != null && embedded.wpFeaturedmedia != null && !embedded.wpFeaturedmedia.isEmpty()) {
             FeaturedMedia media = embedded.wpFeaturedmedia.get(0);
-            if (media != null && media.sourceUrl != null && !media.sourceUrl.isEmpty()) {
+            if (media != null && media.sourceUrl != null && !media.sourceUrl.trim().isEmpty()) {
                 return ensureHttps(media.sourceUrl);
             }
         }
@@ -223,6 +223,7 @@ public class ContentItem {
 
     private String ensureHttps(String url) {
         if (url == null) return null;
+        url = url.trim();
         return url.startsWith("http://") ? url.replace("http://", "https://") : url;
     }
 
