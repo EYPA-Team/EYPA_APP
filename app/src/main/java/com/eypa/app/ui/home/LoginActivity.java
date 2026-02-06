@@ -32,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etPassword;
     private Button btnLogin;
     private View tvRegister;
+    private View tvForgotPassword;
     private ProgressBar progressBar;
 
     @Override
@@ -62,11 +63,15 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
         tvRegister = findViewById(R.id.tv_register);
+        tvForgotPassword = findViewById(R.id.tv_forgot_password);
         progressBar = findViewById(R.id.progress_bar);
 
         btnLogin.setOnClickListener(v -> attemptLogin());
         tvRegister.setOnClickListener(v -> {
             startActivity(new android.content.Intent(this, RegisterActivity.class));
+        });
+        tvForgotPassword.setOnClickListener(v -> {
+            startActivity(new android.content.Intent(this, ResetPasswordActivity.class));
         });
     }
 

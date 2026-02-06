@@ -63,6 +63,11 @@
             android:exported="false"
             android:label="注册" />
 
+        <activity
+            android:name=".ui.home.ResetPasswordActivity"
+            android:exported="false"
+            android:label="重置密码" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

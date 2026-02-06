@@ -72,6 +72,19 @@
                 android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/tv_forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:text="忘记密码？"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"/>
+
         <Button
             android:id="@+id/btn_login"
             android:layout_width="match_parent"

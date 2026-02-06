@@ -10,6 +10,7 @@ import com.eypa.app.model.UpdateInfo;
 import com.eypa.app.model.user.LoginRequest;
 import com.eypa.app.model.user.LoginResponse;
 import com.eypa.app.model.user.RegisterRequest;
+import com.eypa.app.model.user.ResetPasswordRequest;
 import com.eypa.app.model.user.SendCodeRequest;
 import com.eypa.app.model.user.TokenRequest;
 
@@ -132,4 +133,12 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/register")
     Call<LoginResponse> register(@Body RegisterRequest request);
+
+    /**
+     * 重置密码
+     * @param request 重置密码请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/reset-password")
+    Call<LoginResponse> resetPassword(@Body ResetPasswordRequest request);
 }
