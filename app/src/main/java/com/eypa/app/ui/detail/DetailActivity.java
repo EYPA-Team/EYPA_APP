@@ -248,9 +248,11 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 contentTabsAndPager.setVisibility(View.INVISIBLE);
             } else {
                 if (progressBar.getVisibility() == View.VISIBLE) {
+                    int aniDuration = 300;
+                    
                     progressBar.animate()
                             .alpha(0f)
-                            .setDuration(500)
+                            .setDuration(aniDuration)
                             .withEndAction(() -> progressBar.setVisibility(View.GONE))
                             .start();
 
@@ -258,14 +260,14 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                     appBarLayout.setVisibility(View.VISIBLE);
                     appBarLayout.animate()
                             .alpha(1f)
-                            .setDuration(500)
+                            .setDuration(aniDuration)
                             .start();
 
                     contentTabsAndPager.setAlpha(0f);
                     contentTabsAndPager.setVisibility(View.VISIBLE);
                     contentTabsAndPager.animate()
                             .alpha(1f)
-                            .setDuration(500)
+                            .setDuration(aniDuration)
                             .start();
                 } else {
                     progressBar.setVisibility(View.GONE);
