@@ -9,6 +9,8 @@ import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
 import com.eypa.app.model.user.LoginRequest;
 import com.eypa.app.model.user.LoginResponse;
+import com.eypa.app.model.user.RegisterRequest;
+import com.eypa.app.model.user.SendCodeRequest;
 import com.eypa.app.model.user.TokenRequest;
 
 import java.util.List;
@@ -114,4 +116,20 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/user/profile")
     Call<LoginResponse> getUserProfile(@Body TokenRequest request);
+
+    /**
+     * 发送验证码
+     * @param request 发送验证码请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/send-code")
+    Call<LoginResponse> sendCode(@Body SendCodeRequest request);
+
+    /**
+     * 注册账号
+     * @param request 注册请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/register")
+    Call<LoginResponse> register(@Body RegisterRequest request);
 }
