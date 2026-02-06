@@ -7,11 +7,16 @@ import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
+import com.eypa.app.model.user.LoginRequest;
+import com.eypa.app.model.user.LoginResponse;
+import com.eypa.app.model.user.TokenRequest;
 
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -93,4 +98,20 @@ public interface ContentApiService {
      */
     @GET("eu-json/app/v1/check-update")
     Call<UpdateInfo> checkUpdate();
+
+    /**
+     * 用户登录
+     * @param request 登录请求体
+     * @return 登录响应
+     */
+    @POST("eu-json/app/v1/login")
+    Call<LoginResponse> login(@Body LoginRequest request);
+
+    /**
+     * 获取/刷新个人信息
+     * @param request Token请求体
+     * @return 个人信息响应
+     */
+    @POST("eu-json/app/v1/user/profile")
+    Call<LoginResponse> getUserProfile(@Body TokenRequest request);
 }

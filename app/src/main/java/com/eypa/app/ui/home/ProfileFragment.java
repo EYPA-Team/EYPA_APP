@@ -13,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,13 +23,22 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.eypa.app.R;
+import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.utils.ThemeUtils;
+import com.eypa.app.utils.UserManager;
 
 public class ProfileFragment extends Fragment {
 
     private SharedPreferences sharedPreferences;
     private boolean isDarkMode = false;
+    private ImageView ivAvatar;
+    private TextView tvNickname;
+    private TextView tvDesc;
+    private View layoutStats;
+    private TextView tvPoints;
+    private TextView tvBalance;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +58,21 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        ivAvatar = view.findViewById(R.id.iv_avatar);
+        tvNickname = view.findViewById(R.id.tv_nickname);
+        tvDesc = view.findViewById(R.id.tv_desc);
+        layoutStats = view.findViewById(R.id.layout_stats);
+        tvPoints = view.findViewById(R.id.tv_points);
+        tvBalance = view.findViewById(R.id.tv_balance);
+
+        view.findViewById(R.id.card_profile).setOnClickListener(v -> {
+            if (!UserManager.getInstance(requireContext()).isLoggedIn().getValue()) {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+            } else {
+                Toast.makeText(requireContext(), "个人信息页面待开发", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         view.findViewById(R.id.card_favorites).setOnClickListener(v -> {
             Toast.makeText(requireContext(), "收藏功能待开发", Toast.LENGTH_SHORT).show();
         });
@@ -54,6 +80,37 @@ public class ProfileFragment extends Fragment {
         view.findViewById(R.id.card_history).setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), HistoryActivity.class));
         });
+
+        UserManager.getInstance(requireContext()).getUserProfile().observe(getViewLifecycleOwner(), this::updateProfileUI);
+        
+        UserManager.getInstance(requireContext()).refreshProfile();
+    }
+
+    private void updateProfileUI(UserProfile user) {
+        if (user != null) {
+            tvNickname.setText(user.getNickname() != null ? user.getNickname() : user.getUsername());
+            tvDesc.setText(user.getDesc() != null ? user.getDesc() : "暂无简介");
+            
+            if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                Glide.with(this)
+                    .load(user.getAvatar())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(ivAvatar);
+            } else {
+                ivAvatar.setImageResource(R.drawable.ic_person);
+            }
+
+            layoutStats.setVisibility(View.VISIBLE);
+            tvPoints.setText("积分: " + user.getPoints());
+            tvBalance.setText("余额: " + user.getBalance());
+        } else {
+            tvNickname.setText("点击登录/注册");
+            tvDesc.setText("登录后享受更多功能");
+            ivAvatar.setImageResource(R.drawable.ic_person);
+            layoutStats.setVisibility(View.GONE);
+        }
     }
 
     @Override

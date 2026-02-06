@@ -53,6 +53,11 @@
             android:exported="false"
             android:label="通用设置" />
 
+        <activity
+            android:name=".ui.home.LoginActivity"
+            android:exported="false"
+            android:label="登录" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

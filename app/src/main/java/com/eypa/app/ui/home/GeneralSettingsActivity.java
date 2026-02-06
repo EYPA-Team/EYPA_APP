@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -13,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.eypa.app.R;
 import com.eypa.app.utils.ThemeUtils;
+import com.eypa.app.utils.UserManager;
 
 public class GeneralSettingsActivity extends AppCompatActivity {
 
@@ -68,6 +72,25 @@ public class GeneralSettingsActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ThemeSelectionActivity.class);
             startActivity(intent);
         });
+
+        View logoutLayout = findViewById(R.id.layout_logout);
+        UserManager.getInstance(this).isLoggedIn().observe(this, isLoggedIn -> {
+            logoutLayout.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+        });
+
+        logoutLayout.setOnClickListener(v -> showLogoutConfirmation());
+    }
+
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("退出登录")
+                .setMessage("确定要退出登录吗？")
+                .setPositiveButton("确定", (dialog, which) -> {
+                    UserManager.getInstance(this).logout();
+                    Toast.makeText(this, "已退出登录", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("取消", null)
+                .show();
     }
 
     @Override
