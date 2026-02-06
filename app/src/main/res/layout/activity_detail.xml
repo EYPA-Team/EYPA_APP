@@ -54,6 +54,22 @@
                     app:shutter_background_color="@android:color/black"
                     app:resize_mode="fit" />
 
+                <TextView
+                    android:id="@+id/tv_seek_overlay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:layout_marginTop="32dp"
+                    android:background="#80000000"
+                    android:padding="16dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:elevation="10dp"
+                    tools:text="11:45 / 91:78"
+                    tools:visibility="visible"/>
+
                 <ImageButton
                     android:id="@+id/play_button_overlay"
                     android:layout_width="64dp"

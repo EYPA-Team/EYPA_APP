@@ -8,13 +8,17 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -58,6 +62,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private ProgressBar progressBar;
     private ImageView coverImage;
     private PlayerView playerView;
+    private TextView tvSeekOverlay;
     private ImageButton playButtonOverlay;
     private CollapsingToolbarLayout collapsingToolbar;
     private TabLayout tabLayout;
@@ -75,6 +80,11 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private boolean isTitleShown = false;
     private String postTitle = "";
     private List<ContentItem.Episode> currentEpisodes = new ArrayList<>();
+    
+    private GestureDetector gestureDetector;
+    private boolean isSeeking = false;
+    private long gestureStartPosition = 0;
+    private long seekTargetPosition = 0;
 
     public static void start(Context context, int postId) {
         Intent intent = new Intent(context, DetailActivity.class);
@@ -91,6 +101,12 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode = 
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+        
         setContentView(R.layout.activity_detail);
 
         if (savedInstanceState != null) {
@@ -182,6 +198,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         progressBar = findViewById(R.id.progress_bar);
         coverImage = findViewById(R.id.cover_image);
         playerView = findViewById(R.id.player_view);
+        tvSeekOverlay = findViewById(R.id.tv_seek_overlay);
         playButtonOverlay = findViewById(R.id.play_button_overlay);
         collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         mediaContainer = findViewById(R.id.media_container);
@@ -347,6 +364,97 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         });
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (player != null) {
+                    if (player.isPlaying()) {
+                        player.pause();
+                    } else {
+                        player.play();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (playerView != null) {
+                    if (playerView.isControllerFullyVisible()) {
+                        playerView.hideController();
+                    } else {
+                        playerView.showController();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (player == null) return false;
+                
+                float totalDistanceX = e2.getX() - e1.getX();
+                float totalDistanceY = e2.getY() - e1.getY();
+
+                if (Math.abs(totalDistanceX) > Math.abs(totalDistanceY)) {
+                    if (!isSeeking) {
+                        isSeeking = true;
+                        gestureStartPosition = player.getCurrentPosition();
+                        tvSeekOverlay.setVisibility(View.VISIBLE);
+                        playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+
+                    long deltaMs = (long) (totalDistanceX / 20.0 * 1000);
+                    
+                    seekTargetPosition = Math.max(0, Math.min(player.getDuration(), gestureStartPosition + deltaMs));
+
+                    updateSeekOverlay(deltaMs);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        playerView.setOnTouchListener((v, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                return true;
+            }
+
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                if (isSeeking) {
+                    isSeeking = false;
+                    if (player != null) {
+                        player.seekTo(seekTargetPosition);
+                    }
+                    tvSeekOverlay.setVisibility(View.GONE);
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    private void updateSeekOverlay(long deltaMs) {
+        if (player == null) return;
+        String current = formatTime(seekTargetPosition);
+        String total = formatTime(player.getDuration());
+        
+        tvSeekOverlay.setText(String.format("%s / %s", current, total));
+    }
+
+    private String formatTime(long ms) {
+        long totalSeconds = ms / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format(java.util.Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 
     private void initializePlayer(String videoUrl, boolean startPlayback) {
@@ -399,6 +507,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 fullscreenContainer.addView(playerView, new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
+            
+            if (tvSeekOverlay.getParent() != fullscreenContainer) {
+                ((ViewGroup) tvSeekOverlay.getParent()).removeView(tvSeekOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                fullscreenContainer.addView(tvSeekOverlay, params);
+            }
 
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
@@ -413,6 +530,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 // --- 竖屏模式下，填满 XML 中定义的固定高度容器 ---
                 mediaContainer.addView(playerView, 0, new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            
+            if (tvSeekOverlay.getParent() != mediaContainer) {
+                ((ViewGroup) tvSeekOverlay.getParent()).removeView(tvSeekOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                mediaContainer.addView(tvSeekOverlay, params);
             }
 
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
