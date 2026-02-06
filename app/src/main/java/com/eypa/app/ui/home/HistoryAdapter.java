@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.ui.detail.DetailActivity;
@@ -52,6 +53,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
                     .load(imageUrl)
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into(holder.coverImage);
         } else {
             holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);

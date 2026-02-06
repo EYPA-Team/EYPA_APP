@@ -23,6 +23,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
@@ -132,6 +133,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .load(imageUrl)
                     .placeholder(circularProgressDrawable)
                     .error(R.drawable.placeholder_image)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into(postHolder.coverImage);
         } else {
             postHolder.coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -253,6 +255,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .load(item.getImage())
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into(holder.image);
 
             holder.itemView.setOnClickListener(v -> {

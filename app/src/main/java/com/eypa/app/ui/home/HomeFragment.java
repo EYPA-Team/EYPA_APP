@@ -55,6 +55,7 @@ public class HomeFragment extends Fragment {
     private ProgressBar progressBar;
     private LinearLayout errorLayout;
     private Button btnRetry;
+    private StaggeredGridLayoutManager layoutManager;
     private PostsAdapter adapter;
     private List<ContentItem> postList = new ArrayList<>();
     private List<SliderItem> sliderList = new ArrayList<>();
@@ -122,7 +123,8 @@ public class HomeFragment extends Fragment {
         requireContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
         swipeRefreshLayout.setColorSchemeColors(typedValue.data);
 
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new PostsAdapter(postList, categoryMap);
         recyclerView.setAdapter(adapter);
@@ -139,6 +141,7 @@ public class HomeFragment extends Fragment {
             refreshStartTime = System.currentTimeMillis();
             recyclerView.animate().alpha(0f).setDuration(300).start();
             retryCount = 0;
+            layoutManager.invalidateSpanAssignments();
             loadPosts();
         });
 
@@ -220,6 +223,7 @@ public class HomeFragment extends Fragment {
                     postList.clear();
                     adapter.notifyDataSetChanged();
                     refreshStartTime = System.currentTimeMillis();
+                    layoutManager.invalidateSpanAssignments();
                     loadPosts();
                 }).start();
             }
@@ -345,9 +349,12 @@ public class HomeFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             isLoading = false;
             progressBar.setVisibility(View.GONE);
-            recyclerView.animate().alpha(1f).setDuration(300).start();
+            
             if (isFirstLoad) {
                 errorLayout.setVisibility(View.VISIBLE);
+                recyclerView.setAlpha(0f);
+            } else {
+                recyclerView.animate().alpha(1f).setDuration(300).start();
             }
             Log.e("API_FAILURE", "Load failed: " + errorMsg);
         }
