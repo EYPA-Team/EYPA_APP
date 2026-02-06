@@ -70,23 +70,16 @@ public interface ContentApiService {
     );
 
     /**
-     * 新增：根据关键词搜索文章
-     * @param query 搜索关键词
-     * @param page 页码
-     * @param perPage 每页数量
-     * @param fields 请求的字段
-     * @param embed 嵌入的数据
-     * @return 文章列表的 Call 对象
+     * 更新新的搜索API接口
+     * 使用 keyword 而不是 search
+     * 不需要 _fields 和 _embed 参数
      */
-    @GET("eu-json/wp/v2/posts")
+    @GET("eu-json/app/v1/search")
     Call<List<ContentItem>> searchPosts(
-            @Query("search") String query,
-            @Query("page") int page,
-            @Query("per_page") int perPage,
-            @Query("_fields") String fields,
-            @Query("_embed") String embed
+            @Query("keyword") String query,
+            @Query("page") int page
     );
-
+    
     /**
      * 获取首页轮播图
      * @return 轮播图列表
