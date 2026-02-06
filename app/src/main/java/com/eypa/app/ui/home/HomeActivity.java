@@ -21,6 +21,7 @@ public class HomeActivity extends AppCompatActivity {
     private boolean isDarkMode = false;
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
+    private ShopFragment shopFragment;
     private ProfileFragment profileFragment;
     private Fragment activeFragment;
 
@@ -38,10 +39,12 @@ public class HomeActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
+            shopFragment = (ShopFragment) getSupportFragmentManager().findFragmentByTag("SHOP");
             profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentByTag("PROFILE");
         }
 
         if (homeFragment == null) homeFragment = new HomeFragment();
+        if (shopFragment == null) shopFragment = new ShopFragment();
         if (profileFragment == null) profileFragment = new ProfileFragment();
 
         if (savedInstanceState == null) {
@@ -51,8 +54,10 @@ public class HomeActivity extends AppCompatActivity {
                     .commit();
         } else {
             Fragment home = getSupportFragmentManager().findFragmentByTag("HOME");
+            Fragment shop = getSupportFragmentManager().findFragmentByTag("SHOP");
             Fragment profile = getSupportFragmentManager().findFragmentByTag("PROFILE");
             if (home != null && !home.isHidden()) activeFragment = home;
+            else if (shop != null && !shop.isHidden()) activeFragment = shop;
             else if (profile != null && !profile.isHidden()) activeFragment = profile;
             else activeFragment = homeFragment;
         }
@@ -81,6 +86,9 @@ public class HomeActivity extends AppCompatActivity {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_home) {
                 switchFragment(homeFragment, "HOME");
+                return true;
+            } else if (itemId == R.id.navigation_shop) {
+                switchFragment(shopFragment, "SHOP");
                 return true;
             } else if (itemId == R.id.navigation_profile) {
                 switchFragment(profileFragment, "PROFILE");
