@@ -102,7 +102,7 @@
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_favorite"
+                android:src="@drawable/ic_star"
                 app:tint="?android:attr/textColorPrimary" />
 
             <TextView
