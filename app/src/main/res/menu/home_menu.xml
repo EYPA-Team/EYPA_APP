@@ -9,9 +9,4 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
 
-    <item
-        android:id="@+id/action_filter"
-        android:icon="@drawable/ic_filter"
-        android:title="分区"
-        app:showAsAction="always" />
 </menu>

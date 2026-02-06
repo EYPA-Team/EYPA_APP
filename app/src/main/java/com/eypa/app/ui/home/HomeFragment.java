@@ -32,6 +32,7 @@ import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Category;
 import com.eypa.app.model.ContentItem;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public class HomeFragment extends Fragment {
     // 主页列表相关
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TabLayout tabLayout;
     private ProgressBar progressBar;
     private LinearLayout errorLayout;
     private Button btnRetry;
@@ -74,8 +76,6 @@ public class HomeFragment extends Fragment {
     private boolean isSearching = false;
     private String currentQuery = "";
     private SearchView mSearchView;
-    private MenuItem filterItem;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,9 +100,12 @@ public class HomeFragment extends Fragment {
         // --- 主页视图初始化 ---
         recyclerView = view.findViewById(R.id.recycler_view);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        tabLayout = view.findViewById(R.id.tab_layout);
         progressBar = view.findViewById(R.id.progress_bar);
         errorLayout = view.findViewById(R.id.error_layout);
         btnRetry = view.findViewById(R.id.btn_retry);
+
+        setupTabLayout();
 
         btnRetry.setOnClickListener(v -> {
             errorLayout.setVisibility(View.GONE);
@@ -173,6 +176,53 @@ public class HomeFragment extends Fragment {
                     loadMoreSearchResults();
                 }
             }
+        });
+    }
+
+    private void setupTabLayout() {
+        tabLayout.addTab(tabLayout.newTab().setText("全部").setTag(null));
+        
+        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
+                if (isAdded() && response.isSuccessful() && response.body() != null) {
+                    for (Category category : response.body()) {
+                        tabLayout.addTab(tabLayout.newTab().setText(category.getName()).setTag(category.getId()));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
+                // 不做处理
+            }
+        });
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Object tag = tab.getTag();
+                if (tag == null) {
+                    currentCategoryId = null;
+                } else {
+                    currentCategoryId = (Integer) tag;
+                }
+                
+                currentSeed = String.valueOf(System.currentTimeMillis());
+                swipeRefreshLayout.setRefreshing(true);
+                currentPage = 1;
+                postList.clear();
+                adapter.notifyDataSetChanged();
+                refreshStartTime = System.currentTimeMillis();
+                recyclerView.animate().alpha(0f).setDuration(300).start();
+                loadPosts();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
@@ -450,7 +500,6 @@ public class HomeFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.home_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        filterItem = menu.findItem(R.id.action_filter);
         
         mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint("搜索文章...");
@@ -459,9 +508,6 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemActionExpand(@NonNull MenuItem item) {
                 searchResultsContainer.setVisibility(View.VISIBLE);
-                if (filterItem != null) {
-                    filterItem.setVisible(false);
-                }
                 if (getActivity() instanceof HomeActivity) {
                     ((HomeActivity) getActivity()).setBottomNavigationVisibility(View.GONE);
                 }
@@ -473,9 +519,6 @@ public class HomeFragment extends Fragment {
                 searchResultsContainer.setVisibility(View.GONE);
                 searchResults.clear();
                 searchAdapter.notifyDataSetChanged();
-                if (filterItem != null) {
-                    filterItem.setVisible(true);
-                }
                 if (getActivity() instanceof HomeActivity) {
                     ((HomeActivity) getActivity()).setBottomNavigationVisibility(View.VISIBLE);
                 }
@@ -504,67 +547,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_filter) {
-            if (searchResultsContainer.getVisibility() == View.VISIBLE) return true;
-            showCategoryFilterDialog();
-            return true;
-        }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void showCategoryFilterDialog() {
-        Toast.makeText(requireContext(), "请稍后...", Toast.LENGTH_SHORT).show();
-        
-        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
-                if (isAdded() && response.isSuccessful() && response.body() != null) {
-                    List<Category> categories = response.body();
-                    showFilterDialog(categories);
-                } else {
-                    if (isAdded()) {
-                        Toast.makeText(requireContext(), "获取分区失败", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
-                if (isAdded()) {
-                    Toast.makeText(requireContext(), "网络错误", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    private void showFilterDialog(List<Category> categories) {
-        String[] items = new String[categories.size() + 1];
-        items[0] = "全部";
-        for (int i = 0; i < categories.size(); i++) {
-            items[i + 1] = categories.get(i).getName();
-        }
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("选择分区")
-                .setItems(items, (dialog, which) -> {
-                    if (which == 0) {
-                        currentCategoryId = null;
-                    } else {
-                        currentCategoryId = categories.get(which - 1).getId();
-                    }
-                    
-                    currentSeed = String.valueOf(System.currentTimeMillis());
-                    swipeRefreshLayout.setRefreshing(true);
-                    currentPage = 1;
-                    postList.clear();
-                    adapter.notifyDataSetChanged();
-                    refreshStartTime = System.currentTimeMillis();
-                    recyclerView.animate().alpha(0f).setDuration(300).start();
-                    loadPosts();
-                })
-                .show();
     }
 
     public boolean handleBackPressed() {

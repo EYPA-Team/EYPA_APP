@@ -249,7 +249,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             } else {
                 if (progressBar.getVisibility() == View.VISIBLE) {
                     int aniDuration = 300;
-                    
+
                     progressBar.animate()
                             .alpha(0f)
                             .setDuration(aniDuration)
