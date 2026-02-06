@@ -210,7 +210,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             dateView.setText(TimeAgoUtils.getRelativeTime(itemView.getContext(), post.getDate()));
             categoryView.setCategories(post.getCategoriesWithNames());
             tagsView.setTags(post.getTagsWithNames());
-            statsView.setStats(post.getViewCount(), post.getLikeCount(), 0);
+            statsView.setStats(post.getViewCount(), post.getLikeCount(), post.getCommentCount());
 
             if (post.getLikeCount() > 0) {
                 likeCountView.setText(formatCount(post.getLikeCount()));

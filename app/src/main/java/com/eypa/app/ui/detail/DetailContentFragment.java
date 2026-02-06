@@ -67,10 +67,22 @@ public class DetailContentFragment extends Fragment {
         // 获取共享的ViewModel并观察数据变化
         viewModel = new ViewModelProvider(requireActivity()).get(DetailViewModel.class);
         viewModel.getPostData().observe(getViewLifecycleOwner(), this::updateContent);
+        viewModel.getTotalCommentCount().observe(getViewLifecycleOwner(), count -> {
+            ContentItem post = viewModel.getPostData().getValue();
+            if (post != null) {
+                post.setCommentCount(count);
+                adapter.notifyItemChanged(1);
+            }
+        });
     }
 
     private void updateContent(ContentItem post) {
         if (post == null) return;
+
+        Integer totalCount = viewModel.getTotalCommentCount().getValue();
+        if (totalCount != null && totalCount > 0) {
+            post.setCommentCount(totalCount);
+        }
 
         // 设置Adapter的头部数据
         adapter.setPost(post);

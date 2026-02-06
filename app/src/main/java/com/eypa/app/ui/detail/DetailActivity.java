@@ -279,6 +279,16 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             }
         });
         viewModel.getPostData().observe(this, this::displayHeaderInfo);
+        viewModel.getTotalCommentCount().observe(this, count -> {
+            TabLayout.Tab commentTab = tabLayout.getTabAt(1);
+            if (commentTab != null) {
+                if (count != 0) {
+                    commentTab.setText("评论 " + count);
+                } else {
+                    commentTab.setText("评论");
+                }
+            }
+        });
     }
 
     private void displayHeaderInfo(ContentItem post) {

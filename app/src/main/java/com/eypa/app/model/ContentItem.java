@@ -28,6 +28,8 @@ public class ContentItem {
     private int viewCount = 0;
     @SerializedName("like_count")
     private int likeCount = 0;
+    @SerializedName("comment_count")
+    private int commentCount = 0;
 
     @SerializedName("zib_other_data")
     private ZibOtherData zibOtherData;
@@ -187,6 +189,8 @@ public class ContentItem {
     public void setViewCount(int viewCount) { this.viewCount = viewCount; }
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+    public int getCommentCount() { return commentCount; }
+    public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
     public void setCoverImage(String url) {
         if (this.zibOtherData == null) {
             this.zibOtherData = new ZibOtherData();

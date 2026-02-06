@@ -24,6 +24,7 @@ public class DetailViewModel extends ViewModel {
     private final MutableLiveData<ContentItem> postData = new MutableLiveData<>();
     private final MutableLiveData<List<CommentBlock>> commentBlocks = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(true);
+    private final MutableLiveData<Integer> totalCommentCount = new MutableLiveData<>(0);
 
     public LiveData<ContentItem> getPostData() {
         return postData;
@@ -35,6 +36,10 @@ public class DetailViewModel extends ViewModel {
 
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
+    }
+
+    public LiveData<Integer> getTotalCommentCount() {
+        return totalCommentCount;
     }
 
     public void loadPostAndComments(int postId) {
@@ -72,6 +77,17 @@ public class DetailViewModel extends ViewModel {
             public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
                 List<CommentBlock> rootCommentBlocks = new ArrayList<>();
                 if (response.isSuccessful() && response.body() != null) {
+                    String totalHeader = response.headers().get("X-WP-Total");
+                    if (totalHeader != null) {
+                        try {
+                            totalCommentCount.setValue(Integer.parseInt(totalHeader));
+                        } catch (NumberFormatException e) {
+                            totalCommentCount.setValue(response.body().size());
+                        }
+                    } else {
+                        totalCommentCount.setValue(response.body().size());
+                    }
+
                     List<Comment> rootComments = buildCommentTree(response.body());
                     for (Comment rootComment : rootComments) {
                         rootCommentBlocks.add(new CommentBlock(rootComment, 0));
