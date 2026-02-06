@@ -362,13 +362,12 @@ public class HomeFragment extends Fragment {
 
         isSearching = true;
         searchProgressBar.setVisibility(View.VISIBLE);
-        
+
         searchRecyclerView.setAlpha(0f);
 
+        // --- 只传 query 和 page ---
         ApiClient.getApiService().searchPosts(
-                currentQuery, searchPage, 10,
-                "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
-                "wp:featuredmedia"
+                currentQuery, searchPage
         ).enqueue(new Callback<List<ContentItem>>() {
             @Override
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
@@ -382,8 +381,6 @@ public class HomeFragment extends Fragment {
                         } else {
                             searchResults.addAll(items);
                             searchAdapter.notifyDataSetChanged();
-                            fetchCategoriesForSearch(items);
-                            
                             searchRecyclerView.animate()
                                     .alpha(1f)
                                     .setDuration(300)
@@ -410,25 +407,23 @@ public class HomeFragment extends Fragment {
         searchPage++;
         isSearching = true;
         searchAdapter.setLoadingFooterVisible(true);
-        
+
+        // --- 只传 query 和 page ---
         ApiClient.getApiService().searchPosts(
-                currentQuery, searchPage, 10,
-                "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
-                "wp:featuredmedia"
+                currentQuery, searchPage
         ).enqueue(new Callback<List<ContentItem>>() {
             @Override
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
                     isSearching = false;
                     searchAdapter.setLoadingFooterVisible(false);
-                    
+
                     if (response.isSuccessful() && response.body() != null) {
                         List<ContentItem> items = response.body();
                         if (!items.isEmpty()) {
                             int start = searchResults.size();
                             searchResults.addAll(items);
                             searchAdapter.notifyItemRangeInserted(start, items.size());
-                            fetchCategoriesForSearch(items);
                         }
                     }
                 }
