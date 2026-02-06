@@ -204,23 +204,24 @@ public class HomeFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Object tag = tab.getTag();
-                if (tag == null) {
-                    currentCategoryId = null;
-                    adapter.setSliderItems(sliderList);
-                } else {
-                    currentCategoryId = (Integer) tag;
-                    adapter.setSliderItems(new ArrayList<>());
-                }
-                
-                currentSeed = String.valueOf(System.currentTimeMillis());
-                swipeRefreshLayout.setRefreshing(true);
-                currentPage = 1;
-                postList.clear();
-                adapter.notifyDataSetChanged();
-                refreshStartTime = System.currentTimeMillis();
-                recyclerView.animate().alpha(0f).setDuration(300).start();
-                loadPosts();
+                recyclerView.animate().alpha(0f).setDuration(300).withEndAction(() -> {
+                    Object tag = tab.getTag();
+                    if (tag == null) {
+                        currentCategoryId = null;
+                        adapter.setSliderItems(sliderList);
+                    } else {
+                        currentCategoryId = (Integer) tag;
+                        adapter.setSliderItems(new ArrayList<>());
+                    }
+                    
+                    currentSeed = String.valueOf(System.currentTimeMillis());
+                    swipeRefreshLayout.setRefreshing(true);
+                    currentPage = 1;
+                    postList.clear();
+                    adapter.notifyDataSetChanged();
+                    refreshStartTime = System.currentTimeMillis();
+                    loadPosts();
+                }).start();
             }
 
             @Override
