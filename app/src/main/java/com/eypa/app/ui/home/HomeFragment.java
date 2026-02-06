@@ -32,6 +32,7 @@ import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Category;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.SliderItem;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ public class HomeFragment extends Fragment {
     private Button btnRetry;
     private PostsAdapter adapter;
     private List<ContentItem> postList = new ArrayList<>();
+    private List<SliderItem> sliderList = new ArrayList<>();
     private Map<Integer, String> categoryMap = new HashMap<>();
     private int currentPage = 1;
     private String currentSeed;
@@ -94,6 +96,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initViews(view);
         loadPosts();
+        loadSlider();
     }
 
     private void initViews(View view) {
@@ -204,8 +207,10 @@ public class HomeFragment extends Fragment {
                 Object tag = tab.getTag();
                 if (tag == null) {
                     currentCategoryId = null;
+                    adapter.setSliderItems(sliderList);
                 } else {
                     currentCategoryId = (Integer) tag;
+                    adapter.setSliderItems(new ArrayList<>());
                 }
                 
                 currentSeed = String.valueOf(System.currentTimeMillis());
@@ -223,6 +228,25 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    private void loadSlider() {
+        ApiClient.getApiService().getSlider().enqueue(new Callback<List<SliderItem>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<SliderItem>> call, @NonNull Response<List<SliderItem>> response) {
+                if (isAdded() && response.isSuccessful() && response.body() != null) {
+                    sliderList = response.body();
+                    if (currentCategoryId == null) {
+                        adapter.setSliderItems(sliderList);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<SliderItem>> call, @NonNull Throwable t) {
+                // 不做处理
+            }
         });
     }
 

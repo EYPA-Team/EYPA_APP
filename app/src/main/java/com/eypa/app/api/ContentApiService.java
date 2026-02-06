@@ -4,6 +4,7 @@ package com.eypa.app.api;
 import com.eypa.app.model.Category;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
 
@@ -85,6 +86,13 @@ public interface ContentApiService {
             @Query("_fields") String fields,
             @Query("_embed") String embed
     );
+
+    /**
+     * 获取首页轮播图
+     * @return 轮播图列表
+     */
+    @GET("eu-json/app/v1/slider")
+    Call<List<SliderItem>> getSlider();
 
     /**
      * 检查应用更新
