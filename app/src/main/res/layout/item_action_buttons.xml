@@ -22,20 +22,6 @@
             tools:text="124"/>
     </LinearLayout>
 
-    <!-- 点踩 -->
-    <LinearLayout style="@style/ActionButtonContainer">
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_action_dislike"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp"
-            android:text="点踩"/>
-    </LinearLayout>
-
     <!-- 收藏 -->
     <LinearLayout style="@style/ActionButtonContainer">
         <ImageView
