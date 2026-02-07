@@ -33,6 +33,7 @@ import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Category;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
+import com.eypa.app.utils.CategoryCacheManager;
 import com.eypa.app.utils.SearchHistoryManager;
 import com.google.android.material.tabs.TabLayout;
 
@@ -87,6 +88,8 @@ public class HomeFragment extends Fragment {
     private TextView btnClearHistory;
     private SearchHistoryAdapter historyAdapter;
     private SearchHistoryManager searchHistoryManager;
+    private CategoryCacheManager categoryCacheManager;
+    private TabLayout.OnTabSelectedListener tabSelectedListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -261,25 +264,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupTabLayout() {
-        tabLayout.addTab(tabLayout.newTab().setText("全部").setTag(null));
+        categoryCacheManager = new CategoryCacheManager(requireContext());
         
-        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
-                if (isAdded() && response.isSuccessful() && response.body() != null) {
-                    for (Category category : response.body()) {
-                        tabLayout.addTab(tabLayout.newTab().setText(category.getName()).setTag(category.getId()));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
-                // 不做处理
-            }
-        });
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabSelectedListener = new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 recyclerView.animate().alpha(0f).setDuration(300).withEndAction(() -> {
@@ -308,7 +295,78 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
+        };
+
+        tabLayout.addTab(tabLayout.newTab().setText("全部").setTag(null));
+        
+        List<Category> cachedCategories = categoryCacheManager.getCategories();
+        if (!cachedCategories.isEmpty()) {
+            for (Category category : cachedCategories) {
+                tabLayout.addTab(tabLayout.newTab().setText(category.getName()).setTag(category.getId()));
+            }
+        }
+
+        tabLayout.addOnTabSelectedListener(tabSelectedListener);
+        
+        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
+                if (isAdded() && response.isSuccessful() && response.body() != null) {
+                    List<Category> newCategories = response.body();
+                    categoryCacheManager.saveCategories(newCategories);
+                    updateTabs(newCategories);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Category>> call, @NonNull Throwable t) {
+                // 不做处理
+            }
         });
+    }
+
+    private void updateTabs(List<Category> newCategories) {
+        if (newCategories.isEmpty()) return;
+
+        tabLayout.removeOnTabSelectedListener(tabSelectedListener);
+
+        Integer selectedId = currentCategoryId;
+        tabLayout.removeAllTabs();
+
+        TabLayout.Tab allTab = tabLayout.newTab().setText("全部").setTag(null);
+        tabLayout.addTab(allTab);
+        
+        TabLayout.Tab selectedTab = null;
+        if (selectedId == null) {
+            selectedTab = allTab;
+        }
+
+        for (Category category : newCategories) {
+            TabLayout.Tab tab = tabLayout.newTab().setText(category.getName()).setTag(category.getId());
+            tabLayout.addTab(tab);
+            if (selectedId != null && selectedId.equals(category.getId())) {
+                selectedTab = tab;
+            }
+        }
+
+        if (selectedTab != null) {
+            selectedTab.select();
+        } else {
+            allTab.select();
+            if (selectedId != null) {
+                currentCategoryId = null;
+                adapter.setSliderItems(sliderList);
+                currentSeed = String.valueOf(System.currentTimeMillis());
+                swipeRefreshLayout.setRefreshing(true);
+                currentPage = 1;
+                postList.clear();
+                adapter.notifyDataSetChanged();
+                layoutManager.invalidateSpanAssignments();
+                loadPosts();
+            }
+        }
+
+        tabLayout.addOnTabSelectedListener(tabSelectedListener);
     }
 
     private void loadSlider() {
@@ -373,6 +431,7 @@ public class HomeFragment extends Fragment {
                                     .start();
                             
                             adapter.notifyDataSetChanged();
+                            layoutManager.invalidateSpanAssignments();
                             fetchCategories(allCategoryIds);
                         } else {
                             if (currentPage == 1) {
@@ -386,6 +445,7 @@ public class HomeFragment extends Fragment {
                                         categoryMap.clear();
                                         postList.addAll(response.body());
                                         adapter.notifyDataSetChanged();
+                                        layoutManager.invalidateSpanAssignments();
 
                                         recyclerView.animate().alpha(1f).setDuration(300).start();
                                         fetchCategories(allCategoryIds);
