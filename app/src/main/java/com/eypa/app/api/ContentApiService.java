@@ -7,6 +7,7 @@ import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
+import com.eypa.app.model.user.FavoritesRequest;
 import com.eypa.app.model.user.LoginRequest;
 import com.eypa.app.model.user.LoginResponse;
 import com.eypa.app.model.user.RegisterRequest;
@@ -141,4 +142,12 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/reset-password")
     Call<LoginResponse> resetPassword(@Body ResetPasswordRequest request);
+
+    /**
+     * 获取用户收藏列表
+     * @param request 收藏请求体
+     * @return 收藏列表
+     */
+    @POST("eu-json/app/v1/user/favorites")
+    Call<List<ContentItem>> getFavorites(@Body FavoritesRequest request);
 }

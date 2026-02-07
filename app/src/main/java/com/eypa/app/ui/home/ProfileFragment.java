@@ -74,7 +74,11 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.card_favorites).setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "收藏功能待开发", Toast.LENGTH_SHORT).show();
+            if (!UserManager.getInstance(requireContext()).isLoggedIn().getValue()) {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+            } else {
+                startActivity(new Intent(requireContext(), FavoritesActivity.class));
+            }
         });
 
         view.findViewById(R.id.card_history).setOnClickListener(v -> {
