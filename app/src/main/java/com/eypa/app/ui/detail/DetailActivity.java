@@ -327,6 +327,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             currentVideoUrl = firstVideoUrl;
         }
 
+        if (currentVideoUrl != null && !isValidVideoUrl(currentVideoUrl)) {
+            currentVideoUrl = null;
+        }
+
         String imageUrl = post.getBestImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
             coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -484,6 +488,21 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         long minutes = totalSeconds / 60;
         long seconds = totalSeconds % 60;
         return String.format(java.util.Locale.getDefault(), "%02d:%02d", minutes, seconds);
+    }
+
+    private boolean isValidVideoUrl(String url) {
+        if (url == null || url.isEmpty()) return false;
+        String lowerUrl = url.toLowerCase();
+        int queryIndex = lowerUrl.indexOf("?");
+        if (queryIndex != -1) {
+            lowerUrl = lowerUrl.substring(0, queryIndex);
+        }
+        
+        return lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".m3u8") || 
+               lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mkv") || 
+               lowerUrl.endsWith(".avi") || lowerUrl.endsWith(".flv") || 
+               lowerUrl.endsWith(".mov") || lowerUrl.endsWith(".rmvb") || 
+               lowerUrl.endsWith(".ts") || lowerUrl.endsWith(".mpd");
     }
 
     private void initializePlayer(String videoUrl, boolean startPlayback) {
