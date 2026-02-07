@@ -12,6 +12,8 @@ public class ContentItem {
     private int id;
     @SerializedName("title")
     private Title title;
+    @SerializedName("link")
+    private String link;
     @SerializedName("date")
     private String date;
     @SerializedName("content")
@@ -174,6 +176,7 @@ public class ContentItem {
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+    public String getLink() { return link; }
     public String getTitle() { return title != null ? title.getRendered() : ""; }
     public void setTitle(String titleStr) {
         if (this.title == null) {

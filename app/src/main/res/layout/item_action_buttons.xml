@@ -38,7 +38,9 @@
     </LinearLayout>
 
     <!-- 分享 -->
-    <LinearLayout style="@style/ActionButtonContainer">
+    <LinearLayout
+        android:id="@+id/action_share_container"
+        style="@style/ActionButtonContainer">
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"

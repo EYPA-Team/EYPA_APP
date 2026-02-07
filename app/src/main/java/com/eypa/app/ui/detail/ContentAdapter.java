@@ -1,5 +1,7 @@
 package com.eypa.app.ui.detail;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.eypa.app.ui.detail.components.CategoryTagView;
 import com.eypa.app.ui.detail.components.StatsView;
 import com.eypa.app.ui.detail.model.ContentBlock;
@@ -195,6 +199,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         TextView titleView, dateView, likeCountView;
         CategoryTagView categoryView, tagsView;
         StatsView statsView;
+        LinearLayout shareContainer;
 
         InfoHeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -204,6 +209,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tagsView = itemView.findViewById(R.id.tags_container);
             statsView = itemView.findViewById(R.id.stats_view);
             likeCountView = itemView.findViewById(R.id.action_like_count);
+            shareContainer = itemView.findViewById(R.id.action_share_container);
         }
 
         void bind(ContentItem post) {
@@ -218,6 +224,32 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 likeCountView.setText("点赞");
             }
+
+            if (shareContainer != null) {
+                shareContainer.setOnClickListener(v -> showShareSheet(v.getContext(), post));
+            }
+        }
+
+        private void showShareSheet(Context context, ContentItem post) {
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+            View sheetView = LayoutInflater.from(context).inflate(R.layout.layout_share_sheet, null);
+            bottomSheetDialog.setContentView(sheetView);
+
+            TextView copyLink = sheetView.findViewById(R.id.action_copy_link);
+            TextView cancel = sheetView.findViewById(R.id.action_cancel);
+
+            copyLink.setOnClickListener(v -> {
+                String link = "https://eqmemory.cn/" + post.getId() + ".html";
+                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Link", link);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(context, "链接已复制", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            });
+
+            cancel.setOnClickListener(v -> bottomSheetDialog.dismiss());
+
+            bottomSheetDialog.show();
         }
 
         private String formatCount(int count) {
