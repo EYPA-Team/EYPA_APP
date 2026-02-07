@@ -47,17 +47,17 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         holder.date.setText(TimeAgoUtils.getRelativeTime(holder.itemView.getContext(), item.getDate()));
 
         String imageUrl = item.getBestImageUrl();
+        holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
             Glide.with(holder.itemView.getContext())
                     .load(imageUrl)
-                    .placeholder(R.drawable.placeholder_image)
-                    .error(R.drawable.placeholder_image)
-                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .centerCrop()
+                    .placeholder(R.drawable.placeholder_image_small)
+                    .error(R.drawable.placeholder_image_small)
                     .into(holder.coverImage);
         } else {
-            holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            holder.coverImage.setImageResource(R.drawable.placeholder_image);
+            holder.coverImage.setImageResource(R.drawable.placeholder_image_small);
         }
 
         holder.itemView.setOnClickListener(v -> {
