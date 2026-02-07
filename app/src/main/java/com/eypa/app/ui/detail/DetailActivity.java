@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -64,6 +65,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private PlayerView playerView;
     private TextView tvSeekOverlay;
     private TextView tvSpeedOverlay;
+    private TextView tvGestureOverlay;
     private ImageButton playButtonOverlay;
     private CollapsingToolbarLayout collapsingToolbar;
     private TabLayout tabLayout;
@@ -85,8 +87,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private GestureDetector gestureDetector;
     private boolean isSeeking = false;
     private boolean isLongPressing = false;
+    private boolean isVolumeControl = false;
+    private boolean isBrightnessControl = false;
     private long gestureStartPosition = 0;
     private long seekTargetPosition = 0;
+    private AudioManager audioManager;
+    private int initialVolume = -1;
+    private float initialBrightness = -1f;
+    private int gestureStartVolume = 0;
+    private float gestureStartBrightness = 0f;
 
     public static void start(Context context, int postId) {
         Intent intent = new Intent(context, DetailActivity.class);
@@ -202,6 +211,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         playerView = findViewById(R.id.player_view);
         tvSeekOverlay = findViewById(R.id.tv_seek_overlay);
         tvSpeedOverlay = findViewById(R.id.tv_speed_overlay);
+        tvGestureOverlay = findViewById(R.id.tv_gesture_overlay);
         playButtonOverlay = findViewById(R.id.play_button_overlay);
         collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         mediaContainer = findViewById(R.id.media_container);
@@ -213,6 +223,11 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         
         appBarLayout.setVisibility(View.INVISIBLE);
         contentTabsAndPager.setVisibility(View.INVISIBLE);
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        initialVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        initialBrightness = lp.screenBrightness;
     }
 
     private void setupToolbar() {
@@ -233,6 +248,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             toolbar.setPadding(0, topInset, 0, 0);
             return WindowInsetsCompat.CONSUMED;
         });
+        
+        toolbar.setClickable(false);
+        toolbar.setOnTouchListener((v, event) -> false);
     }
 
     private void setupViewPager() {
@@ -382,6 +400,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                if (playerView != null && playerView.getParent() != null) {
+                    playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                }
                 return true;
             }
 
@@ -416,22 +437,64 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 if (player == null) return false;
                 
                 float totalDistanceX = e2.getX() - e1.getX();
-                float totalDistanceY = e2.getY() - e1.getY();
+                float totalDistanceY = e1.getY() - e2.getY();
 
                 if (Math.abs(totalDistanceX) > Math.abs(totalDistanceY)) {
-                    if (!isSeeking) {
-                        isSeeking = true;
-                        gestureStartPosition = player.getCurrentPosition();
-                        tvSeekOverlay.setVisibility(View.VISIBLE);
-                        playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                    if (!isVolumeControl && !isBrightnessControl) {
+                        if (!isSeeking) {
+                            isSeeking = true;
+                            gestureStartPosition = player.getCurrentPosition();
+                            tvSeekOverlay.setVisibility(View.VISIBLE);
+                            playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                        }
+
+                        long deltaMs = (long) (totalDistanceX / 20.0 * 1000);
+                        
+                        seekTargetPosition = Math.max(0, Math.min(player.getDuration(), gestureStartPosition + deltaMs));
+
+                        updateSeekOverlay(deltaMs);
+                        return true;
                     }
+                } else {
+                    if (!isSeeking) {
+                        if (!isVolumeControl && !isBrightnessControl) {
+                            if (e1.getX() > playerView.getWidth() / 2) {
+                                isVolumeControl = true;
+                                gestureStartVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                            } else {
+                                isBrightnessControl = true;
+                                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                                gestureStartBrightness = lp.screenBrightness;
+                                if (gestureStartBrightness < 0) {
+                                    try {
+                                        int sysBrightness = android.provider.Settings.System.getInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS);
+                                        gestureStartBrightness = sysBrightness / 255.0f;
+                                    } catch (android.provider.Settings.SettingNotFoundException e) {
+                                        gestureStartBrightness = 0.5f;
+                                    }
+                                }
+                            }
+                            tvGestureOverlay.setVisibility(View.VISIBLE);
+                            playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                        }
 
-                    long deltaMs = (long) (totalDistanceX / 20.0 * 1000);
-                    
-                    seekTargetPosition = Math.max(0, Math.min(player.getDuration(), gestureStartPosition + deltaMs));
-
-                    updateSeekOverlay(deltaMs);
-                    return true;
+                        float percent = totalDistanceY / playerView.getHeight();
+                        
+                        if (isVolumeControl) {
+                            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                            int deltaVolume = (int) (maxVolume * percent);
+                            int targetVolume = Math.max(0, Math.min(maxVolume, gestureStartVolume + deltaVolume));
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVolume, 0);
+                            tvGestureOverlay.setText(String.format("音量 %d%%", (int) ((targetVolume / (float) maxVolume) * 100)));
+                        } else if (isBrightnessControl) {
+                            float targetBrightness = Math.max(0.01f, Math.min(1.0f, gestureStartBrightness + percent));
+                            WindowManager.LayoutParams lp = getWindow().getAttributes();
+                            lp.screenBrightness = targetBrightness;
+                            getWindow().setAttributes(lp);
+                            tvGestureOverlay.setText(String.format("亮度 %d%%", (int) (targetBrightness * 100)));
+                        }
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -468,6 +531,13 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                         player.setPlaybackParameters(new androidx.media3.common.PlaybackParameters(1.0f));
                     }
                     tvSpeedOverlay.setVisibility(View.GONE);
+                    return true;
+                }
+
+                if (isVolumeControl || isBrightnessControl) {
+                    isVolumeControl = false;
+                    isBrightnessControl = false;
+                    tvGestureOverlay.setVisibility(View.GONE);
                     return true;
                 }
             }
@@ -574,6 +644,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 fullscreenContainer.addView(tvSpeedOverlay, params);
             }
 
+            if (tvGestureOverlay.getParent() != fullscreenContainer) {
+                ((ViewGroup) tvGestureOverlay.getParent()).removeView(tvGestureOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                fullscreenContainer.addView(tvGestureOverlay, params);
+            }
+
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -605,6 +684,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
                 params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
                 mediaContainer.addView(tvSpeedOverlay, params);
+            }
+
+            if (tvGestureOverlay.getParent() != mediaContainer) {
+                ((ViewGroup) tvGestureOverlay.getParent()).removeView(tvGestureOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                mediaContainer.addView(tvGestureOverlay, params);
             }
 
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
@@ -650,6 +738,13 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     protected void onDestroy() {
         super.onDestroy();
         releasePlayer();
+        
+        if (initialVolume != -1) {
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, initialVolume, 0);
+        }
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = initialBrightness;
+        getWindow().setAttributes(lp);
     }
 
     @Override
