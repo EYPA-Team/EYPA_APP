@@ -186,11 +186,31 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         }
 
         currentVideoUrl = clickedEpisode.getUrl();
-        playbackPosition = 0;
-        currentWindow = 0;
-        initializePlayer(currentVideoUrl, true);
+        
+        if (player != null) {
+            int index = currentEpisodes.indexOf(clickedEpisode);
+            if (index != -1) {
+                player.seekTo(index, 0);
+                player.play();
+            } else {
+                playbackPosition = 0;
+                currentWindow = 0;
+                initializePlayer(currentVideoUrl, true);
+            }
+        } else {
+            playbackPosition = 0;
+            currentWindow = 0;
+            initializePlayer(currentVideoUrl, true);
+        }
 
-        post.updatePlayingEpisode(clickedEpisode);
+        updateEpisodeUi(clickedEpisode);
+    }
+
+    private void updateEpisodeUi(ContentItem.Episode episode) {
+        ContentItem post = viewModel.getPostData().getValue();
+        if (post != null) {
+            post.updatePlayingEpisode(episode);
+        }
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("f0");
         if (fragment instanceof DetailContentFragment) {
@@ -592,15 +612,42 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                     }
                 }
             }
-            // 删除了动态计算高度的 onVideoSizeChanged 方法 ---
+
+            @Override
+            public void onMediaItemTransition(MediaItem mediaItem, int reason) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || 
+                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
+                    int index = player.getCurrentMediaItemIndex();
+                    if (index >= 0 && index < currentEpisodes.size()) {
+                        ContentItem.Episode newEpisode = currentEpisodes.get(index);
+                        if (currentVideoUrl == null || !currentVideoUrl.equals(newEpisode.getUrl())) {
+                            currentVideoUrl = newEpisode.getUrl();
+                            updateEpisodeUi(newEpisode);
+                        }
+                    }
+                }
+            }
         });
 
         playerView.setPlayer(player);
 
-        MediaItem mediaItem = MediaItem.fromUri(videoUrl);
-        player.setMediaItem(mediaItem);
+        List<MediaItem> mediaItems = new ArrayList<>();
+        int startIndex = 0;
+        if (!currentEpisodes.isEmpty()) {
+            for (int i = 0; i < currentEpisodes.size(); i++) {
+                mediaItems.add(MediaItem.fromUri(currentEpisodes.get(i).getUrl()));
+                if (currentEpisodes.get(i).getUrl().equals(videoUrl)) {
+                    startIndex = i;
+                }
+            }
+            player.setMediaItems(mediaItems, startIndex, playbackPosition);
+        } else {
+            MediaItem mediaItem = MediaItem.fromUri(videoUrl);
+            player.setMediaItem(mediaItem);
+            player.seekTo(currentWindow, playbackPosition);
+        }
+
         player.setPlayWhenReady(startPlayback);
-        player.seekTo(currentWindow, playbackPosition);
         player.prepare();
     }
 
