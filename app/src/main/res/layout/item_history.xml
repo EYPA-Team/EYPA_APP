@@ -75,7 +75,7 @@
                 <ImageView
                     android:layout_width="14dp"
                     android:layout_height="14dp"
-                    android:src="@drawable/ic_likes"
+                    android:src="@drawable/ic_thumb_up_outline"
                     app:tint="?android:attr/textColorSecondary" />
 
                 <TextView

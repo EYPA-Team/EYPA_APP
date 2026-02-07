@@ -97,7 +97,7 @@
                     <ImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:src="@drawable/ic_heart"
+                        android:src="@drawable/ic_thumb_up_outline"
                         app:tint="?android:attr/textColorSecondary"/>
 
                     <TextView
