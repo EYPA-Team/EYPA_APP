@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -264,7 +265,16 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     static class ImageViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
         ImageViewHolder(@NonNull ImageView itemView) { super(itemView); this.imageView = itemView; }
-        void bind(ImageBlock block) { Glide.with(itemView.getContext()).load(block.getImageUrl()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(imageView); }
+        void bind(ImageBlock block) {
+            Glide.with(itemView.getContext()).load(block.getImageUrl()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(imageView);
+            imageView.setOnClickListener(v -> {
+                Context context = itemView.getContext();
+                if (context instanceof AppCompatActivity) {
+                    ImageViewerFragment.newInstance(block.getImageUrl())
+                            .show(((AppCompatActivity) context).getSupportFragmentManager(), "image_viewer");
+                }
+            });
+        }
     }
 
     static class DownloadViewHolder extends RecyclerView.ViewHolder {

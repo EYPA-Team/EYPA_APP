@@ -353,6 +353,13 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                     initializePlayer(currentVideoUrl, true);
                 });
             }
+        } else {
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                coverImage.setOnClickListener(v -> {
+                    ImageViewerFragment.newInstance(imageUrl)
+                            .show(getSupportFragmentManager(), "image_viewer");
+                });
+            }
         }
     }
 
