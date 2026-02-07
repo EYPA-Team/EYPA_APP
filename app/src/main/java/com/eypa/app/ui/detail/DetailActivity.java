@@ -63,6 +63,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private ImageView coverImage;
     private PlayerView playerView;
     private TextView tvSeekOverlay;
+    private TextView tvSpeedOverlay;
     private ImageButton playButtonOverlay;
     private CollapsingToolbarLayout collapsingToolbar;
     private TabLayout tabLayout;
@@ -83,6 +84,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     
     private GestureDetector gestureDetector;
     private boolean isSeeking = false;
+    private boolean isLongPressing = false;
     private long gestureStartPosition = 0;
     private long seekTargetPosition = 0;
 
@@ -199,6 +201,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         coverImage = findViewById(R.id.cover_image);
         playerView = findViewById(R.id.player_view);
         tvSeekOverlay = findViewById(R.id.tv_seek_overlay);
+        tvSpeedOverlay = findViewById(R.id.tv_speed_overlay);
         playButtonOverlay = findViewById(R.id.play_button_overlay);
         collapsingToolbar = findViewById(R.id.collapsing_toolbar);
         mediaContainer = findViewById(R.id.media_container);
@@ -428,6 +431,16 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 }
                 return false;
             }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (player != null && player.isPlaying() && !isSeeking) {
+                    isLongPressing = true;
+                    player.setPlaybackParameters(new androidx.media3.common.PlaybackParameters(2.0f));
+                    tvSpeedOverlay.setVisibility(View.VISIBLE);
+                    playerView.getParent().requestDisallowInterceptTouchEvent(true);
+                }
+            }
         });
 
         playerView.setOnTouchListener((v, event) -> {
@@ -442,6 +455,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                         player.seekTo(seekTargetPosition);
                     }
                     tvSeekOverlay.setVisibility(View.GONE);
+                    return true;
+                }
+
+                if (isLongPressing) {
+                    isLongPressing = false;
+                    if (player != null) {
+                        player.setPlaybackParameters(new androidx.media3.common.PlaybackParameters(1.0f));
+                    }
+                    tvSpeedOverlay.setVisibility(View.GONE);
                     return true;
                 }
             }
@@ -524,6 +546,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 fullscreenContainer.addView(tvSeekOverlay, params);
             }
 
+            if (tvSpeedOverlay.getParent() != fullscreenContainer) {
+                ((ViewGroup) tvSpeedOverlay.getParent()).removeView(tvSpeedOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                fullscreenContainer.addView(tvSpeedOverlay, params);
+            }
+
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
             windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -546,6 +577,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
                 params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
                 mediaContainer.addView(tvSeekOverlay, params);
+            }
+
+            if (tvSpeedOverlay.getParent() != mediaContainer) {
+                ((ViewGroup) tvSpeedOverlay.getParent()).removeView(tvSpeedOverlay);
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.gravity = android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL;
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+                mediaContainer.addView(tvSpeedOverlay, params);
             }
 
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
