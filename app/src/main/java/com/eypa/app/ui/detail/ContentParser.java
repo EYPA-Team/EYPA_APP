@@ -131,8 +131,13 @@ public class ContentParser {
             downloadUrl = linkElement.attr("href");
             if (TextUtils.isEmpty(downloadUrl) || "javascript:;".equals(downloadUrl)) {
                 String fileId = linkElement.attr("data-download-file");
+                String nonce = linkElement.attr("download-nonce");
                 if (!TextUtils.isEmpty(fileId)) {
-                    downloadUrl = "https://eqmemory.cn/?download=" + fileId;
+                    if (!TextUtils.isEmpty(nonce)) {
+                        downloadUrl = "https://eqmemory.cn/ajax-call?action=download_file&file=" + fileId + "&nonce=" + nonce;
+                    } else {
+                        downloadUrl = "https://eqmemory.cn/?download=" + fileId;
+                    }
                 }
             }
         }
