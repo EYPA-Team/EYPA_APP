@@ -28,31 +28,45 @@
         android:padding="16dp">
 
         <RadioButton
+            android:id="@+id/theme_yellow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="追忆黄"
+            android:padding="8dp"/>
+
+        <RadioButton
+            android:id="@+id/theme_cyan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="溯光青"
+            android:padding="8dp"/>
+
+        <RadioButton
             android:id="@+id/theme_green"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="绿色"
+            android:text="匿名绿"
             android:padding="8dp"/>
 
         <RadioButton
             android:id="@+id/theme_blue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="蓝色"
+            android:text="云宝蓝"
             android:padding="8dp"/>
 
         <RadioButton
             android:id="@+id/theme_red"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="红色"
+            android:text="烈焰红"
             android:padding="8dp"/>
 
         <RadioButton
             android:id="@+id/theme_purple"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="紫色"
+            android:text="暮光紫"
             android:padding="8dp"/>
 
     </RadioGroup>

@@ -5,11 +5,11 @@
     <style name="Theme.EYPA_APP" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- ... (原有属性) ... -->
         <item name="android:windowActivityTransitions">true</item>
-        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimary">@color/primary_yellow</item>
         <item name="colorPrimaryVariant">@color/night_status_bar</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/primary_green</item>
-        <item name="colorSecondaryVariant">@color/primary_green</item>
+        <item name="colorSecondary">@color/primary_yellow</item>
+        <item name="colorSecondaryVariant">@color/primary_yellow</item>
         <item name="colorOnSecondary">@color/white</item>
 
         <item name="android:statusBarColor">@color/night_status_bar</item>

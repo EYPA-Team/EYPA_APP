@@ -47,9 +47,27 @@ public class ThemeSelectionActivity extends AppCompatActivity {
 
     private void setupThemeSelection() {
         RadioGroup radioGroup = findViewById(R.id.theme_radio_group);
-        int currentThemeId = sharedPreferences.getInt("ThemeId", R.style.Theme_EYPA_APP);
+        int themeId = sharedPreferences.getInt("ThemeId", R.style.Theme_EYPA_APP);
+
+        boolean isValidTheme = themeId == R.style.Theme_EYPA_APP ||
+                themeId == R.style.Theme_EYPA_APP_Cyan ||
+                themeId == R.style.Theme_EYPA_APP_Green ||
+                themeId == R.style.Theme_EYPA_APP_Blue ||
+                themeId == R.style.Theme_EYPA_APP_Red ||
+                themeId == R.style.Theme_EYPA_APP_Purple;
+
+        if (!isValidTheme) {
+            themeId = R.style.Theme_EYPA_APP;
+            sharedPreferences.edit().putInt("ThemeId", themeId).apply();
+        }
+
+        final int currentThemeId = themeId;
 
         if (currentThemeId == R.style.Theme_EYPA_APP) {
+            radioGroup.check(R.id.theme_yellow);
+        } else if (currentThemeId == R.style.Theme_EYPA_APP_Cyan) {
+            radioGroup.check(R.id.theme_cyan);
+        } else if (currentThemeId == R.style.Theme_EYPA_APP_Green) {
             radioGroup.check(R.id.theme_green);
         } else if (currentThemeId == R.style.Theme_EYPA_APP_Blue) {
             radioGroup.check(R.id.theme_blue);
@@ -61,7 +79,11 @@ public class ThemeSelectionActivity extends AppCompatActivity {
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             int selectedThemeId = R.style.Theme_EYPA_APP;
-            if (checkedId == R.id.theme_blue) {
+            if (checkedId == R.id.theme_cyan) {
+                selectedThemeId = R.style.Theme_EYPA_APP_Cyan;
+            } else if (checkedId == R.id.theme_green) {
+                selectedThemeId = R.style.Theme_EYPA_APP_Green;
+            } else if (checkedId == R.id.theme_blue) {
                 selectedThemeId = R.style.Theme_EYPA_APP_Blue;
             } else if (checkedId == R.id.theme_red) {
                 selectedThemeId = R.style.Theme_EYPA_APP_Red;
