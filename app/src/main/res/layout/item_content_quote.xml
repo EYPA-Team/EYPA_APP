@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:layout_marginTop="12dp"
     android:layout_marginBottom="12dp"
-    android:background="#F5F5F5"> <!-- 浅灰背景 -->
+    android:background="@color/quote_background">
 
     <!-- 左侧装饰线条 -->
     <View
@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:textColor="#666666"
+        android:textColor="@color/quote_text_color"
         android:textSize="14sp"
         android:lineSpacingExtra="6dp"/>
 

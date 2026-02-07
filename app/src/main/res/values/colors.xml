@@ -23,6 +23,10 @@
     <color name="placeholder_color">#CCCCCC</color>
     <color name="card_background_light">#F5F5F5</color>
 
+    <color name="tag_background">#E0E0E0</color>
+    <color name="quote_background">#F5F5F5</color>
+    <color name="quote_text_color">#666666</color>
+
     <!-- 确保这些颜色名称与 themes.xml 中引用的完全一致 -->
     <color name="light_toolbar_background">#FFFFFF</color>
     <color name="light_navigation_background">#FFFFFF</color>
