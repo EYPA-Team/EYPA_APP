@@ -151,7 +151,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             if (categoryName != null) {
                 postHolder.category.setText(categoryName);
             } else {
-                postHolder.category.setText("分类: " + categoryId);
+                postHolder.category.setText(String.valueOf(categoryId));
             }
         } else {
             postHolder.category.setText("");

@@ -392,6 +392,7 @@ public class HomeFragment extends Fragment {
                                     .alpha(1f)
                                     .setDuration(300)
                                     .start();
+                            fetchCategoriesForSearch(items);
                         }
                     } else {
                         Toast.makeText(requireContext(), "搜索失败", Toast.LENGTH_SHORT).show();
@@ -431,6 +432,7 @@ public class HomeFragment extends Fragment {
                             int start = searchResults.size();
                             searchResults.addAll(items);
                             searchAdapter.notifyItemRangeInserted(start, items.size());
+                            fetchCategoriesForSearch(items);
                         }
                     }
                 }
