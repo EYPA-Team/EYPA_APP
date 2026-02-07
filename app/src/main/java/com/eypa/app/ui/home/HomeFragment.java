@@ -33,6 +33,7 @@ import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Category;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
+import com.eypa.app.utils.SearchHistoryManager;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -79,6 +80,14 @@ public class HomeFragment extends Fragment {
     private boolean isSearching = false;
     private String currentQuery = "";
     private SearchView mSearchView;
+
+    // 搜索历史相关
+    private LinearLayout searchHistoryLayout;
+    private RecyclerView historyRecyclerView;
+    private TextView btnClearHistory;
+    private SearchHistoryAdapter historyAdapter;
+    private SearchHistoryManager searchHistoryManager;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,6 +192,64 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+
+        // --- 搜索历史初始化 ---
+        searchHistoryLayout = view.findViewById(R.id.search_history_layout);
+        historyRecyclerView = view.findViewById(R.id.history_recycler_view);
+        btnClearHistory = view.findViewById(R.id.btn_clear_history);
+        
+        searchHistoryManager = new SearchHistoryManager(requireContext());
+        historyRecyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(requireContext()));
+        
+        historyAdapter = new SearchHistoryAdapter(searchHistoryManager.getHistory(), new SearchHistoryAdapter.OnHistoryItemClickListener() {
+            @Override
+            public void onItemClick(String keyword) {
+                if (mSearchView != null) {
+                    mSearchView.setQuery(keyword, true);
+                }
+            }
+
+            @Override
+            public void onDeleteClick(String keyword) {
+                searchHistoryManager.removeHistory(keyword);
+                updateSearchHistory();
+            }
+        });
+        historyRecyclerView.setAdapter(historyAdapter);
+
+        btnClearHistory.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("清除历史")
+                    .setMessage("确定要清除所有搜索历史吗？")
+                    .setPositiveButton("确定", (dialog, which) -> {
+                        searchHistoryManager.clearHistory();
+                        updateSearchHistory();
+                    })
+                    .setNegativeButton("取消", null)
+                    .show();
+        });
+    }
+
+    private void updateSearchHistory() {
+        List<String> history = searchHistoryManager.getHistory();
+        historyAdapter.updateData(history);
+        updateSearchHistoryVisibility();
+    }
+
+    private void updateSearchHistoryVisibility() {
+        if (searchResultsContainer.getVisibility() == View.VISIBLE && 
+            (currentQuery == null || currentQuery.isEmpty())) {
+            List<String> history = searchHistoryManager.getHistory();
+            if (!history.isEmpty()) {
+                searchHistoryLayout.setVisibility(View.VISIBLE);
+                searchRecyclerView.setVisibility(View.GONE);
+                searchEmptyView.setVisibility(View.GONE);
+            } else {
+                searchHistoryLayout.setVisibility(View.GONE);
+            }
+        } else {
+            searchHistoryLayout.setVisibility(View.GONE);
+        }
     }
 
     private void setupTabLayout() {
@@ -362,10 +429,15 @@ public class HomeFragment extends Fragment {
 
     private void performSearch(String query) {
         currentQuery = query;
+        searchHistoryManager.addHistory(query);
+        updateSearchHistory();
+        
         searchPage = 1;
         searchResults.clear();
         searchAdapter.notifyDataSetChanged();
         searchEmptyView.setVisibility(View.GONE);
+        searchHistoryLayout.setVisibility(View.GONE);
+        searchRecyclerView.setVisibility(View.VISIBLE);
 
         isSearching = true;
         searchProgressBar.setVisibility(View.VISIBLE);
@@ -537,6 +609,8 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemActionExpand(@NonNull MenuItem item) {
                 searchResultsContainer.setVisibility(View.VISIBLE);
+                currentQuery = "";
+                updateSearchHistory();
                 if (getActivity() instanceof HomeActivity) {
                     ((HomeActivity) getActivity()).setBottomNavigationVisibility(View.GONE);
                 }
@@ -568,6 +642,12 @@ public class HomeFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    currentQuery = "";
+                    searchResults.clear();
+                    searchAdapter.notifyDataSetChanged();
+                    updateSearchHistoryVisibility();
+                }
                 return false;
             }
         });
