@@ -55,7 +55,7 @@ public class DetailCommentsFragment extends Fragment {
 
             @Override
             public void onShare(Comment comment) {
-                Toast.makeText(getContext(), "分享功能开发中", Toast.LENGTH_SHORT).show();
+                showCommentShareSheet(comment);
             }
 
             @Override
@@ -84,6 +84,29 @@ public class DetailCommentsFragment extends Fragment {
 
         sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
             Toast.makeText(getContext(), "已收到举报", Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+        });
+
+        sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+    }
+
+    private void showCommentShareSheet(Comment comment) {
+        if (getContext() == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.layout_comment_share_sheet, null);
+
+        sheetView.findViewById(R.id.action_copy_link).setOnClickListener(v -> {
+            if (viewModel.getPostData().getValue() != null) {
+                int articleId = viewModel.getPostData().getValue().getId();
+                String link = "https://eqmemory.cn/" + articleId + ".html#comment-" + comment.getId();
+                copyToClipboard(link);
+            }
             bottomSheetDialog.dismiss();
         });
 
