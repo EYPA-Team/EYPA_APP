@@ -5,6 +5,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ImageSpan;
+import android.text.util.Linkify;
 import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
@@ -56,6 +57,9 @@ public class HtmlUtils {
             ssb.removeSpan(span);
             ssb.setSpan(new VerticalImageSpan(span.getDrawable()), start, end, flags);
         }
+
+        // 自动识别并链接化纯文本中的 URL
+        Linkify.addLinks(ssb, Linkify.WEB_URLS);
 
         textView.setText(ssb);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
