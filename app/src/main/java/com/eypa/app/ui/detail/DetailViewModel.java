@@ -19,7 +19,9 @@ import com.eypa.app.utils.UserManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -272,27 +274,58 @@ public class DetailViewModel extends AndroidViewModel {
             return;
         }
 
+        sortComments(comments);
+
+        for (Comment root : comments) {
+            List<Comment> flattenedDescendants = root.getChildren();
+            if (flattenedDescendants != null && !flattenedDescendants.isEmpty()) {
+                reconstructCommentTree(root, flattenedDescendants);
+            }
+        }
+    }
+
+    private void reconstructCommentTree(Comment root, List<Comment> flattenedDescendants) {
+        Map<Integer, Comment> descendantMap = new HashMap<>();
+        for (Comment c : flattenedDescendants) {
+            descendantMap.put(c.getId(), c);
+            if (c.getChildren() == null) {
+                c.setChildren(new ArrayList<>());
+            } else {
+                c.getChildren().clear();
+            }
+        }
+
+        List<Comment> directChildren = new ArrayList<>();
+
+        for (Comment c : flattenedDescendants) {
+            int parentId = c.getParentId();
+            if (parentId == root.getId()) {
+                directChildren.add(c);
+            } else {
+                Comment parent = descendantMap.get(parentId);
+                if (parent != null) {
+                    parent.getChildren().add(c);
+                }
+            }
+        }
+
+        sortComments(directChildren);
+        for (Comment c : flattenedDescendants) {
+            if (c.getChildren() != null && !c.getChildren().isEmpty()) {
+                sortComments(c.getChildren());
+            }
+        }
+
+        root.setChildren(directChildren);
+    }
+
+    private void sortComments(List<Comment> comments) {
         if ("date".equals(currentSortType)) {
             Collections.sort(comments, (c1, c2) -> {
                 String d1 = c1.getDate() != null ? c1.getDate() : "";
                 String d2 = c2.getDate() != null ? c2.getDate() : "";
                 return d2.compareTo(d1);
             });
-        }
-
-        for (Comment comment : comments) {
-            List<Comment> allDescendants = comment.getChildren();
-            if (allDescendants != null && !allDescendants.isEmpty()) {
-                List<Comment> directChildren = new ArrayList<>();
-                for (Comment child : allDescendants) {
-                    if (child.getParentId() == comment.getId()) {
-                        directChildren.add(child);
-                    }
-                }
-                comment.setChildren(directChildren);
-
-                processComments(directChildren);
-            }
         }
     }
 }
