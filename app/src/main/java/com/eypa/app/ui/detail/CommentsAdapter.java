@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.ui.detail.model.CommentBlock;
+import com.eypa.app.ui.home.AuthorProfileActivity;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.TimeAgoUtils;
 
@@ -388,6 +389,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             Glide.with(context).load(comment.getAvatarUrl()).circleCrop()
                     .placeholder(R.drawable.ic_person).error(R.drawable.ic_person).into(avatarView);
+
+            avatarView.setOnClickListener(v -> {
+                if (comment.getAuthor() != null && comment.getAuthor().getId() > 0) {
+                    AuthorProfileActivity.start(context, comment.getAuthor().getId());
+                }
+            });
 
             if (comment.getInteraction() != null) {
                 int count = comment.getInteraction().getLikeCount();

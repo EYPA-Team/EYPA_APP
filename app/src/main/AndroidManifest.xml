@@ -56,6 +56,16 @@
             android:theme="@style/Theme.Eypa.NoActionBar" />
 
         <activity
+            android:name=".ui.home.AuthorProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Eypa.NoActionBar" />
+
+        <activity
+            android:name=".ui.home.MedalsActivity"
+            android:exported="false"
+            android:label="获得的徽章" />
+
+        <activity
             android:name=".ui.home.GeneralSettingsActivity"
             android:exported="false"
             android:label="通用设置" />

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    tools:context=".ui.home.AuthorProfileActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleTextColor="@android:color/transparent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <!-- 背景图 -->
+            <ImageView
+                android:id="@+id/iv_cover"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="背景图"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7"
+                tools:src="@drawable/placeholder_image" />
+            
+            <!-- 遮罩层 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:background="#40000000"
+                app:layout_collapseMode="parallax"/>
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 用户信息卡片 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="?android:attr/colorBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.eypa.app.ui.widget.ZoomableImageView
+                            android:id="@+id/iv_avatar"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:contentDescription="头像"
+                            tools:src="@drawable/ic_person" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textColor="?android:attr/textColorPrimary"
+                                tools:text="Exist" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="4dp"
+                                android:gravity="center_vertical">
+                                
+                                <TextView
+                                    android:id="@+id/tv_level"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="12sp"
+                                    android:textColor="@android:color/white"
+                                    android:background="@drawable/bg_tag"
+                                    android:backgroundTint="?attr/colorPrimary"
+                                    android:paddingStart="6dp"
+                                    android:paddingEnd="6dp"
+                                    android:paddingTop="2dp"
+                                    android:paddingBottom="2dp"
+                                    android:layout_marginEnd="8dp"
+                                    tools:text="LV5" />
+
+                                <TextView
+                                    android:id="@+id/tv_vip"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/primary_yellow_dark"
+                                    android:background="@drawable/bg_tag"
+                                    android:backgroundTint="#FFF8E1"
+                                    android:paddingStart="6dp"
+                                    android:paddingEnd="6dp"
+                                    android:paddingTop="2dp"
+                                    android:paddingBottom="2dp"
+                                    tools:text="高级通行证" 
+                                    android:visibility="gone"
+                                    tools:visibility="visible"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                        
+                        <Button
+                            android:id="@+id/btn_action"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="关注"
+                            android:minHeight="40dp"
+                            android:textSize="12sp"
+                            android:background="@android:color/transparent"
+                            android:textColor="?attr/colorPrimary"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        tools:text="这个人很懒..." />
+
+                    <!-- 认证信息 -->
+                    <LinearLayout
+                        android:id="@+id/layout_auth"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_auth_info"
+                        android:padding="8dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+                        
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_star"
+                            app:tint="#FFC107"
+                            android:layout_gravity="center_vertical"/>
+                            
+                        <TextView
+                            android:id="@+id/tv_auth_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textSize="12sp"
+                            android:textColor="#FFA000"
+                            tools:text="官方认证：马记大大滴领导" />
+                    </LinearLayout>
+                    
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 统计数据 -->
+            <com.eypa.app.ui.detail.components.StatsView
+                android:id="@+id/view_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 徽章入口 -->
+            <LinearLayout
+                android:id="@+id/layout_medals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="获得的徽章"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary"/>
+
+                <TextView
+                    android:id="@+id/tv_medals_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:layout_marginEnd="4dp"/>
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_play_arrow"
+                    app:tint="?android:attr/textColorSecondary"
+                    android:rotation="0"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <include
+        android:id="@+id/loading_mask"
+        layout="@layout/layout_loading_mask" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

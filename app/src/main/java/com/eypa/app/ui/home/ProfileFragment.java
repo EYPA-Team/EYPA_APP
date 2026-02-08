@@ -61,6 +61,20 @@ public class ProfileFragment extends Fragment {
         ivAvatar = view.findViewById(R.id.iv_avatar);
         tvNickname = view.findViewById(R.id.tv_nickname);
         tvDesc = view.findViewById(R.id.tv_desc);
+
+        ivAvatar.setOnClickListener(v -> {
+            UserProfile profile = UserManager.getInstance(requireContext()).getUserProfile().getValue();
+            if (profile != null) {
+                try {
+                    int userId = Integer.parseInt(profile.getId());
+                    AuthorProfileActivity.start(requireContext(), userId);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+            }
+        });
         layoutStats = view.findViewById(R.id.layout_stats);
         tvPoints = view.findViewById(R.id.tv_points);
         tvBalance = view.findViewById(R.id.tv_balance);
@@ -69,7 +83,15 @@ public class ProfileFragment extends Fragment {
             if (!UserManager.getInstance(requireContext()).isLoggedIn().getValue()) {
                 startActivity(new Intent(requireContext(), LoginActivity.class));
             } else {
-                Toast.makeText(requireContext(), "个人信息页面待开发", Toast.LENGTH_SHORT).show();
+                UserProfile profile = UserManager.getInstance(requireContext()).getUserProfile().getValue();
+                if (profile != null) {
+                    try {
+                        int userId = Integer.parseInt(profile.getId());
+                        AuthorProfileActivity.start(requireContext(), userId);
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 

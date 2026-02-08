@@ -164,9 +164,13 @@ public class ContentItem {
         private String name;
         @SerializedName("avatar_urls")
         private AvatarUrls avatarUrls;
+        private boolean isFollowing;
+
         public int getId() { return id; }
         public String getName() { return name; }
         public AvatarUrls getAvatarUrls() { return avatarUrls; }
+        public boolean isFollowing() { return isFollowing; }
+        public void setFollowing(boolean following) { isFollowing = following; }
         public static class AvatarUrls {
             @SerializedName("96")
             private String small;

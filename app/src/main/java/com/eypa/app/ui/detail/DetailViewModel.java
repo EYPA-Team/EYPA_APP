@@ -97,6 +97,65 @@ public class DetailViewModel extends AndroidViewModel {
         editComment.setValue(comment);
     }
 
+    public void checkFollowStatus(int authorId) {
+        String token = UserManager.getInstance(getApplication()).getToken();
+        if (token == null) return;
+
+        com.eypa.app.model.user.AuthorInfoRequest request = new com.eypa.app.model.user.AuthorInfoRequest(authorId, token);
+        ApiClient.getApiService().getAuthorInfo(request).enqueue(new Callback<com.eypa.app.model.user.AuthorInfoResponse>() {
+            @Override
+            public void onResponse(Call<com.eypa.app.model.user.AuthorInfoResponse> call, Response<com.eypa.app.model.user.AuthorInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    com.eypa.app.model.user.AuthorInfoResponse.Data data = response.body().getData();
+                    if (data != null && data.getInteraction() != null) {
+                        boolean isFollowing = data.getInteraction().isFollowing();
+                        ContentItem post = postData.getValue();
+                        if (post != null && post.getAuthor() != null && post.getAuthor().getId() == authorId) {
+                            post.getAuthor().setFollowing(isFollowing);
+                            postData.setValue(post);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.eypa.app.model.user.AuthorInfoResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    public void followUser(int authorId, Runnable onSuccess) {
+        String token = UserManager.getInstance(getApplication()).getToken();
+        if (token == null) {
+            navigateToLogin.setValue(true);
+            return;
+        }
+
+        com.eypa.app.model.user.FollowRequest request = new com.eypa.app.model.user.FollowRequest(token, authorId);
+        ApiClient.getApiService().followUser(request).enqueue(new Callback<com.eypa.app.model.user.FollowResponse>() {
+            @Override
+            public void onResponse(Call<com.eypa.app.model.user.FollowResponse> call, Response<com.eypa.app.model.user.FollowResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    com.eypa.app.model.user.FollowResponse.Data data = response.body().getData();
+                    if (data != null) {
+                        ContentItem post = postData.getValue();
+                        if (post != null && post.getAuthor() != null && post.getAuthor().getId() == authorId) {
+                            post.getAuthor().setFollowing(data.isFollowing());
+                            postData.setValue(post);
+                        }
+                        if (onSuccess != null) onSuccess.run();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.eypa.app.model.user.FollowResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
     public void onLoginNavigationHandled() {
         navigateToLogin.setValue(false);
     }
@@ -146,7 +205,11 @@ public class DetailViewModel extends AndroidViewModel {
                     @Override
                     public void onResponse(Call<ContentItem> call, Response<ContentItem> response) {
                         if (response.isSuccessful()) {
-                            postData.setValue(response.body());
+                            ContentItem post = response.body();
+                            postData.setValue(post);
+                            if (post != null && post.getAuthor() != null) {
+                                checkFollowStatus(post.getAuthor().getId());
+                            }
                         }
                         // 只有当两个请求都结束后才停止加载动画
                         if (commentBlocks.getValue() != null || !response.isSuccessful()) {

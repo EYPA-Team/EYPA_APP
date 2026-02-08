@@ -34,6 +34,7 @@ import com.eypa.app.ui.detail.model.HeaderBlock;
 import com.eypa.app.ui.detail.model.ImageBlock;
 import com.eypa.app.ui.detail.model.QuoteBlock;
 import com.eypa.app.ui.detail.model.TextBlock;
+import com.eypa.app.ui.home.AuthorProfileActivity;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.TimeAgoUtils;
 
@@ -55,6 +56,15 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private ContentItem post;
     private final List<ContentBlock> contentBlocks;
     private final Consumer<ContentItem.Episode> episodeClickListener;
+    private OnAuthorFollowClickListener onAuthorFollowClickListener;
+
+    public interface OnAuthorFollowClickListener {
+        void onFollowClick(int authorId);
+    }
+
+    public void setOnAuthorFollowClickListener(OnAuthorFollowClickListener listener) {
+        this.onAuthorFollowClickListener = listener;
+    }
 
     public ContentAdapter(List<ContentBlock> contentBlocks, Consumer<ContentItem.Episode> episodeClickListener) {
         this.contentBlocks = contentBlocks;
@@ -98,7 +108,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType) {
             case TYPE_AUTHOR_HEADER:
-                return new AuthorHeaderViewHolder(inflater.inflate(R.layout.item_content_author_header, parent, false));
+                return new AuthorHeaderViewHolder(inflater.inflate(R.layout.item_content_author_header, parent, false), onAuthorFollowClickListener);
             case TYPE_INFO_HEADER:
                 // 这是文章顶部的元信息区域
                 return new InfoHeaderViewHolder(inflater.inflate(R.layout.item_content_header, parent, false));
@@ -171,9 +181,11 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         ImageView avatarView;
         TextView nameView;
         Button followButton;
+        OnAuthorFollowClickListener listener;
 
-        AuthorHeaderViewHolder(@NonNull View itemView) {
+        AuthorHeaderViewHolder(@NonNull View itemView, OnAuthorFollowClickListener listener) {
             super(itemView);
+            this.listener = listener;
             avatarView = itemView.findViewById(R.id.author_avatar);
             nameView = itemView.findViewById(R.id.author_name);
             followButton = itemView.findViewById(R.id.follow_button);
@@ -191,6 +203,32 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Glide.with(itemView.getContext()).load(author.getAvatarUrls().getMedium()).circleCrop().placeholder(R.drawable.ic_person).into(avatarView);
             } else {
                 avatarView.setImageResource(R.drawable.ic_person);
+            }
+
+            avatarView.setOnClickListener(v -> {
+                if (author != null) {
+                    AuthorProfileActivity.start(itemView.getContext(), author.getId());
+                }
+            });
+
+            if (author != null) {
+                if (author.isFollowing()) {
+                    followButton.setText("已关注");
+                    followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
+                } else {
+                    followButton.setText("关注");
+                    TypedValue typedValue = new TypedValue();
+                    itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                    followButton.setTextColor(typedValue.data);
+                }
+
+                followButton.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onFollowClick(author.getId());
+                    }
+                });
+            } else {
+                followButton.setVisibility(View.GONE);
             }
         }
     }

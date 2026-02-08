@@ -66,6 +66,11 @@ public class DetailContentFragment extends Fragment {
 
         // 获取共享的ViewModel并观察数据变化
         viewModel = new ViewModelProvider(requireActivity()).get(DetailViewModel.class);
+        
+        adapter.setOnAuthorFollowClickListener(authorId -> {
+            viewModel.followUser(authorId, () -> {});
+        });
+
         viewModel.getPostData().observe(getViewLifecycleOwner(), this::updateContent);
         viewModel.getTotalCommentCount().observe(getViewLifecycleOwner(), count -> {
             ContentItem post = viewModel.getPostData().getValue();
