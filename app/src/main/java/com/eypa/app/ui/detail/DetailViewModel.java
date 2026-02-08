@@ -207,7 +207,7 @@ public class DetailViewModel extends AndroidViewModel {
         Collections.sort(comments, (c1, c2) -> {
             String d1 = c1.getDate() != null ? c1.getDate() : "";
             String d2 = c2.getDate() != null ? c2.getDate() : "";
-            return d1.compareTo(d2);
+            return d2.compareTo(d1);
         });
 
         for (Comment comment : comments) {
