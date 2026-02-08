@@ -44,6 +44,15 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         notifyDataSetChanged();
     }
 
+    public void notifyCommentChanged(int commentId) {
+        for (int i = 0; i < displayedComments.size(); i++) {
+            if (displayedComments.get(i).getComment().getId() == commentId) {
+                notifyItemChanged(i);
+                return;
+            }
+        }
+    }
+
     @NonNull
     @Override
     public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -143,6 +152,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         ImageView avatarView;
         TextView authorView, dateView, contentView, expandRepliesView;
         View likeContainer, shareBtn, moreBtn;
+        ImageView likeIcon;
+        TextView likeCount;
 
         CommentViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -154,6 +165,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             expandRepliesView = itemView.findViewById(R.id.expand_replies_view);
 
             likeContainer = itemView.findViewById(R.id.action_like_container);
+            likeIcon = itemView.findViewById(R.id.action_like_icon);
+            likeCount = itemView.findViewById(R.id.action_like_count);
             shareBtn = itemView.findViewById(R.id.action_share_btn);
             moreBtn = itemView.findViewById(R.id.action_more_btn);
         }
@@ -173,6 +186,28 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
 
             Glide.with(context).load(comment.getAvatarUrl()).circleCrop()
                     .placeholder(R.drawable.ic_person).error(R.drawable.ic_person).into(avatarView);
+
+            if (comment.getInteraction() != null) {
+                int count = comment.getInteraction().getLikeCount();
+                likeCount.setText(count > 0 ? String.valueOf(count) : "赞");
+                
+                if (comment.getInteraction().isLiked()) {
+                    likeIcon.setImageResource(R.drawable.ic_action_like);
+                    android.util.TypedValue typedValue = new android.util.TypedValue();
+                    context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+                    likeIcon.setColorFilter(typedValue.data);
+                    likeCount.setTextColor(typedValue.data);
+                } else {
+                    likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
+                    likeIcon.clearColorFilter();
+                    likeCount.setTextColor(0xFF999999);
+                }
+            } else {
+                likeCount.setText("赞");
+                likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
+                likeIcon.clearColorFilter();
+                likeCount.setTextColor(0xFF999999);
+            }
 
             // 缩进逻辑
             int depth = block.getDepth();

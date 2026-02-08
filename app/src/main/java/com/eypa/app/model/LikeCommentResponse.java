@@ -1,0 +1,40 @@
+package com.eypa.app.model;
+
+import com.google.gson.annotations.SerializedName;
+
+public class LikeCommentResponse {
+    private int code;
+    private String msg;
+    private Data data;
+
+    public boolean isSuccess() {
+        return code == 200;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public Data getData() {
+        return data;
+    }
+
+    public static class Data {
+        @SerializedName("like_count")
+        private int likeCount;
+        @SerializedName("is_liked")
+        private boolean isLiked;
+
+        public int getLikeCount() {
+            return likeCount;
+        }
+
+        public boolean isLiked() {
+            return isLiked;
+        }
+    }
+}

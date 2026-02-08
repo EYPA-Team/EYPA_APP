@@ -5,6 +5,8 @@ import com.eypa.app.model.Category;
 import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.LikeCommentRequest;
+import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
@@ -70,10 +72,18 @@ public interface ContentApiService {
     /**
      * 根据文章ID获取评论列表
      * @param request 评论请求体
-     * @return 评论列表的 Call 对象
+     * @return 响应
      */
     @POST("eu-json/app/v1/comments")
     Call<CommentsResponse> getComments(@Body CommentsRequest request);
+
+    /**
+     * 评论点赞/取消点赞
+     * @param request 点赞请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/comment/like")
+    Call<LikeCommentResponse> likeComment(@Body LikeCommentRequest request);
 
     /**
      * 更新新的搜索API接口

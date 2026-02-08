@@ -78,11 +78,13 @@
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless">
                     <ImageView
+                        android:id="@+id/action_like_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_thumb_up_outline"/>
                     <!-- 如果后端没有评论点赞数据，可以先隐藏或显示0 -->
                     <TextView
+                        android:id="@+id/action_like_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"

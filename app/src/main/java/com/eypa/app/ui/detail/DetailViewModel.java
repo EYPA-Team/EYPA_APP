@@ -1,15 +1,21 @@
 package com.eypa.app.ui.detail;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.LikeCommentRequest;
+import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.ui.detail.model.CommentBlock;
+import com.eypa.app.utils.UserManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,15 +25,33 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailViewModel extends ViewModel {
+public class DetailViewModel extends AndroidViewModel {
 
     private final MutableLiveData<ContentItem> postData = new MutableLiveData<>();
     private final MutableLiveData<List<CommentBlock>> commentBlocks = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(true);
     private final MutableLiveData<Integer> totalCommentCount = new MutableLiveData<>(0);
+    private final MutableLiveData<Boolean> navigateToLogin = new MutableLiveData<>(false);
+    private final MutableLiveData<Integer> commentItemUpdated = new MutableLiveData<>();
+
+    public DetailViewModel(@NonNull Application application) {
+        super(application);
+    }
 
     public LiveData<ContentItem> getPostData() {
         return postData;
+    }
+
+    public LiveData<Boolean> getNavigateToLogin() {
+        return navigateToLogin;
+    }
+
+    public LiveData<Integer> getCommentItemUpdated() {
+        return commentItemUpdated;
+    }
+
+    public void onLoginNavigationHandled() {
+        navigateToLogin.setValue(false);
     }
 
     public LiveData<List<CommentBlock>> getCommentBlocks() {
@@ -72,6 +96,12 @@ public class DetailViewModel extends ViewModel {
 
     private void loadComments(int postId) {
         CommentsRequest request = new CommentsRequest(postId, 1);
+        
+        String token = UserManager.getInstance(getApplication()).getToken();
+        if (token != null) {
+            request.setToken(token);
+        }
+
         ApiClient.getApiService().getComments(request).enqueue(new Callback<CommentsResponse>() {
             @Override
             public void onResponse(Call<CommentsResponse> call, Response<CommentsResponse> response) {
@@ -100,6 +130,61 @@ public class DetailViewModel extends ViewModel {
                 isLoading.setValue(false);
             }
         });
+    }
+
+    public void likeComment(Comment comment) {
+        if (UserManager.getInstance(getApplication()).getToken() == null) {
+            navigateToLogin.setValue(true);
+            return;
+        }
+
+        LikeCommentRequest request = new LikeCommentRequest(UserManager.getInstance(getApplication()).getToken(), comment.getId());
+        ApiClient.getApiService().likeComment(request).enqueue(new Callback<LikeCommentResponse>() {
+            @Override
+            public void onResponse(Call<LikeCommentResponse> call, Response<LikeCommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    LikeCommentResponse.Data data = response.body().getData();
+                    updateCommentLikeStatus(comment.getId(), data.getLikeCount(), data.isLiked());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LikeCommentResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    private void updateCommentLikeStatus(int commentId, int likeCount, boolean isLiked) {
+        List<CommentBlock> blocks = commentBlocks.getValue();
+        if (blocks != null) {
+            for (CommentBlock block : blocks) {
+                if (updateCommentInTree(block.getComment(), commentId, likeCount, isLiked)) {
+                    commentItemUpdated.setValue(commentId);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean updateCommentInTree(Comment root, int targetId, int likeCount, boolean isLiked) {
+        if (root.getId() == targetId) {
+            if (root.getInteraction() == null) {
+                root.setInteraction(new Comment.Interaction());
+            }
+            root.getInteraction().setLikeCount(likeCount);
+            root.getInteraction().setLiked(isLiked);
+            return true;
+        }
+
+        if (root.getChildren() != null) {
+            for (Comment child : root.getChildren()) {
+                if (updateCommentInTree(child, targetId, likeCount, isLiked)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private int calculateTotalCommentCount(List<Comment> comments) {

@@ -17,9 +17,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.ui.detail.model.CommentBlock;
+import com.eypa.app.ui.home.LoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
@@ -50,7 +52,7 @@ public class DetailCommentsFragment extends Fragment {
         adapter.setOnCommentActionListener(new CommentsAdapter.OnCommentActionListener() {
             @Override
             public void onLike(Comment comment) {
-                Toast.makeText(getContext(), "点赞功能开发中", Toast.LENGTH_SHORT).show();
+                viewModel.likeComment(comment);
             }
 
             @Override
@@ -69,6 +71,19 @@ public class DetailCommentsFragment extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(DetailViewModel.class);
         viewModel.getCommentBlocks().observe(getViewLifecycleOwner(), this::updateComments);
+        
+        viewModel.getNavigateToLogin().observe(getViewLifecycleOwner(), navigate -> {
+            if (navigate) {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+                viewModel.onLoginNavigationHandled();
+            }
+        });
+
+        viewModel.getCommentItemUpdated().observe(getViewLifecycleOwner(), commentId -> {
+            if (commentId != null) {
+                adapter.notifyCommentChanged(commentId);
+            }
+        });
     }
 
     private void showCommentActionSheet(Comment comment) {

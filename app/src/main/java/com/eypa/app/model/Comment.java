@@ -80,6 +80,10 @@ public class Comment {
         return interaction;
     }
 
+    public void setInteraction(Interaction interaction) {
+        this.interaction = interaction;
+    }
+
     public List<Comment> getChildren() {
         return children;
     }
@@ -192,6 +196,14 @@ public class Comment {
 
         public int getReplyCount() {
             return replyCount;
+        }
+
+        public void setLikeCount(int likeCount) {
+            this.likeCount = likeCount;
+        }
+
+        public void setLiked(boolean liked) {
+            isLiked = liked;
         }
     }
 }
