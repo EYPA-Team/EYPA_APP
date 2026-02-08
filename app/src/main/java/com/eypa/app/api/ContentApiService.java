@@ -2,7 +2,8 @@
 package com.eypa.app.api;
 
 import com.eypa.app.model.Category;
-import com.eypa.app.model.Comment;
+import com.eypa.app.model.CommentsRequest;
+import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.Tag;
@@ -68,15 +69,11 @@ public interface ContentApiService {
 
     /**
      * 根据文章ID获取评论列表
-     * @param postId 文章ID
-     * @param perPage 每页数量 (新增参数)
+     * @param request 评论请求体
      * @return 评论列表的 Call 对象
      */
-    @GET("eu-json/wp/v2/comments")
-    Call<List<com.eypa.app.model.Comment>> getComments(
-            @Query("post") int postId,
-            @Query("per_page") int perPage
-    );
+    @POST("eu-json/app/v1/comments")
+    Call<CommentsResponse> getComments(@Body CommentsRequest request);
 
     /**
      * 更新新的搜索API接口

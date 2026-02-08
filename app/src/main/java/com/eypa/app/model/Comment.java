@@ -2,68 +2,82 @@ package com.eypa.app.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Comment {
 
     private int id;
-    private int parent;
-
-    @SerializedName("author_name")
-    private String authorName;
-
-    @SerializedName("author_avatar_urls")
-    private Map<String, String> authorAvatarUrls;
-
-    private String date;
-
-    @SerializedName("content")
+    @SerializedName("post_id")
+    private int postId;
+    @SerializedName("parent_id")
+    private int parentId;
+    @SerializedName("is_topping")
+    private boolean isTopping;
+    private Author author;
     private Content content;
+    private String date;
+    @SerializedName("date_formatted")
+    private String dateFormatted;
+    private Object location;
+    @SerializedName("reply_to")
+    private ReplyTo replyTo;
+    private Interaction interaction;
+    private List<Comment> children;
 
-    // 用于构建评论树的临时字段
-    private transient List<Comment> children = new ArrayList<>();
+    public String getAuthorName() {
+        return author != null ? author.getName() : "";
+    }
 
-    public static class Content {
-        @SerializedName("rendered")
-        private String rendered;
+    public String getAvatarUrl() {
+        return author != null ? author.getAvatar() : null;
+    }
 
-        public String getRendered() {
-            return rendered;
-        }
+    public int getParent() {
+        return parentId;
     }
 
     public int getId() {
         return id;
     }
 
-    public int getParent() {
-        return parent;
+    public int getPostId() {
+        return postId;
     }
 
-    public String getAuthorName() {
-        return authorName;
+    public int getParentId() {
+        return parentId;
     }
 
-    public String getAvatarUrl() {
-        if (authorAvatarUrls != null) {
-            // 优先获取96尺寸的头像，如果不存在则获取任意一个
-            if (authorAvatarUrls.containsKey("96")) {
-                return authorAvatarUrls.get("96");
-            } else if (!authorAvatarUrls.isEmpty()) {
-                return authorAvatarUrls.values().iterator().next();
-            }
-        }
-        return null;
+    public boolean isTopping() {
+        return isTopping;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public Content getContent() {
+        return content;
     }
 
     public String getDate() {
         return date;
     }
 
-    public Content getContent() {
-        return content;
+    public String getDateFormatted() {
+        return dateFormatted;
+    }
+
+    public Object getLocation() {
+        return location;
+    }
+
+    public ReplyTo getReplyTo() {
+        return replyTo;
+    }
+
+    public Interaction getInteraction() {
+        return interaction;
     }
 
     public List<Comment> getChildren() {
@@ -72,5 +86,112 @@ public class Comment {
 
     public void setChildren(List<Comment> children) {
         this.children = children;
+    }
+
+    public static class Author {
+        private int id;
+        private String name;
+        private String avatar;
+        private Level level;
+        private Vip vip;
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getAvatar() {
+            return avatar;
+        }
+
+        public Level getLevel() {
+            return level;
+        }
+
+        public Vip getVip() {
+            return vip;
+        }
+    }
+
+    public static class Level {
+        private Object index;
+        private String name;
+        private String icon;
+
+        public int getIndex() {
+            if (index instanceof Number) {
+                return ((Number) index).intValue();
+            } else if (index instanceof String) {
+                try {
+                    return Integer.parseInt((String) index);
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
+            }
+            return 0;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+    }
+
+    public static class Vip {
+        private int level;
+        private String name;
+    }
+
+    public static class Content {
+        private String rendered;
+        private String raw;
+
+        public String getRendered() {
+            return rendered;
+        }
+
+        public String getRaw() {
+            return raw;
+        }
+    }
+
+    public static class ReplyTo {
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    public static class Interaction {
+        @SerializedName("like_count")
+        private int likeCount;
+        @SerializedName("is_liked")
+        private boolean isLiked;
+        @SerializedName("reply_count")
+        private int replyCount;
+
+        public int getLikeCount() {
+            return likeCount;
+        }
+
+        public boolean isLiked() {
+            return isLiked;
+        }
+
+        public int getReplyCount() {
+            return replyCount;
+        }
     }
 }

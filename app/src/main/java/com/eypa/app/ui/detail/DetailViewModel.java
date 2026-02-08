@@ -6,14 +6,14 @@ import androidx.lifecycle.ViewModel;
 
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.Comment;
+import com.eypa.app.model.CommentsRequest;
+import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.ui.detail.model.CommentBlock;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,29 +71,23 @@ public class DetailViewModel extends ViewModel {
     }
 
     private void loadComments(int postId) {
-        // 传入 100 作为 per_page 参数，获取更多评论（解决只显示9条的问题）
-        ApiClient.getApiService().getComments(postId, 100).enqueue(new Callback<List<Comment>>() {
+        CommentsRequest request = new CommentsRequest(postId, 1);
+        ApiClient.getApiService().getComments(request).enqueue(new Callback<CommentsResponse>() {
             @Override
-            public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+            public void onResponse(Call<CommentsResponse> call, Response<CommentsResponse> response) {
                 List<CommentBlock> rootCommentBlocks = new ArrayList<>();
-                if (response.isSuccessful() && response.body() != null) {
-                    String totalHeader = response.headers().get("X-WP-Total");
-                    if (totalHeader != null) {
-                        try {
-                            totalCommentCount.setValue(Integer.parseInt(totalHeader));
-                        } catch (NumberFormatException e) {
-                            totalCommentCount.setValue(response.body().size());
-                        }
-                    } else {
-                        totalCommentCount.setValue(response.body().size());
-                    }
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    List<Comment> comments = response.body().getData();
+                    if (comments != null) {
+                        processComments(comments);
 
-                    List<Comment> rootComments = buildCommentTree(response.body());
-                    for (Comment rootComment : rootComments) {
-                        rootCommentBlocks.add(new CommentBlock(rootComment, 0));
+                        for (Comment rootComment : comments) {
+                            rootCommentBlocks.add(new CommentBlock(rootComment, 0));
+                        }
+                        totalCommentCount.setValue(calculateTotalCommentCount(comments));
                     }
                 }
-                commentBlocks.setValue(rootCommentBlocks); // LiveData 只发布顶层评论
+                commentBlocks.setValue(rootCommentBlocks);
 
                 // 只有当两个请求都结束后才停止加载动画
                 if (postData.getValue() != null || !response.isSuccessful()) {
@@ -101,44 +95,49 @@ public class DetailViewModel extends ViewModel {
                 }
             }
             @Override
-            public void onFailure(Call<List<Comment>> call, Throwable t) {
+            public void onFailure(Call<CommentsResponse> call, Throwable t) {
                 commentBlocks.setValue(new ArrayList<>());
                 isLoading.setValue(false);
             }
         });
     }
 
-    /**
-     * 将扁平的评论列表构建成树形结构
-     * @param flatComments 从API获取的原始评论列表
-     * @return 只包含顶层评论的列表，每个评论对象内部都包含了它的子评论
-     */
-    private List<Comment> buildCommentTree(List<Comment> flatComments) {
-        Map<Integer, Comment> commentMap = new HashMap<>();
-        List<Comment> rootComments = new ArrayList<>();
+    private int calculateTotalCommentCount(List<Comment> comments) {
+        if (comments == null) {
+            return 0;
+        }
+        int count = 0;
+        for (Comment comment : comments) {
+            count++;
+            count += calculateTotalCommentCount(comment.getChildren());
+        }
+        return count;
+    }
 
-        Collections.sort(flatComments, (c1, c2) -> c1.getDate().compareTo(c2.getDate()));
-
-        for (Comment comment : flatComments) {
-            commentMap.put(comment.getId(), comment);
+    private void processComments(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return;
         }
 
-        // 遍历所有评论，构建层级关系
-        for (Comment comment : flatComments) {
-            if (comment.getParent() == 0) {
-                // 如果 parent 是 0，说明是顶层评论
-                rootComments.add(comment);
-            } else {
-                Comment parent = commentMap.get(comment.getParent());
-                if (parent != null) {
-                    // children 列表已初始化
-                    if (parent.getChildren() == null) {
-                        parent.setChildren(new ArrayList<>());
+        Collections.sort(comments, (c1, c2) -> {
+            String d1 = c1.getDate() != null ? c1.getDate() : "";
+            String d2 = c2.getDate() != null ? c2.getDate() : "";
+            return d1.compareTo(d2);
+        });
+
+        for (Comment comment : comments) {
+            List<Comment> allDescendants = comment.getChildren();
+            if (allDescendants != null && !allDescendants.isEmpty()) {
+                List<Comment> directChildren = new ArrayList<>();
+                for (Comment child : allDescendants) {
+                    if (child.getParentId() == comment.getId()) {
+                        directChildren.add(child);
                     }
-                    parent.getChildren().add(comment);
                 }
+                comment.setChildren(directChildren);
+
+                processComments(directChildren);
             }
         }
-        return rootComments;
     }
 }
