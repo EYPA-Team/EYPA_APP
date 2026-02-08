@@ -36,6 +36,9 @@ public class ContentItem {
     @SerializedName("zib_other_data")
     private ZibOtherData zibOtherData;
 
+    @SerializedName("cover_image")
+    private String apiCoverImage;
+    
     public static class ZibOtherData {
         @SerializedName("featured_video")
         private String featuredVideo;
@@ -213,18 +216,24 @@ public class ContentItem {
     }
 
     public String getBestImageUrl() {
+        if (apiCoverImage != null && !apiCoverImage.trim().isEmpty()) {
+            return ensureHttps(apiCoverImage);
+        }
+
         if (zibOtherData != null && zibOtherData.coverImage != null && !zibOtherData.coverImage.trim().isEmpty()) {
             return ensureHttps(zibOtherData.coverImage);
         }
         if (zibOtherData != null && zibOtherData.thumbnailUrl != null && !zibOtherData.thumbnailUrl.trim().isEmpty()) {
             return ensureHttps(zibOtherData.thumbnailUrl);
         }
+
         if (embedded != null && embedded.wpFeaturedmedia != null && !embedded.wpFeaturedmedia.isEmpty()) {
             FeaturedMedia media = embedded.wpFeaturedmedia.get(0);
             if (media != null && media.sourceUrl != null && !media.sourceUrl.trim().isEmpty()) {
                 return ensureHttps(media.sourceUrl);
             }
         }
+
         return null;
     }
 
