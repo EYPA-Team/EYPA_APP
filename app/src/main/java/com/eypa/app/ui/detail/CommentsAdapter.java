@@ -152,6 +152,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             if (parentBlock != null) {
                 Comment parentComment = parentBlock.getComment();
+                boolean wasEmpty = parentComment.getChildren() == null || parentComment.getChildren().isEmpty();
+                
                 if (parentComment.getChildren() == null) {
                     parentComment.setChildren(new ArrayList<>());
                 }
@@ -159,7 +161,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                 newBlock.setDepth(parentBlock.getDepth() + 1);
 
-                if (parentBlock.isExpanded()) {
+                if (parentBlock.isExpanded() || wasEmpty) {
+                    if (wasEmpty) {
+                        parentBlock.setExpanded(true);
+                    }
+                    
                     int insertIndex = parentIndex + 1;
                     while (insertIndex < displayedComments.size()) {
                         CommentBlock nextBlock = displayedComments.get(insertIndex);
