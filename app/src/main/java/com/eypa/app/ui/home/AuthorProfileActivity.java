@@ -31,6 +31,7 @@ import com.eypa.app.model.user.AuthorInfoResponse;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.model.user.UserProfile;
+import com.eypa.app.ui.detail.ImageViewerFragment;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -212,6 +213,11 @@ public class AuthorProfileActivity extends AppCompatActivity {
                 .error(R.drawable.ic_avatar_placeholder)
                 .circleCrop()
                 .into(ivAvatar);
+
+            ivAvatar.setOnClickListener(v -> {
+                ImageViewerFragment.newInstance(base.getAvatar())
+                        .show(getSupportFragmentManager(), "avatar_viewer");
+            });
             
             if (base.getLevel() != null) {
                 tvLevel.setText(base.getLevel().getName());
