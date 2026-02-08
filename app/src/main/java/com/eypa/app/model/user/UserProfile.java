@@ -26,6 +26,9 @@ public class UserProfile {
 
         public int getLevel() { return level; }
         public String getName() { return name; }
+
+        public void setLevel(int level) { this.level = level; }
+        public void setName(String name) { this.name = name; }
     }
 
     public static class LevelInfo {
@@ -59,5 +62,9 @@ public class UserProfile {
 
     public void setLevel(LevelInfo level) {
         this.level = level;
+    }
+
+    public void setVip(VipInfo vip) {
+        this.vip = vip;
     }
 }

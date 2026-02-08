@@ -61,8 +61,13 @@ public class UserManager {
         if (profile == null) return;
 
         UserProfile currentProfile = userProfileLiveData.getValue();
-        if (currentProfile != null && currentProfile.getLevel() != null && profile.getLevel() == null) {
-            profile.setLevel(currentProfile.getLevel());
+        if (currentProfile != null) {
+            if (currentProfile.getLevel() != null && profile.getLevel() == null) {
+                profile.setLevel(currentProfile.getLevel());
+            }
+            if (currentProfile.getVip() != null && profile.getVip() == null) {
+                profile.setVip(currentProfile.getVip());
+            }
         }
         
         SharedPreferences.Editor editor = prefs.edit();

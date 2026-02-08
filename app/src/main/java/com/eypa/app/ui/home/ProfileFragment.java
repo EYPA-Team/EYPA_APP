@@ -44,6 +44,7 @@ public class ProfileFragment extends Fragment {
     private ImageView ivAvatar;
     private TextView tvNickname;
     private TextView tvLevel;
+    private TextView tvVip;
     private TextView tvDesc;
     private View layoutStats;
     private TextView tvPoints;
@@ -70,6 +71,7 @@ public class ProfileFragment extends Fragment {
         ivAvatar = view.findViewById(R.id.iv_avatar);
         tvNickname = view.findViewById(R.id.tv_nickname);
         tvLevel = view.findViewById(R.id.tv_level);
+        tvVip = view.findViewById(R.id.tv_vip);
         tvDesc = view.findViewById(R.id.tv_desc);
 
         ivAvatar.setOnClickListener(v -> {
@@ -139,6 +141,24 @@ public class ProfileFragment extends Fragment {
                 }
             }
 
+            if (user.getVip() != null && user.getVip().getName() != null) {
+                tvVip.setText(user.getVip().getName());
+                tvVip.setVisibility(View.VISIBLE);
+                
+                if ("普通用户".equals(user.getVip().getName())) {
+                    tvVip.setTextColor(0xFF757575);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+                } else if ("高级通行证".equals(user.getVip().getName())) {
+                    tvVip.setTextColor(0xFFFFA000);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFF8E1));
+                } else {
+                    tvVip.setTextColor(0xFF757575);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+                }
+            } else {
+                tvVip.setVisibility(View.GONE);
+            }
+
             tvDesc.setText(user.getDesc() != null ? user.getDesc() : "暂无简介");
             
             if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
@@ -158,6 +178,7 @@ public class ProfileFragment extends Fragment {
         } else {
             tvNickname.setText("点击登录/注册");
             tvLevel.setVisibility(View.GONE);
+            tvVip.setVisibility(View.GONE);
             tvDesc.setText("登录后享受更多功能");
             ivAvatar.setImageResource(R.drawable.ic_person);
             layoutStats.setVisibility(View.GONE);
@@ -229,20 +250,52 @@ public class ProfileFragment extends Fragment {
             public void onResponse(Call<AuthorInfoResponse> call, Response<AuthorInfoResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     AuthorInfoResponse.BaseInfo baseInfo = response.body().getData().getBase();
-                    if (baseInfo != null && baseInfo.getLevel() != null) {
-                        AuthorInfoResponse.LevelInfo authorLevel = baseInfo.getLevel();
-                        
-                        tvLevel.setText(authorLevel.getName());
-                        tvLevel.setVisibility(View.VISIBLE);
-                        
+                    if (baseInfo != null) {
                         UserProfile userProfile = UserManager.getInstance(requireContext()).getUserProfile().getValue();
-                        if (userProfile != null) {
-                            UserProfile.LevelInfo levelInfo = new UserProfile.LevelInfo();
-                            levelInfo.setIndex(authorLevel.getIndex());
-                            levelInfo.setName(authorLevel.getName());
-                            levelInfo.setIcon(authorLevel.getIcon());
+                        boolean needsSave = false;
+
+                        if (baseInfo.getLevel() != null) {
+                            AuthorInfoResponse.LevelInfo authorLevel = baseInfo.getLevel();
                             
-                            userProfile.setLevel(levelInfo);
+                            tvLevel.setText(authorLevel.getName());
+                            tvLevel.setVisibility(View.VISIBLE);
+                            
+                            if (userProfile != null) {
+                                UserProfile.LevelInfo levelInfo = new UserProfile.LevelInfo();
+                                levelInfo.setIndex(authorLevel.getIndex());
+                                levelInfo.setName(authorLevel.getName());
+                                levelInfo.setIcon(authorLevel.getIcon());
+                                
+                                userProfile.setLevel(levelInfo);
+                                needsSave = true;
+                            }
+                        }
+
+                        if (baseInfo.getVip() != null) {
+                            AuthorInfoResponse.VipInfo authorVip = baseInfo.getVip();
+                            
+                            tvVip.setText(authorVip.getName());
+                            tvVip.setVisibility(View.VISIBLE);
+                            
+                            if ("普通用户".equals(authorVip.getName())) {
+                                tvVip.setTextColor(0xFF757575);
+                                tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+                            } else if ("高级通行证".equals(authorVip.getName())) {
+                                tvVip.setTextColor(0xFFFFA000);
+                                tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFF8E1));
+                            }
+
+                            if (userProfile != null) {
+                                UserProfile.VipInfo vipInfo = new UserProfile.VipInfo();
+                                vipInfo.setLevel(authorVip.getLevel());
+                                vipInfo.setName(authorVip.getName());
+                                
+                                userProfile.setVip(vipInfo);
+                                needsSave = true;
+                            }
+                        }
+
+                        if (userProfile != null && needsSave) {
                             UserManager.getInstance(requireContext()).saveUser(userProfile);
                         }
                     }
