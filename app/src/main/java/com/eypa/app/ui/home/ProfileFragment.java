@@ -25,9 +25,17 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
+import com.eypa.app.api.ApiClient;
+import com.eypa.app.api.ContentApiService;
+import com.eypa.app.model.user.AuthorInfoRequest;
+import com.eypa.app.model.user.AuthorInfoResponse;
 import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UserManager;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
 
@@ -35,6 +43,7 @@ public class ProfileFragment extends Fragment {
     private boolean isDarkMode = false;
     private ImageView ivAvatar;
     private TextView tvNickname;
+    private TextView tvLevel;
     private TextView tvDesc;
     private View layoutStats;
     private TextView tvPoints;
@@ -60,6 +69,7 @@ public class ProfileFragment extends Fragment {
 
         ivAvatar = view.findViewById(R.id.iv_avatar);
         tvNickname = view.findViewById(R.id.tv_nickname);
+        tvLevel = view.findViewById(R.id.tv_level);
         tvDesc = view.findViewById(R.id.tv_desc);
 
         ivAvatar.setOnClickListener(v -> {
@@ -115,6 +125,20 @@ public class ProfileFragment extends Fragment {
     private void updateProfileUI(UserProfile user) {
         if (user != null) {
             tvNickname.setText(user.getNickname() != null ? user.getNickname() : user.getUsername());
+            
+            if (user.getLevel() != null && user.getLevel().getName() != null) {
+                tvLevel.setText(user.getLevel().getName());
+                tvLevel.setVisibility(View.VISIBLE);
+            } else {
+                tvLevel.setVisibility(View.GONE);
+                try {
+                    int userId = Integer.parseInt(user.getId());
+                    fetchAuthorInfo(userId);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
             tvDesc.setText(user.getDesc() != null ? user.getDesc() : "暂无简介");
             
             if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
@@ -133,6 +157,7 @@ public class ProfileFragment extends Fragment {
             tvBalance.setText("余额: " + user.getBalance());
         } else {
             tvNickname.setText("点击登录/注册");
+            tvLevel.setVisibility(View.GONE);
             tvDesc.setText("登录后享受更多功能");
             ivAvatar.setImageResource(R.drawable.ic_person);
             layoutStats.setVisibility(View.GONE);
@@ -194,5 +219,40 @@ public class ProfileFragment extends Fragment {
         requireActivity().invalidateOptionsMenu();
 
         ThemeUtils.applyTheme(requireContext());
+    }
+
+    private void fetchAuthorInfo(int userId) {
+        String token = UserManager.getInstance(requireContext()).getToken();
+        ContentApiService apiService = ApiClient.getClient().create(ContentApiService.class);
+        apiService.getAuthorInfo(new AuthorInfoRequest(userId, token)).enqueue(new Callback<AuthorInfoResponse>() {
+            @Override
+            public void onResponse(Call<AuthorInfoResponse> call, Response<AuthorInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    AuthorInfoResponse.BaseInfo baseInfo = response.body().getData().getBase();
+                    if (baseInfo != null && baseInfo.getLevel() != null) {
+                        AuthorInfoResponse.LevelInfo authorLevel = baseInfo.getLevel();
+                        
+                        tvLevel.setText(authorLevel.getName());
+                        tvLevel.setVisibility(View.VISIBLE);
+                        
+                        UserProfile userProfile = UserManager.getInstance(requireContext()).getUserProfile().getValue();
+                        if (userProfile != null) {
+                            UserProfile.LevelInfo levelInfo = new UserProfile.LevelInfo();
+                            levelInfo.setIndex(authorLevel.getIndex());
+                            levelInfo.setName(authorLevel.getName());
+                            levelInfo.setIcon(authorLevel.getIcon());
+                            
+                            userProfile.setLevel(levelInfo);
+                            UserManager.getInstance(requireContext()).saveUser(userProfile);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthorInfoResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
     }
 }

@@ -14,6 +14,7 @@ public class UserProfile {
     private int points;
     private int balance;
     private VipInfo vip;
+    private LevelInfo level;
     @SerializedName("post_count")
     private String postCount;
     @SerializedName("favorite_count")
@@ -27,6 +28,20 @@ public class UserProfile {
         public String getName() { return name; }
     }
 
+    public static class LevelInfo {
+        private int index;
+        private String name;
+        private String icon;
+
+        public int getIndex() { return index; }
+        public String getName() { return name; }
+        public String getIcon() { return icon; }
+
+        public void setIndex(int index) { this.index = index; }
+        public void setName(String name) { this.name = name; }
+        public void setIcon(String icon) { this.icon = icon; }
+    }
+
     public String getToken() { return token; }
     public String getId() { return id; }
     public String getUsername() { return username; }
@@ -38,6 +53,11 @@ public class UserProfile {
     public int getPoints() { return points; }
     public int getBalance() { return balance; }
     public VipInfo getVip() { return vip; }
+    public LevelInfo getLevel() { return level; }
     public String getPostCount() { return postCount; }
     public int getFavoriteCount() { return favoriteCount; }
+
+    public void setLevel(LevelInfo level) {
+        this.level = level;
+    }
 }

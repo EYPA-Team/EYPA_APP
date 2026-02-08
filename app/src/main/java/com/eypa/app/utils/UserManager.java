@@ -59,6 +59,11 @@ public class UserManager {
 
     public void saveUser(UserProfile profile) {
         if (profile == null) return;
+
+        UserProfile currentProfile = userProfileLiveData.getValue();
+        if (currentProfile != null && currentProfile.getLevel() != null && profile.getLevel() == null) {
+            profile.setLevel(currentProfile.getLevel());
+        }
         
         SharedPreferences.Editor editor = prefs.edit();
         if (profile.getToken() != null) {
