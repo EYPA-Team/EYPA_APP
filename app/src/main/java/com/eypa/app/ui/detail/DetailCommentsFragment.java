@@ -26,7 +26,6 @@ import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.ui.detail.model.CommentBlock;
-import com.eypa.app.ui.home.LoginActivity;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -112,13 +111,6 @@ public class DetailCommentsFragment extends Fragment {
         
         viewModel.getIsLoadMoreLoading().observe(getViewLifecycleOwner(), isLoading -> {
             adapter.setLoading(isLoading);
-        });
-
-        viewModel.getNavigateToLogin().observe(getViewLifecycleOwner(), navigate -> {
-            if (navigate) {
-                startActivity(new Intent(requireContext(), LoginActivity.class));
-                viewModel.onLoginNavigationHandled();
-            }
         });
 
         viewModel.getCommentItemUpdated().observe(getViewLifecycleOwner(), commentId -> {

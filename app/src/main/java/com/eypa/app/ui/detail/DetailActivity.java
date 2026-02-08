@@ -45,6 +45,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
+import com.eypa.app.ui.home.LoginActivity;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.model.ContentItem;
 import com.google.android.material.appbar.AppBarLayout;
@@ -442,6 +443,13 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             }
         });
         
+        viewModel.getNavigateToLogin().observe(this, navigate -> {
+            if (navigate) {
+                startActivity(new Intent(this, LoginActivity.class));
+                viewModel.onLoginNavigationHandled();
+            }
+        });
+
         viewModel.getReplyToComment().observe(this, comment -> {
             if (comment != null) {
                 replyToCommentId = comment.getId();
