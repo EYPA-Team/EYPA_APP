@@ -30,6 +30,7 @@ import com.eypa.app.model.user.AuthorInfoRequest;
 import com.eypa.app.model.user.AuthorInfoResponse;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
+import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -345,10 +346,30 @@ public class AuthorProfileActivity extends AppCompatActivity {
             bottomSheetDialog.dismiss();
         });
 
-        sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
-            Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
-            bottomSheetDialog.dismiss();
-        });
+        View actionReport = sheetView.findViewById(R.id.action_report);
+        
+        UserProfile currentUser = UserManager.getInstance(this).getUserProfile().getValue();
+        boolean isMe = false;
+        if (currentUser != null) {
+            try {
+                int currentUserId = Integer.parseInt(currentUser.getId());
+                if (currentUserId == userId) {
+                    isMe = true;
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (isMe) {
+            actionReport.setVisibility(View.GONE);
+        } else {
+            actionReport.setVisibility(View.VISIBLE);
+            actionReport.setOnClickListener(v -> {
+                Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            });
+        }
 
         sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
             bottomSheetDialog.dismiss();

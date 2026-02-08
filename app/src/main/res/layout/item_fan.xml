@@ -42,7 +42,7 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:ellipsize="end"
                 android:maxLines="1"
-                tools:text="Username" />
+                tools:text="用户名" />
 
             <TextView
                 android:id="@+id/tv_level"
@@ -70,7 +70,7 @@
             android:textColor="?android:attr/textColorSecondary"
             android:ellipsize="end"
             android:maxLines="1"
-            tools:text="User description..." />
+            tools:text="用户签名" />
 
     </LinearLayout>
 
