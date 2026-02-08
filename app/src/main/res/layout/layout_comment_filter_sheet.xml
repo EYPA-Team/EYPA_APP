@@ -18,15 +18,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="评论筛选"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"
-        android:textColor="?android:attr/textColorPrimary"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="排序方式"
         android:textSize="14sp"
         android:textColor="?android:attr/textColorSecondary"
