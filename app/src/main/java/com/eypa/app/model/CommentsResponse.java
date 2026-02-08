@@ -32,11 +32,29 @@ public class CommentsResponse {
 
     public static class Pagination {
         private int page;
+        @SerializedName("per_page")
+        private int perPage;
+        @SerializedName("total_count")
+        private int totalCount;
+        @SerializedName("total_pages")
+        private int totalPages;
         @SerializedName("has_next")
         private boolean hasNext;
 
         public int getPage() {
             return page;
+        }
+
+        public int getPerPage() {
+            return perPage;
+        }
+
+        public int getTotalCount() {
+            return totalCount;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
         }
 
         public boolean isHasNext() {

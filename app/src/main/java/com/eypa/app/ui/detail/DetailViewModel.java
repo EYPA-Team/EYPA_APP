@@ -33,9 +33,15 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> totalCommentCount = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> navigateToLogin = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> commentItemUpdated = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
 
     private String currentSortType = "date";
     private Integer currentOnlyAuthor = 0;
+    
+    // 分页相关
+    private int currentPage = 1;
+    private boolean hasMoreComments = true;
+    private boolean isCommentsLoading = false;
 
     public DetailViewModel(@NonNull Application application) {
         super(application);
@@ -51,6 +57,10 @@ public class DetailViewModel extends AndroidViewModel {
 
     public LiveData<Integer> getCommentItemUpdated() {
         return commentItemUpdated;
+    }
+
+    public LiveData<Boolean> getIsLoadMoreLoading() {
+        return isLoadMoreLoading;
     }
 
     public void onLoginNavigationHandled() {
@@ -72,14 +82,27 @@ public class DetailViewModel extends AndroidViewModel {
     public void loadPostAndComments(int postId) {
         isLoading.setValue(true);
         loadPost(postId);
-        loadComments(postId);
+        refreshComments(postId);
     }
 
     public void updateCommentFilter(int postId, String type, Integer onlyAuthor) {
         this.currentSortType = type;
         this.currentOnlyAuthor = onlyAuthor;
         isLoading.setValue(true);
-        loadComments(postId);
+        refreshComments(postId);
+    }
+    
+    public void loadMoreComments(int postId) {
+        if (isCommentsLoading || !hasMoreComments) {
+            return;
+        }
+        loadCommentsInternal(postId, currentPage + 1);
+    }
+    
+    public void refreshComments(int postId) {
+        currentPage = 1;
+        hasMoreComments = true;
+        loadCommentsInternal(postId, 1);
     }
 
     private void loadPost(int postId) {
@@ -104,8 +127,12 @@ public class DetailViewModel extends AndroidViewModel {
                 });
     }
 
-    private void loadComments(int postId) {
-        CommentsRequest request = new CommentsRequest(postId, 1);
+    private void loadCommentsInternal(int postId, int page) {
+        isCommentsLoading = true;
+        if (page > 1) {
+            isLoadMoreLoading.setValue(true);
+        }
+        CommentsRequest request = new CommentsRequest(postId, page);
         request.setType(currentSortType);
         request.setOnlyAuthor(currentOnlyAuthor);
         
@@ -117,19 +144,44 @@ public class DetailViewModel extends AndroidViewModel {
         ApiClient.getApiService().getComments(request).enqueue(new Callback<CommentsResponse>() {
             @Override
             public void onResponse(Call<CommentsResponse> call, Response<CommentsResponse> response) {
-                List<CommentBlock> rootCommentBlocks = new ArrayList<>();
+                isCommentsLoading = false;
+                isLoadMoreLoading.setValue(false);
+                List<CommentBlock> newBlocks = new ArrayList<>();
+                
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    CommentsResponse.Pagination pagination = response.body().getPagination();
+                    if (pagination != null) {
+                        hasMoreComments = pagination.isHasNext();
+                        currentPage = pagination.getPage();
+                        totalCommentCount.setValue(pagination.getTotalCount());
+                    } else {
+                        hasMoreComments = false;
+                    }
+
                     List<Comment> comments = response.body().getData();
                     if (comments != null) {
                         processComments(comments);
-
                         for (Comment rootComment : comments) {
-                            rootCommentBlocks.add(new CommentBlock(rootComment, 0));
+                            newBlocks.add(new CommentBlock(rootComment, 0));
                         }
-                        totalCommentCount.setValue(calculateTotalCommentCount(comments));
                     }
+                    
+                    if (page == 1) {
+                        commentBlocks.setValue(newBlocks);
+                    } else {
+                        List<CommentBlock> currentBlocks = commentBlocks.getValue();
+                        if (currentBlocks == null) {
+                            currentBlocks = new ArrayList<>();
+                        }
+                        currentBlocks.addAll(newBlocks);
+                        commentBlocks.setValue(currentBlocks);
+                    }
+                } else {
+                    if (page == 1) {
+                        commentBlocks.setValue(new ArrayList<>());
+                    }
+                    hasMoreComments = false;
                 }
-                commentBlocks.setValue(rootCommentBlocks);
 
                 // 只有当两个请求都结束后才停止加载动画
                 if (postData.getValue() != null || !response.isSuccessful()) {
@@ -138,7 +190,11 @@ public class DetailViewModel extends AndroidViewModel {
             }
             @Override
             public void onFailure(Call<CommentsResponse> call, Throwable t) {
-                commentBlocks.setValue(new ArrayList<>());
+                isCommentsLoading = false;
+                isLoadMoreLoading.setValue(false);
+                if (page == 1) {
+                    commentBlocks.setValue(new ArrayList<>());
+                }
                 isLoading.setValue(false);
             }
         });

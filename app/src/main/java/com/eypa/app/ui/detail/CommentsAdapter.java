@@ -21,10 +21,14 @@ import com.eypa.app.utils.TimeAgoUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
+public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_FOOTER = 1;
 
     private final List<CommentBlock> displayedComments = new ArrayList<>();
     private OnCommentActionListener actionListener;
+    private boolean isLoading = false;
 
     public interface OnCommentActionListener {
         void onLike(Comment comment);
@@ -44,6 +48,17 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         notifyDataSetChanged();
     }
 
+    public void setLoading(boolean loading) {
+        if (this.isLoading != loading) {
+            this.isLoading = loading;
+            if (loading) {
+                notifyItemInserted(displayedComments.size());
+            } else {
+                notifyItemRemoved(displayedComments.size());
+            }
+        }
+    }
+
     public void notifyCommentChanged(int commentId) {
         for (int i = 0; i < displayedComments.size(); i++) {
             if (displayedComments.get(i).getComment().getId() == commentId) {
@@ -53,38 +68,53 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         }
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoading && position == displayedComments.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_ITEM;
+    }
+
     @NonNull
     @Override
-    public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_loading_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_content_comment, parent, false);
         return new CommentViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        // 这里获取 block 只是为了绑定数据显示，点击事件里不能直接用这个 position
-        CommentBlock block = displayedComments.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof FooterViewHolder) {
+            return;
+        }
 
-        holder.bind(block, actionListener);
+        if (holder instanceof CommentViewHolder) {
+            CommentViewHolder commentHolder = (CommentViewHolder) holder;
+            CommentBlock block = displayedComments.get(position);
 
-        // --- V V V 关键修复：解决位置错乱 Bug V V V ---
-        holder.contentContainer.setOnClickListener(v -> {
-            // 获取当前点击时的实时位置，而不是绑定时的旧位置
-            int currentPosition = holder.getBindingAdapterPosition();
+            commentHolder.bind(block, actionListener);
 
-            // 确保位置有效（防止在动画过程中点击导致的崩溃）
-            if (currentPosition != RecyclerView.NO_POSITION && currentPosition < displayedComments.size()) {
-                // 获取当前位置对应的最新数据对象
-                CommentBlock currentBlock = displayedComments.get(currentPosition);
-                handleCommentClick(currentBlock, currentPosition);
-            }
-        });
+            commentHolder.contentContainer.setOnClickListener(v -> {
+                int currentPosition = commentHolder.getBindingAdapterPosition();
+
+                if (currentPosition != RecyclerView.NO_POSITION && currentPosition < displayedComments.size()) {
+                    CommentBlock currentBlock = displayedComments.get(currentPosition);
+                    handleCommentClick(currentBlock, currentPosition);
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return displayedComments.size();
+        return displayedComments.size() + (isLoading ? 1 : 0);
     }
 
     private void handleCommentClick(CommentBlock clickedBlock, int position) {
@@ -145,6 +175,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             }
         }
         return new CommentBlock(commentToFind, 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     static class CommentViewHolder extends RecyclerView.ViewHolder {

@@ -76,12 +76,36 @@ public class DetailCommentsFragment extends Fragment {
             }
         });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) {
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                            && firstVisibleItemPosition >= 0) {
+                        if (viewModel.getPostData().getValue() != null) {
+                            viewModel.loadMoreComments(viewModel.getPostData().getValue().getId());
+                        }
+                    }
+                }
+            }
+        });
 
         viewModel = new ViewModelProvider(requireActivity()).get(DetailViewModel.class);
         viewModel.getCommentBlocks().observe(getViewLifecycleOwner(), this::updateComments);
         
+        viewModel.getIsLoadMoreLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            adapter.setLoading(isLoading);
+        });
+
         viewModel.getNavigateToLogin().observe(getViewLifecycleOwner(), navigate -> {
             if (navigate) {
                 startActivity(new Intent(requireContext(), LoginActivity.class));
