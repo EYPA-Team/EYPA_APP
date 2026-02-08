@@ -219,6 +219,17 @@ public class AuthorProfileActivity extends AppCompatActivity {
             if (base.getVip() != null) {
                 tvVip.setVisibility(View.VISIBLE);
                 tvVip.setText(base.getVip().getName());
+                
+                if ("普通用户".equals(base.getVip().getName())) {
+                    tvVip.setTextColor(0xFF757575);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+                } else if ("高级通行证".equals(base.getVip().getName())) {
+                    tvVip.setTextColor(0xFFFFA000);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFFFF8E1));
+                } else {
+                    tvVip.setTextColor(0xFF757575);
+                    tvVip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFE0E0E0));
+                }
             } else {
                 tvVip.setVisibility(View.GONE);
             }
