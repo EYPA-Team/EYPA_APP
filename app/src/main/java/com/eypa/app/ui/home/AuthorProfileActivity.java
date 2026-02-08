@@ -26,7 +26,6 @@ import com.eypa.app.model.user.AuthorInfoRequest;
 import com.eypa.app.model.user.AuthorInfoResponse;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
-import com.eypa.app.ui.detail.components.StatsView;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -54,7 +53,6 @@ public class AuthorProfileActivity extends AppCompatActivity {
     private LinearLayout layoutAuth;
     private TextView tvAuthInfo;
     private Button btnAction;
-    private StatsView viewStats;
     private LinearLayout layoutMedals;
     private TextView tvMedalsCount;
     private View loadingMask;
@@ -102,7 +100,6 @@ public class AuthorProfileActivity extends AppCompatActivity {
         layoutAuth = findViewById(R.id.layout_auth);
         tvAuthInfo = findViewById(R.id.tv_auth_info);
         btnAction = findViewById(R.id.btn_action);
-        viewStats = findViewById(R.id.view_stats);
         layoutMedals = findViewById(R.id.layout_medals);
         tvMedalsCount = findViewById(R.id.tv_medals_count);
         loadingMask = findViewById(R.id.loading_mask);
@@ -196,15 +193,6 @@ public class AuthorProfileActivity extends AppCompatActivity {
             }
         }
 
-        AuthorInfoResponse.StatsInfo stats = data.getStats();
-        if (stats != null) {
-            viewStats.setStats(
-                stats.getViews(),
-                0,
-                stats.getComments()
-            );
-        }
-
         AuthorInfoResponse.InteractionInfo interaction = data.getInteraction();
         if (interaction != null) {
             if (interaction.isMe()) {
@@ -235,7 +223,6 @@ public class AuthorProfileActivity extends AppCompatActivity {
                     FollowResponse.Data data = response.body().getData();
                     if (data != null) {
                         updateFollowButton(data.isFollowing());
-                        Toast.makeText(AuthorProfileActivity.this, response.body().getMsg(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(AuthorProfileActivity.this, "操作失败", Toast.LENGTH_SHORT).show();
