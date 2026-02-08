@@ -4,13 +4,13 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.user.UserProfile;
@@ -39,13 +38,10 @@ public class DetailCommentsFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextView noCommentsView;
     private CommentsAdapter adapter;
-    private View btnFilter;
-    private EditText editComment;
-    private Button btnSend;
+    private ImageView btnFilter;
 
     private String currentSortType = "date";
     private boolean currentOnlyAuthor = false;
-    private int replyToCommentId = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -60,33 +56,8 @@ public class DetailCommentsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.comments_recycler_view);
         noCommentsView = view.findViewById(R.id.no_comments_view);
         btnFilter = view.findViewById(R.id.btn_filter);
-        editComment = view.findViewById(R.id.edit_comment);
-        btnSend = view.findViewById(R.id.btn_send);
 
         btnFilter.setOnClickListener(v -> showFilterSheet());
-        
-        btnSend.setOnClickListener(v -> {
-            String content = editComment.getText().toString().trim();
-            if (content.isEmpty()) {
-                Toast.makeText(getContext(), "请输入评论内容", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
-            if (viewModel.getPostData().getValue() != null) {
-                int postId = viewModel.getPostData().getValue().getId();
-                viewModel.submitComment(postId, content, replyToCommentId);
-                editComment.setText("");
-                editComment.clearFocus();
-                
-                if (replyToCommentId > 0) {
-                    replyToCommentId = 0;
-                    editComment.setHint("说点什么吧...");
-                }
-                
-                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
-            }
-        });
 
         adapter = new CommentsAdapter();
 
@@ -104,13 +75,7 @@ public class DetailCommentsFragment extends Fragment {
 
             @Override
             public void onReply(Comment comment) {
-                replyToCommentId = comment.getId();
-                String authorName = comment.getAuthorName();
-                editComment.setHint("回复 " + authorName + ":");
-                editComment.requestFocus();
-                
-                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(editComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                viewModel.setReplyToComment(comment);
             }
 
             @Override

@@ -25,6 +25,7 @@
             android:name=".ui.detail.DetailActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:theme="@style/Theme.Eypa.NoActionBar" />
 
         <activity

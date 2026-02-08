@@ -41,6 +41,7 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> commentItemRemoved = new MutableLiveData<>();
     private final MutableLiveData<CommentBlock> commentItemAdded = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<Comment> replyToComment = new MutableLiveData<>();
 
     private String currentSortType = "date";
     private Integer currentOnlyAuthor = 0;
@@ -76,6 +77,14 @@ public class DetailViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getIsLoadMoreLoading() {
         return isLoadMoreLoading;
+    }
+
+    public LiveData<Comment> getReplyToComment() {
+        return replyToComment;
+    }
+
+    public void setReplyToComment(Comment comment) {
+        replyToComment.setValue(comment);
     }
 
     public void onLoginNavigationHandled() {

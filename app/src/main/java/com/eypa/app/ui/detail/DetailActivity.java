@@ -15,11 +15,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -83,6 +86,11 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private boolean isTitleShown = false;
     private String postTitle = "";
     private List<ContentItem.Episode> currentEpisodes = new ArrayList<>();
+    
+    private View commentInputContainer;
+    private EditText editComment;
+    private Button btnSend;
+    private int replyToCommentId = 0;
     
     private GestureDetector gestureDetector;
     private boolean isSeeking = false;
@@ -241,13 +249,54 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         appBarLayout = findViewById(R.id.app_bar);
         contentTabsAndPager = findViewById(R.id.content_tabs_and_pager);
         
+        commentInputContainer = findViewById(R.id.comment_input_container);
+        editComment = findViewById(R.id.edit_comment);
+        btnSend = findViewById(R.id.btn_send);
+        
         appBarLayout.setVisibility(View.INVISIBLE);
         contentTabsAndPager.setVisibility(View.INVISIBLE);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            int imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
+            int navBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            
+            if (commentInputContainer != null) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) commentInputContainer.getLayoutParams();
+                params.bottomMargin = imeHeight;
+                commentInputContainer.setLayoutParams(params);
+            }
+            
+            return insets;
+        });
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         initialVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         initialBrightness = lp.screenBrightness;
+        
+        btnSend.setOnClickListener(v -> {
+            String content = editComment.getText().toString().trim();
+            if (content.isEmpty()) {
+                Toast.makeText(this, "请输入评论内容", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (viewModel.getPostData().getValue() != null) {
+                int postId = viewModel.getPostData().getValue().getId();
+                viewModel.submitComment(postId, content, replyToCommentId);
+                editComment.setText("");
+                editComment.clearFocus();
+                
+                if (replyToCommentId > 0) {
+                    replyToCommentId = 0;
+                    editComment.setHint("说点什么吧...");
+                    viewModel.setReplyToComment(null);
+                }
+                
+                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -279,6 +328,37 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             if (position == 0) tab.setText("内容");
             else tab.setText("评论");
         }).attach();
+        
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 1) {
+                    commentInputContainer.setVisibility(View.VISIBLE);
+                    commentInputContainer.setAlpha(0f);
+                    commentInputContainer.setTranslationY(getResources().getDisplayMetrics().density * 60);
+                    commentInputContainer.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setDuration(300)
+                            .setListener(null)
+                            .start();
+                } else {
+                    if (commentInputContainer.getVisibility() == View.VISIBLE) {
+                        commentInputContainer.animate()
+                                .alpha(0f)
+                                .translationY(commentInputContainer.getHeight())
+                                .setDuration(300)
+                                .withEndAction(() -> commentInputContainer.setVisibility(View.GONE))
+                                .start();
+                        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (getCurrentFocus() != null) {
+                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void setupCollapsingToolbarListener() {
@@ -345,6 +425,21 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 } else {
                     commentTab.setText("评论");
                 }
+            }
+        });
+        
+        viewModel.getReplyToComment().observe(this, comment -> {
+            if (comment != null) {
+                replyToCommentId = comment.getId();
+                String authorName = comment.getAuthorName();
+                editComment.setHint("回复 " + authorName + ":");
+                editComment.requestFocus();
+                
+                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            } else {
+                replyToCommentId = 0;
+                editComment.setHint("说点什么吧...");
             }
         });
     }
@@ -666,6 +761,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             appBarLayout.setVisibility(View.GONE);
             contentTabsAndPager.setVisibility(View.GONE);
             fullscreenContainer.setVisibility(View.VISIBLE);
+            
+            if (commentInputContainer != null) {
+                commentInputContainer.setVisibility(View.GONE);
+            }
 
             if (playerView.getParent() != fullscreenContainer) {
                 ((ViewGroup) playerView.getParent()).removeView(playerView);
@@ -707,6 +806,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             appBarLayout.setVisibility(View.VISIBLE);
             contentTabsAndPager.setVisibility(View.VISIBLE);
             fullscreenContainer.setVisibility(View.GONE);
+            
+            if (commentInputContainer != null && viewPager != null && viewPager.getCurrentItem() == 1) {
+                commentInputContainer.setVisibility(View.VISIBLE);
+            }
 
             if (playerView.getParent() != mediaContainer) {
                 ((ViewGroup) playerView.getParent()).removeView(playerView);
