@@ -12,7 +12,8 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent">
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
@@ -118,6 +119,7 @@
                                     android:textColor="@android:color/white"
                                     android:background="@drawable/bg_tag"
                                     android:backgroundTint="?attr/colorPrimary"
+                                    android:textStyle="bold"
                                     android:paddingStart="6dp"
                                     android:paddingEnd="6dp"
                                     android:paddingTop="2dp"
@@ -133,6 +135,7 @@
                                     android:textColor="@color/primary_yellow_dark"
                                     android:background="@drawable/bg_tag"
                                     android:backgroundTint="#FFF8E1"
+                                    android:textStyle="bold"
                                     android:paddingStart="6dp"
                                     android:paddingEnd="6dp"
                                     android:paddingTop="2dp"
@@ -189,6 +192,7 @@
                             android:layout_marginStart="8dp"
                             android:textSize="12sp"
                             android:textColor="#FFA000"
+                            android:textStyle="bold"
                             tools:text="官方认证：马记大大滴领导" />
                     </LinearLayout>
                     

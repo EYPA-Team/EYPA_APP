@@ -53,6 +53,7 @@
                 android:textColor="@android:color/white"
                 android:background="@drawable/bg_tag"
                 android:backgroundTint="?attr/colorPrimary"
+                android:textStyle="bold"
                 android:paddingStart="4dp"
                 android:paddingEnd="4dp"
                 android:paddingTop="1dp"
