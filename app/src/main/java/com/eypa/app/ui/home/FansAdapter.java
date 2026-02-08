@@ -132,7 +132,7 @@ public class FansAdapter extends RecyclerView.Adapter<FansAdapter.FanViewHolder>
         private void updateFollowButton(boolean isFollowing) {
             if (isFollowing) {
                 btnFollow.setText("已关注");
-                btnFollow.setTextColor(ContextCompat.getColor(context, R.color.darker_gray));
+                btnFollow.setTextColor(ContextCompat.getColor(context, android.R.color.darker_gray));
                 btnFollow.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
             } else {
                 btnFollow.setText("关注");
