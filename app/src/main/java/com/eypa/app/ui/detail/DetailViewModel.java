@@ -12,6 +12,7 @@ import com.eypa.app.model.Comment;
 import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.ui.detail.model.CommentBlock;
@@ -35,6 +36,7 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> totalCommentCount = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> navigateToLogin = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> commentItemUpdated = new MutableLiveData<>();
+    private final MutableLiveData<Integer> commentItemRemoved = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
 
     private String currentSortType = "date";
@@ -59,6 +61,10 @@ public class DetailViewModel extends AndroidViewModel {
 
     public LiveData<Integer> getCommentItemUpdated() {
         return commentItemUpdated;
+    }
+
+    public LiveData<Integer> getCommentItemRemoved() {
+        return commentItemRemoved;
     }
 
     public LiveData<Boolean> getIsLoadMoreLoading() {
@@ -223,6 +229,40 @@ public class DetailViewModel extends AndroidViewModel {
                 // 不做处理
             }
         });
+    }
+
+    public void deleteComment(Comment comment) {
+        if (UserManager.getInstance(getApplication()).getToken() == null) {
+            navigateToLogin.setValue(true);
+            return;
+        }
+
+        DeleteCommentRequest request = new DeleteCommentRequest(UserManager.getInstance(getApplication()).getToken(), comment.getId());
+        ApiClient.getApiService().deleteComment(request).enqueue(new Callback<LikeCommentResponse>() {
+            @Override
+            public void onResponse(Call<LikeCommentResponse> call, Response<LikeCommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    removeCommentFromList(comment.getId());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LikeCommentResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    private void removeCommentFromList(int commentId) {
+        List<CommentBlock> blocks = commentBlocks.getValue();
+        if (blocks != null) {
+            commentItemRemoved.setValue(commentId);
+            
+            Integer currentCount = totalCommentCount.getValue();
+            if (currentCount != null && currentCount > 0) {
+                totalCommentCount.setValue(currentCount - 1);
+            }
+        }
     }
 
     private void updateCommentLikeStatus(int commentId, int likeCount, boolean isLiked) {

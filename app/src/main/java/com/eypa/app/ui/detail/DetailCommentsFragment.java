@@ -1,5 +1,6 @@
 package com.eypa.app.ui.detail;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -23,8 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import com.eypa.app.R;
 import com.eypa.app.model.Comment;
+import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.ui.detail.model.CommentBlock;
 import com.eypa.app.ui.home.LoginActivity;
+import com.eypa.app.utils.UserManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
@@ -118,6 +121,12 @@ public class DetailCommentsFragment extends Fragment {
                 adapter.notifyCommentChanged(commentId);
             }
         });
+
+        viewModel.getCommentItemRemoved().observe(getViewLifecycleOwner(), commentId -> {
+            if (commentId != null) {
+                adapter.removeComment(commentId);
+            }
+        });
     }
 
     private void showFilterSheet() {
@@ -162,6 +171,37 @@ public class DetailCommentsFragment extends Fragment {
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
         View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.layout_comment_actions_sheet, null);
+
+        UserProfile currentUser = UserManager.getInstance(getContext()).getUserProfile().getValue();
+        boolean isMyComment = false;
+        if (currentUser != null && comment.getAuthor() != null) {
+            try {
+                int currentUserId = Integer.parseInt(currentUser.getId());
+                if (currentUserId == comment.getAuthor().getId()) {
+                    isMyComment = true;
+                }
+            } catch (NumberFormatException e) {
+                // 不做处理
+            }
+        }
+
+        View deleteBtn = sheetView.findViewById(R.id.action_delete);
+        if (isMyComment) {
+            deleteBtn.setVisibility(View.VISIBLE);
+            deleteBtn.setOnClickListener(v -> {
+                bottomSheetDialog.dismiss();
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("删除评论")
+                        .setMessage("确定要删除这条评论吗？")
+                        .setPositiveButton("删除", (dialog, which) -> {
+                            viewModel.deleteComment(comment);
+                        })
+                        .setNegativeButton("取消", null)
+                        .show();
+            });
+        } else {
+            deleteBtn.setVisibility(View.GONE);
+        }
 
         sheetView.findViewById(R.id.action_copy).setOnClickListener(v -> {
             copyToClipboard(comment.getContent().getRendered()); // 注意：这里可能包含HTML标签，建议先清除

@@ -68,6 +68,65 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    public void removeComment(int commentId) {
+        int positionToRemove = -1;
+        CommentBlock blockToRemove = null;
+
+        for (int i = 0; i < displayedComments.size(); i++) {
+            if (displayedComments.get(i).getComment().getId() == commentId) {
+                positionToRemove = i;
+                blockToRemove = displayedComments.get(i);
+                break;
+            }
+        }
+
+        if (positionToRemove != -1 && blockToRemove != null) {
+            Comment commentToRemove = blockToRemove.getComment();
+            int parentId = commentToRemove.getParentId();
+            if (parentId > 0) {
+                for (int i = positionToRemove - 1; i >= 0; i--) {
+                    if (displayedComments.get(i).getComment().getId() == parentId) {
+                        CommentBlock parentBlock = displayedComments.get(i);
+                        Comment parentComment = parentBlock.getComment();
+                        List<Comment> children = parentComment.getChildren();
+                        if (children != null) {
+                            for (int j = 0; j < children.size(); j++) {
+                                if (children.get(j).getId() == commentId) {
+                                    children.remove(j);
+                                    break;
+                                }
+                            }
+                            if (children.isEmpty()) {
+                                parentBlock.setExpanded(false);
+                            }
+                            notifyItemChanged(i);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            int countToRemove = 1;
+            
+            if (blockToRemove.isExpanded()) {
+                for (int i = positionToRemove + 1; i < displayedComments.size(); i++) {
+                    if (displayedComments.get(i).getDepth() > blockToRemove.getDepth()) {
+                        countToRemove++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < countToRemove; i++) {
+                if (positionToRemove < displayedComments.size()) {
+                    displayedComments.remove(positionToRemove);
+                }
+            }
+            notifyItemRangeRemoved(positionToRemove, countToRemove);
+        }
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (isLoading && position == displayedComments.size()) {

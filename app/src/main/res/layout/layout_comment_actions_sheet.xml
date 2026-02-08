@@ -36,6 +36,17 @@
         android:textColor="?android:attr/textColorPrimary"
         android:background="?attr/selectableItemBackground"/>
 
+    <TextView
+        android:id="@+id/action_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="删除评论"
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_red_light"
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone"/>
+
     <!-- 分割条 -->
     <!-- 修复：使用 @color/dialog_divider_bg -->
     <View

@@ -5,6 +5,7 @@ import com.eypa.app.model.Category;
 import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.model.SliderItem;
@@ -84,6 +85,14 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/comment/like")
     Call<LikeCommentResponse> likeComment(@Body LikeCommentRequest request);
+
+    /**
+     * 删除评论
+     * @param request 删除请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/comment/delete")
+    Call<LikeCommentResponse> deleteComment(@Body DeleteCommentRequest request);
 
     /**
      * 更新新的搜索API接口
