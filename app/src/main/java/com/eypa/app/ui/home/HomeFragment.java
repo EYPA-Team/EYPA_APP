@@ -390,7 +390,10 @@ public class HomeFragment extends Fragment {
 
     private void loadPosts() {
         isLoading = true;
-        if (isFirstLoad) {
+        if (searchResultsContainer.getVisibility() == View.VISIBLE) {
+            progressBar.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+        } else if (isFirstLoad) {
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setAlpha(1f);
             errorLayout.setVisibility(View.GONE);
@@ -486,7 +489,9 @@ public class HomeFragment extends Fragment {
             progressBar.setVisibility(View.GONE);
             
             if (isFirstLoad) {
-                errorLayout.setVisibility(View.VISIBLE);
+                if (searchResultsContainer.getVisibility() != View.VISIBLE) {
+                    errorLayout.setVisibility(View.VISIBLE);
+                }
                 recyclerView.setAlpha(0f);
             } else {
                 recyclerView.animate().alpha(1f).setDuration(300).start();
@@ -677,6 +682,16 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemActionExpand(@NonNull MenuItem item) {
                 searchResultsContainer.setVisibility(View.VISIBLE);
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                if (errorLayout != null) {
+                    errorLayout.setVisibility(View.GONE);
+                }
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                    swipeRefreshLayout.setEnabled(false);
+                }
                 currentQuery = "";
                 updateSearchHistory();
                 if (getActivity() instanceof HomeActivity) {
@@ -688,6 +703,15 @@ public class HomeFragment extends Fragment {
             @Override
             public boolean onMenuItemActionCollapse(@NonNull MenuItem item) {
                 searchResultsContainer.setVisibility(View.GONE);
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setEnabled(true);
+                }
+                if (isLoading && progressBar != null) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.setAlpha(1f);
+                } else if (!isLoading && postList.isEmpty() && isFirstLoad && errorLayout != null) {
+                    errorLayout.setVisibility(View.VISIBLE);
+                }
                 searchResults.clear();
                 searchAdapter.notifyDataSetChanged();
                 if (getActivity() instanceof HomeActivity) {
