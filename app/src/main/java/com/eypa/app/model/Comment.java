@@ -60,6 +60,10 @@ public class Comment {
         return content;
     }
 
+    public void setContent(Content content) {
+        this.content = content;
+    }
+
     public String getDate() {
         return date;
     }
@@ -160,8 +164,16 @@ public class Comment {
             return rendered;
         }
 
+        public void setRendered(String rendered) {
+            this.rendered = rendered;
+        }
+
         public String getRaw() {
             return raw;
+        }
+
+        public void setRaw(String raw) {
+            this.raw = raw;
         }
     }
 

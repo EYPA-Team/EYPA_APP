@@ -209,6 +209,8 @@ public class DetailCommentsFragment extends Fragment {
         }
 
         View deleteBtn = sheetView.findViewById(R.id.action_delete);
+        View editBtn = sheetView.findViewById(R.id.action_edit);
+        
         if (isMyComment) {
             deleteBtn.setVisibility(View.VISIBLE);
             deleteBtn.setOnClickListener(v -> {
@@ -222,8 +224,15 @@ public class DetailCommentsFragment extends Fragment {
                         .setNegativeButton("取消", null)
                         .show();
             });
+            
+            editBtn.setVisibility(View.VISIBLE);
+            editBtn.setOnClickListener(v -> {
+                bottomSheetDialog.dismiss();
+                viewModel.setEditComment(comment);
+            });
         } else {
             deleteBtn.setVisibility(View.GONE);
+            editBtn.setVisibility(View.GONE);
         }
 
         sheetView.findViewById(R.id.action_copy).setOnClickListener(v -> {

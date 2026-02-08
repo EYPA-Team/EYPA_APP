@@ -37,6 +37,17 @@
         android:background="?attr/selectableItemBackground"/>
 
     <TextView
+        android:id="@+id/action_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="编辑评论"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone"/>
+
+    <TextView
         android:id="@+id/action_delete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

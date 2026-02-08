@@ -91,6 +91,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private EditText editComment;
     private Button btnSend;
     private int replyToCommentId = 0;
+    private int editCommentId = 0;
     
     private GestureDetector gestureDetector;
     private boolean isSeeking = false;
@@ -281,6 +282,19 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 return;
             }
             
+            if (editCommentId > 0) {
+                viewModel.editComment(editCommentId, content);
+                editComment.setText("");
+                editComment.clearFocus();
+                editCommentId = 0;
+                editComment.setHint("说点什么吧...");
+                viewModel.setEditComment(null);
+                
+                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+                return;
+            }
+            
             if (viewModel.getPostData().getValue() != null) {
                 int postId = viewModel.getPostData().getValue().getId();
                 viewModel.submitComment(postId, content, replyToCommentId);
@@ -431,6 +445,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         viewModel.getReplyToComment().observe(this, comment -> {
             if (comment != null) {
                 replyToCommentId = comment.getId();
+                editCommentId = 0;
                 String authorName = comment.getAuthorName();
                 editComment.setHint("回复 " + authorName + ":");
                 editComment.requestFocus();
@@ -439,7 +454,28 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 imm.showSoftInput(editComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
             } else {
                 replyToCommentId = 0;
-                editComment.setHint("说点什么吧...");
+                if (editCommentId == 0) {
+                    editComment.setHint("说点什么吧...");
+                }
+            }
+        });
+        
+        viewModel.getEditComment().observe(this, comment -> {
+            if (comment != null) {
+                editCommentId = comment.getId();
+                replyToCommentId = 0;
+                editComment.setText(HtmlCompat.fromHtml(comment.getContent().getRaw(), HtmlCompat.FROM_HTML_MODE_LEGACY).toString());
+                editComment.setSelection(editComment.getText().length());
+                editComment.setHint("编辑评论...");
+                editComment.requestFocus();
+                
+                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            } else {
+                editCommentId = 0;
+                if (replyToCommentId == 0) {
+                    editComment.setHint("说点什么吧...");
+                }
             }
         });
     }

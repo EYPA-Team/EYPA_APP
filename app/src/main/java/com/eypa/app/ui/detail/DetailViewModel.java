@@ -13,6 +13,7 @@ import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.DeleteCommentRequest;
+import com.eypa.app.model.EditCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.model.SubmitCommentRequest;
@@ -42,6 +43,7 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<CommentBlock> commentItemAdded = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
     private final MutableLiveData<Comment> replyToComment = new MutableLiveData<>();
+    private final MutableLiveData<Comment> editComment = new MutableLiveData<>();
 
     private String currentSortType = "date";
     private Integer currentOnlyAuthor = 0;
@@ -85,6 +87,14 @@ public class DetailViewModel extends AndroidViewModel {
 
     public void setReplyToComment(Comment comment) {
         replyToComment.setValue(comment);
+    }
+
+    public LiveData<Comment> getEditComment() {
+        return editComment;
+    }
+
+    public void setEditComment(Comment comment) {
+        editComment.setValue(comment);
     }
 
     public void onLoginNavigationHandled() {
@@ -292,6 +302,59 @@ public class DetailViewModel extends AndroidViewModel {
                 // 不做处理
             }
         });
+    }
+
+    public void editComment(int commentId, String content) {
+        if (UserManager.getInstance(getApplication()).getToken() == null) {
+            navigateToLogin.setValue(true);
+            return;
+        }
+
+        EditCommentRequest request = new EditCommentRequest(UserManager.getInstance(getApplication()).getToken(), commentId, content);
+        ApiClient.getApiService().editComment(request).enqueue(new Callback<SubmitCommentResponse>() {
+            @Override
+            public void onResponse(Call<SubmitCommentResponse> call, Response<SubmitCommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    Comment updatedComment = response.body().getData();
+                    if (updatedComment != null) {
+                        updateCommentContent(updatedComment);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SubmitCommentResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    private void updateCommentContent(Comment updatedComment) {
+        List<CommentBlock> blocks = commentBlocks.getValue();
+        if (blocks != null) {
+            for (CommentBlock block : blocks) {
+                if (updateCommentContentInTree(block.getComment(), updatedComment)) {
+                    commentItemUpdated.setValue(updatedComment.getId());
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean updateCommentContentInTree(Comment root, Comment updatedComment) {
+        if (root.getId() == updatedComment.getId()) {
+            root.setContent(updatedComment.getContent());
+            return true;
+        }
+
+        if (root.getChildren() != null) {
+            for (Comment child : root.getChildren()) {
+                if (updateCommentContentInTree(child, updatedComment)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void addCommentToList(Comment newComment) {
