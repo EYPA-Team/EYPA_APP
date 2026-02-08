@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.content.Intent;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -120,7 +121,7 @@ public class FansAdapter extends RecyclerView.Adapter<FansAdapter.FanViewHolder>
 
             btnFollow.setOnClickListener(v -> {
                 if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
-                    Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show();
+                    context.startActivity(new Intent(context, LoginActivity.class));
                     return;
                 }
                 
