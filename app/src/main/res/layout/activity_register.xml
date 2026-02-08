@@ -111,6 +111,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
+                android:stateListAnimator="@null"
                 android:text="注册"
                 android:textSize="16sp"/>
 
