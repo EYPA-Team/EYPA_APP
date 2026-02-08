@@ -34,6 +34,9 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> navigateToLogin = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> commentItemUpdated = new MutableLiveData<>();
 
+    private String currentSortType = "date";
+    private Integer currentOnlyAuthor = 0;
+
     public DetailViewModel(@NonNull Application application) {
         super(application);
     }
@@ -72,6 +75,13 @@ public class DetailViewModel extends AndroidViewModel {
         loadComments(postId);
     }
 
+    public void updateCommentFilter(int postId, String type, Integer onlyAuthor) {
+        this.currentSortType = type;
+        this.currentOnlyAuthor = onlyAuthor;
+        isLoading.setValue(true);
+        loadComments(postId);
+    }
+
     private void loadPost(int postId) {
         // 包含 author_info 字段，确保作者信息能正确显示
         ApiClient.getApiService().getPostWithCustomFields(postId, "id,title,date,content,author,categories,tags,zib_other_data,view_count,like_count,comment_count,_embedded,author_info", "wp:featuredmedia,author,wp:term")
@@ -96,6 +106,8 @@ public class DetailViewModel extends AndroidViewModel {
 
     private void loadComments(int postId) {
         CommentsRequest request = new CommentsRequest(postId, 1);
+        request.setType(currentSortType);
+        request.setOnlyAuthor(currentOnlyAuthor);
         
         String token = UserManager.getInstance(getApplication()).getToken();
         if (token != null) {
@@ -204,11 +216,13 @@ public class DetailViewModel extends AndroidViewModel {
             return;
         }
 
-        Collections.sort(comments, (c1, c2) -> {
-            String d1 = c1.getDate() != null ? c1.getDate() : "";
-            String d2 = c2.getDate() != null ? c2.getDate() : "";
-            return d2.compareTo(d1);
-        });
+        if ("date".equals(currentSortType)) {
+            Collections.sort(comments, (c1, c2) -> {
+                String d1 = c1.getDate() != null ? c1.getDate() : "";
+                String d2 = c2.getDate() != null ? c2.getDate() : "";
+                return d2.compareTo(d1);
+            });
+        }
 
         for (Comment comment : comments) {
             List<Comment> allDescendants = comment.getChildren();

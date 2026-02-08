@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +35,10 @@ public class DetailCommentsFragment extends Fragment {
     private RecyclerView recyclerView;
     private TextView noCommentsView;
     private CommentsAdapter adapter;
+    private View btnFilter;
+
+    private String currentSortType = "date";
+    private boolean currentOnlyAuthor = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -45,6 +52,9 @@ public class DetailCommentsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.comments_recycler_view);
         noCommentsView = view.findViewById(R.id.no_comments_view);
+        btnFilter = view.findViewById(R.id.btn_filter);
+
+        btnFilter.setOnClickListener(v -> showFilterSheet());
 
         adapter = new CommentsAdapter();
 
@@ -84,6 +94,43 @@ public class DetailCommentsFragment extends Fragment {
                 adapter.notifyCommentChanged(commentId);
             }
         });
+    }
+
+    private void showFilterSheet() {
+        if (getContext() == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.layout_comment_filter_sheet, null);
+
+        RadioGroup sortGroup = sheetView.findViewById(R.id.sort_group);
+        CheckBox checkOnlyAuthor = sheetView.findViewById(R.id.check_only_author);
+        TextView btnApply = sheetView.findViewById(R.id.btn_apply);
+
+        if ("like".equals(currentSortType)) {
+            sortGroup.check(R.id.radio_hottest);
+        } else {
+            sortGroup.check(R.id.radio_latest);
+        }
+        checkOnlyAuthor.setChecked(currentOnlyAuthor);
+
+        btnApply.setOnClickListener(v -> {
+            int checkedId = sortGroup.getCheckedRadioButtonId();
+            if (checkedId == R.id.radio_hottest) {
+                currentSortType = "like";
+            } else {
+                currentSortType = "date";
+            }
+            currentOnlyAuthor = checkOnlyAuthor.isChecked();
+
+            if (viewModel.getPostData().getValue() != null) {
+                int postId = viewModel.getPostData().getValue().getId();
+                viewModel.updateCommentFilter(postId, currentSortType, currentOnlyAuthor ? 1 : 0);
+            }
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
     }
 
     private void showCommentActionSheet(Comment comment) {
