@@ -105,7 +105,7 @@
                     android:id="@+id/tv_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="余额: 0"
+                    android:text="余额: 0元"
                     android:textSize="12sp"
                     android:textColor="?android:attr/textColorSecondary"/>
             </LinearLayout>

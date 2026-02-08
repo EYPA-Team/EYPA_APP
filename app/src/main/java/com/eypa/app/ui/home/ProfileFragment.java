@@ -174,7 +174,7 @@ public class ProfileFragment extends Fragment {
 
             layoutStats.setVisibility(View.VISIBLE);
             tvPoints.setText("积分: " + user.getPoints());
-            tvBalance.setText("余额: " + user.getBalance());
+            tvBalance.setText("余额: " + user.getBalance() + "元");
         } else {
             tvNickname.setText("点击登录/注册");
             tvLevel.setVisibility(View.GONE);
