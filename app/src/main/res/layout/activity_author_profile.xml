@@ -12,14 +12,14 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:background="@android:color/transparent">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleTextColor="@android:color/transparent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -51,17 +51,11 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_scrollFlags="scroll">
 
             <!-- 用户信息卡片 -->
             <androidx.cardview.widget.CardView
@@ -238,7 +232,25 @@
             </LinearLayout>
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/colorBackground"
+            app:tabIndicatorColor="?attr/colorPrimary"
+            app:tabSelectedTextColor="?attr/colorPrimary"
+            app:tabTextColor="?android:attr/textColorSecondary"
+            app:tabMode="fixed"
+            app:tabGravity="fill"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <include
         android:id="@+id/loading_mask"

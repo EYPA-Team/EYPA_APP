@@ -14,8 +14,10 @@ import com.eypa.app.model.SubmitCommentRequest;
 import com.eypa.app.model.SubmitCommentResponse;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
+import com.eypa.app.model.user.AuthorFansResponse;
 import com.eypa.app.model.user.AuthorInfoRequest;
 import com.eypa.app.model.user.AuthorInfoResponse;
+import com.eypa.app.model.user.AuthorListRequest;
 import com.eypa.app.model.user.FavoritesRequest;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
@@ -205,4 +207,28 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/user/follow")
     Call<FollowResponse> followUser(@Body FollowRequest request);
+
+    /**
+     * 获取作者发布的文章列表
+     * @param request 请求体
+     * @return 文章列表
+     */
+    @POST("eu-json/app/v1/author/posts")
+    Call<List<ContentItem>> getAuthorPosts(@Body AuthorListRequest request);
+
+    /**
+     * 获取作者收藏的文章列表
+     * @param request 请求体
+     * @return 收藏列表
+     */
+    @POST("eu-json/app/v1/author/favorites")
+    Call<List<ContentItem>> getAuthorFavorites(@Body AuthorListRequest request);
+
+    /**
+     * 获取作者关注列表
+     * @param request 请求体
+     * @return 关注列表
+     */
+    @POST("eu-json/app/v1/author/following")
+    Call<AuthorFansResponse> getAuthorFans(@Body AuthorListRequest request);
 }

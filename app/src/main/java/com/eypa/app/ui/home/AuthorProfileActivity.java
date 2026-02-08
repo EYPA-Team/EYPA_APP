@@ -29,10 +29,15 @@ import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -57,6 +62,8 @@ public class AuthorProfileActivity extends AppCompatActivity {
     private TextView tvMedalsCount;
     private View loadingMask;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
 
     public static void start(Context context, int userId) {
         Intent intent = new Intent(context, AuthorProfileActivity.class);
@@ -103,6 +110,48 @@ public class AuthorProfileActivity extends AppCompatActivity {
         layoutMedals = findViewById(R.id.layout_medals);
         tvMedalsCount = findViewById(R.id.tv_medals_count);
         loadingMask = findViewById(R.id.loading_mask);
+        tabLayout = findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.view_pager);
+
+        setupViewPager();
+    }
+
+    private void setupViewPager() {
+        viewPager.setAdapter(new FragmentStateAdapter(this) {
+            @NonNull
+            @Override
+            public Fragment createFragment(int position) {
+                switch (position) {
+                    case 0:
+                        return AuthorContentFragment.newInstance(userId, AuthorContentFragment.TYPE_POSTS);
+                    case 1:
+                        return AuthorContentFragment.newInstance(userId, AuthorContentFragment.TYPE_FAVORITES);
+                    case 2:
+                        return AuthorContentFragment.newInstance(userId, AuthorContentFragment.TYPE_FANS);
+                    default:
+                        return AuthorContentFragment.newInstance(userId, AuthorContentFragment.TYPE_POSTS);
+                }
+            }
+
+            @Override
+            public int getItemCount() {
+                return 3;
+            }
+        });
+
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            switch (position) {
+                case 0:
+                    tab.setText("文章");
+                    break;
+                case 1:
+                    tab.setText("收藏");
+                    break;
+                case 2:
+                    tab.setText("关注");
+                    break;
+            }
+        }).attach();
     }
 
     private void applyCustomTheme() {
