@@ -96,11 +96,21 @@ public class MedalsActivity extends AppCompatActivity {
             }
             
              if (medal.getIcon() != null && !medal.getIcon().isEmpty()) {
-                 Glide.with(holder.itemView.getContext())
-                         .load(medal.getIcon())
-                         .placeholder(R.drawable.ic_medal)
-                         .error(R.drawable.ic_medal)
-                         .into(holder.ivIcon);
+                 if (medal.getIcon().toLowerCase().endsWith(".svg")) {
+                     Glide.with(holder.itemView.getContext())
+                             .as(android.graphics.drawable.PictureDrawable.class)
+                             .load(medal.getIcon())
+                             .placeholder(R.drawable.ic_medal)
+                             .error(R.drawable.ic_medal)
+                             .listener(new com.eypa.app.utils.svg.SvgSoftwareLayerSetter())
+                             .into(holder.ivIcon);
+                 } else {
+                     Glide.with(holder.itemView.getContext())
+                             .load(medal.getIcon())
+                             .placeholder(R.drawable.ic_medal)
+                             .error(R.drawable.ic_medal)
+                             .into(holder.ivIcon);
+                 }
              } else {
                  holder.ivIcon.setImageResource(R.drawable.ic_medal);
              }
