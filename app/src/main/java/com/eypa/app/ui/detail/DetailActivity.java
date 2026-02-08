@@ -10,6 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +52,7 @@ import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.model.ContentItem;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -942,11 +945,41 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.author_profile_menu, menu);
+        MenuItem moreItem = menu.findItem(R.id.action_more);
+        if (moreItem != null && moreItem.getIcon() != null) {
+            moreItem.getIcon().setTint(android.graphics.Color.WHITE);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             getOnBackPressedDispatcher().onBackPressed();
             return true;
+        } else if (item.getItemId() == R.id.action_more) {
+            showActionSheet();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showActionSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_resource_actions_sheet, null);
+
+        sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
+            Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+        });
+
+        sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
     }
 }

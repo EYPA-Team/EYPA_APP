@@ -1,8 +1,12 @@
 package com.eypa.app.ui.home;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +33,7 @@ import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -299,12 +304,54 @@ public class AuthorProfileActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.author_profile_menu, menu);
+        MenuItem moreItem = menu.findItem(R.id.action_more);
+        if (moreItem != null && moreItem.getIcon() != null) {
+            moreItem.getIcon().setTint(android.graphics.Color.WHITE);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
+        } else if (item.getItemId() == R.id.action_more) {
+            showActionSheet();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showActionSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_author_profile_actions_sheet, null);
+
+        sheetView.findViewById(R.id.action_copy_link).setOnClickListener(v -> {
+            copyToClipboard("https://eqmemory.cn/author/" + userId);
+            bottomSheetDialog.dismiss();
+        });
+
+        sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
+            Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+        });
+
+        sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+    }
+
+    private void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Link", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "已复制链接", Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:background="?attr/cardBackgroundColor">
+
+    <!-- 顶部小横条 -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/dialog_handle_bg"/>
+
+    <TextView
+        android:id="@+id/action_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="举报"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?attr/selectableItemBackground"/>
+
+    <!-- 分割条 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="@color/dialog_divider_bg"/>
+
+    <TextView
+        android:id="@+id/action_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="取消"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="?attr/selectableItemBackground"/>
+
+</LinearLayout>

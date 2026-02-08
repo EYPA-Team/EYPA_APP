@@ -49,6 +49,12 @@
                         tools:src="@drawable/placeholder_image"
                         android:contentDescription="文章封面" />
 
+                    <!-- 遮罩层 -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#40000000" />
+
                     <androidx.media3.ui.PlayerView
                         android:id="@+id/player_view"
                         android:layout_width="match_parent"
