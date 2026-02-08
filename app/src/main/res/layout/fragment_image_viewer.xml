@@ -21,4 +21,15 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="关闭" />
 
+    <ImageView
+        android:id="@+id/btn_save"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_download_white"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="保存" />
+
 </FrameLayout>
