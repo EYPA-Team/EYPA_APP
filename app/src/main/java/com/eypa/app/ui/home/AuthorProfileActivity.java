@@ -245,6 +245,14 @@ public class AuthorProfileActivity extends AppCompatActivity {
         AuthorInfoResponse.ProfileInfo profile = data.getProfile();
         if (profile != null) {
             Glide.with(this).load(profile.getCover()).into(ivCover);
+            
+            ivCover.setOnClickListener(v -> {
+                if (profile.getCover() != null && !profile.getCover().isEmpty()) {
+                    ImageViewerFragment.newInstance(profile.getCover())
+                            .show(getSupportFragmentManager(), "cover_viewer");
+                }
+            });
+
             tvDesc.setText(profile.getDesc());
             
             if (profile.getAuth() != null) {
