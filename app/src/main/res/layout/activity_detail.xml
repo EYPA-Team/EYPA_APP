@@ -187,9 +187,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="说点什么吧..."
-            android:background="@drawable/bg_comment_input"
             android:padding="10dp"
             android:textSize="14sp"
+            android:backgroundTint="@color/edit_text_tint"
             android:layout_marginEnd="8dp"
             android:maxLines="3"
             android:inputType="textMultiLine"/>
