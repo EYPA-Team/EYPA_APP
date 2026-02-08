@@ -9,6 +9,8 @@ import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
 import com.eypa.app.model.SliderItem;
+import com.eypa.app.model.SubmitCommentRequest;
+import com.eypa.app.model.SubmitCommentResponse;
 import com.eypa.app.model.Tag;
 import com.eypa.app.model.UpdateInfo;
 import com.eypa.app.model.user.FavoritesRequest;
@@ -93,6 +95,14 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/comment/delete")
     Call<LikeCommentResponse> deleteComment(@Body DeleteCommentRequest request);
+
+    /**
+     * 发表/回复评论
+     * @param request 评论请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/comment/submit")
+    Call<SubmitCommentResponse> submitComment(@Body SubmitCommentRequest request);
 
     /**
      * 更新新的搜索API接口

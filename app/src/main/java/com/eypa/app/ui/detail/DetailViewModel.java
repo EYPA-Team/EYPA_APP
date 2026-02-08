@@ -15,6 +15,8 @@ import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
+import com.eypa.app.model.SubmitCommentRequest;
+import com.eypa.app.model.SubmitCommentResponse;
 import com.eypa.app.ui.detail.model.CommentBlock;
 import com.eypa.app.utils.UserManager;
 
@@ -37,6 +39,7 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> navigateToLogin = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> commentItemUpdated = new MutableLiveData<>();
     private final MutableLiveData<Integer> commentItemRemoved = new MutableLiveData<>();
+    private final MutableLiveData<CommentBlock> commentItemAdded = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
 
     private String currentSortType = "date";
@@ -65,6 +68,10 @@ public class DetailViewModel extends AndroidViewModel {
 
     public LiveData<Integer> getCommentItemRemoved() {
         return commentItemRemoved;
+    }
+
+    public LiveData<CommentBlock> getCommentItemAdded() {
+        return commentItemAdded;
     }
 
     public LiveData<Boolean> getIsLoadMoreLoading() {
@@ -251,6 +258,40 @@ public class DetailViewModel extends AndroidViewModel {
                 // 不做处理
             }
         });
+    }
+
+    public void submitComment(int postId, String content, int parentId) {
+        if (UserManager.getInstance(getApplication()).getToken() == null) {
+            navigateToLogin.setValue(true);
+            return;
+        }
+
+        SubmitCommentRequest request = new SubmitCommentRequest(UserManager.getInstance(getApplication()).getToken(), postId, content, parentId);
+        ApiClient.getApiService().submitComment(request).enqueue(new Callback<SubmitCommentResponse>() {
+            @Override
+            public void onResponse(Call<SubmitCommentResponse> call, Response<SubmitCommentResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    Comment newComment = response.body().getData();
+                    if (newComment != null) {
+                        addCommentToList(newComment);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SubmitCommentResponse> call, Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    private void addCommentToList(Comment newComment) {
+        commentItemAdded.setValue(new CommentBlock(newComment, -1));
+        
+        Integer currentCount = totalCommentCount.getValue();
+        if (currentCount != null) {
+            totalCommentCount.setValue(currentCount + 1);
+        }
     }
 
     private void removeCommentFromList(int commentId) {

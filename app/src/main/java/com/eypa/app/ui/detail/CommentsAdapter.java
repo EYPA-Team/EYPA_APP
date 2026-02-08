@@ -33,6 +33,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public interface OnCommentActionListener {
         void onLike(Comment comment);
         void onShare(Comment comment);
+        void onReply(Comment comment);
         void onMore(Comment comment);
     }
 
@@ -127,6 +128,93 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    public int addComment(CommentBlock newBlock) {
+        Comment newComment = newBlock.getComment();
+        int parentId = newComment.getParentId();
+        int insertedPosition = -1;
+
+        if (parentId == 0) {
+            newBlock.setDepth(0);
+            displayedComments.add(0, newBlock);
+            notifyItemInserted(0);
+            insertedPosition = 0;
+        } else {
+            int parentIndex = -1;
+            CommentBlock parentBlock = null;
+
+            for (int i = 0; i < displayedComments.size(); i++) {
+                if (displayedComments.get(i).getComment().getId() == parentId) {
+                    parentIndex = i;
+                    parentBlock = displayedComments.get(i);
+                    break;
+                }
+            }
+
+            if (parentBlock != null) {
+                Comment parentComment = parentBlock.getComment();
+                if (parentComment.getChildren() == null) {
+                    parentComment.setChildren(new ArrayList<>());
+                }
+                parentComment.getChildren().add(newComment);
+
+                newBlock.setDepth(parentBlock.getDepth() + 1);
+
+                if (parentBlock.isExpanded()) {
+                    int insertIndex = parentIndex + 1;
+                    while (insertIndex < displayedComments.size()) {
+                        CommentBlock nextBlock = displayedComments.get(insertIndex);
+                        if (nextBlock.getDepth() > parentBlock.getDepth()) {
+                            insertIndex++;
+                        } else {
+                            break;
+                        }
+                    }
+                    displayedComments.add(insertIndex, newBlock);
+                    notifyItemInserted(insertIndex);
+                    insertedPosition = insertIndex;
+                }
+                
+                notifyItemChanged(parentIndex);
+            } else {
+                boolean foundInTree = false;
+                for (int i = 0; i < displayedComments.size(); i++) {
+                    CommentBlock block = displayedComments.get(i);
+                    if (findAndAddChild(block.getComment(), newComment)) {
+                        notifyItemChanged(i);
+                        foundInTree = true;
+                        break;
+                    }
+                }
+                
+                if (!foundInTree) {
+                     newBlock.setDepth(0);
+                     displayedComments.add(0, newBlock);
+                     notifyItemInserted(0);
+                     insertedPosition = 0;
+                }
+            }
+        }
+        return insertedPosition;
+    }
+    
+    private boolean findAndAddChild(Comment root, Comment childToAdd) {
+        if (root.getId() == childToAdd.getParentId()) {
+            if (root.getChildren() == null) {
+                root.setChildren(new ArrayList<>());
+            }
+            root.getChildren().add(childToAdd);
+            return true;
+        }
+        if (root.getChildren() != null) {
+            for (Comment child : root.getChildren()) {
+                if (findAndAddChild(child, childToAdd)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (isLoading && position == displayedComments.size()) {
@@ -174,6 +262,18 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public int getItemCount() {
         return displayedComments.size() + (isLoading ? 1 : 0);
+    }
+
+    public void expandComment(int commentId) {
+        for (int i = 0; i < displayedComments.size(); i++) {
+            CommentBlock block = displayedComments.get(i);
+            if (block.getComment().getId() == commentId) {
+                if (!block.isExpanded() && block.getComment().getChildren() != null && !block.getComment().getChildren().isEmpty()) {
+                    handleCommentClick(block, i);
+                }
+                break;
+            }
+        }
     }
 
     private void handleCommentClick(CommentBlock clickedBlock, int position) {
@@ -246,7 +346,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         LinearLayout contentContainer;
         ImageView avatarView;
         TextView authorView, dateView, contentView, expandRepliesView;
-        View likeContainer, shareBtn, moreBtn;
+        View likeContainer, shareBtn, replyBtn, moreBtn;
         ImageView likeIcon;
         TextView likeCount;
 
@@ -263,6 +363,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             likeIcon = itemView.findViewById(R.id.action_like_icon);
             likeCount = itemView.findViewById(R.id.action_like_count);
             shareBtn = itemView.findViewById(R.id.action_share_btn);
+            replyBtn = itemView.findViewById(R.id.action_reply_btn);
             moreBtn = itemView.findViewById(R.id.action_more_btn);
         }
 
@@ -332,6 +433,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             if (listener != null) {
                 likeContainer.setOnClickListener(v -> listener.onLike(comment));
                 shareBtn.setOnClickListener(v -> listener.onShare(comment));
+                if (replyBtn != null) {
+                    replyBtn.setOnClickListener(v -> listener.onReply(comment));
+                }
                 moreBtn.setOnClickListener(v -> listener.onMore(comment));
             }
         }

@@ -62,4 +62,36 @@
 
     </FrameLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="?android:attr/colorBackground"
+        android:elevation="4dp">
+
+        <EditText
+            android:id="@+id/edit_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="说点什么吧..."
+            android:background="@drawable/bg_comment_input"
+            android:padding="10dp"
+            android:textSize="14sp"
+            android:layout_marginEnd="8dp"
+            android:maxLines="3"
+            android:inputType="textMultiLine"/>
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="发送"
+            android:minWidth="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"/>
+
+    </LinearLayout>
+
 </LinearLayout>

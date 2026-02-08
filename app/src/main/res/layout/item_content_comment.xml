@@ -79,8 +79,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless">
                     <ImageView
                         android:id="@+id/action_like_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:src="@drawable/ic_thumb_up_outline"/>
                     <!-- 如果后端没有评论点赞数据，可以先隐藏或显示0 -->
                     <TextView
@@ -89,20 +89,59 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:text="赞"
-                        android:textSize="12sp"
+                        android:textSize="10sp"
                         android:textColor="#999999"/>
                 </LinearLayout>
 
                 <!-- 分享按钮 -->
-                <ImageView
+                <LinearLayout
                     android:id="@+id/action_share_btn"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="24dp"
-                    android:src="@drawable/ic_share_outline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:gravity="center_vertical"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"/>
+                    android:background="?attr/selectableItemBackgroundBorderless">
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_share_outline"
+                        android:tint="#999999"
+                        tools:ignore="UseAppTint"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="分享"
+                        android:textSize="10sp"
+                        android:textColor="#999999"/>
+                </LinearLayout>
+
+                <!-- 回复按钮 -->
+                <LinearLayout
+                    android:id="@+id/action_reply_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless">
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_comment"
+                        android:tint="#999999"
+                        tools:ignore="UseAppTint"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="回复"
+                        android:textSize="10sp"
+                        android:textColor="#999999"/>
+                </LinearLayout>
 
                 <!-- 占位符，把"更多"按钮挤到最右边 -->
                 <View

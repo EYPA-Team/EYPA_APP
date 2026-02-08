@@ -4,7 +4,7 @@ import com.eypa.app.model.Comment;
 
 public class CommentBlock implements ContentBlock {
     private final Comment comment;
-    private final int depth;
+    private int depth;
     private boolean isExpanded = false;
 
     public CommentBlock(Comment comment, int depth) {
@@ -18,6 +18,10 @@ public class CommentBlock implements ContentBlock {
 
     public int getDepth() {
         return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
     public boolean isExpanded() {
