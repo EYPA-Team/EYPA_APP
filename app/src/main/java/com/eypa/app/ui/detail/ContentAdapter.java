@@ -37,6 +37,8 @@ import com.eypa.app.ui.detail.model.TextBlock;
 import com.eypa.app.ui.home.AuthorProfileActivity;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.TimeAgoUtils;
+import com.eypa.app.utils.UserManager;
+import com.eypa.app.model.user.UserProfile;
 
 import java.util.List;
 import java.util.Locale;
@@ -212,21 +214,39 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             });
 
             if (author != null) {
-                if (author.isFollowing()) {
-                    followButton.setText("已关注");
-                    followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
-                } else {
-                    followButton.setText("关注");
-                    TypedValue typedValue = new TypedValue();
-                    itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-                    followButton.setTextColor(typedValue.data);
+                boolean isMe = false;
+                UserProfile userProfile = UserManager.getInstance(itemView.getContext()).getUserProfile().getValue();
+                if (userProfile != null && userProfile.getId() != null) {
+                    try {
+                        int currentUserId = Integer.parseInt(userProfile.getId());
+                        if (currentUserId == author.getId()) {
+                            isMe = true;
+                        }
+                    } catch (NumberFormatException e) {
+                        // 不做处理
+                    }
                 }
 
-                followButton.setOnClickListener(v -> {
-                    if (listener != null) {
-                        listener.onFollowClick(author.getId());
+                if (isMe) {
+                    followButton.setVisibility(View.GONE);
+                } else {
+                    followButton.setVisibility(View.VISIBLE);
+                    if (author.isFollowing()) {
+                        followButton.setText("已关注");
+                        followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
+                    } else {
+                        followButton.setText("关注");
+                        TypedValue typedValue = new TypedValue();
+                        itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                        followButton.setTextColor(typedValue.data);
                     }
-                });
+
+                    followButton.setOnClickListener(v -> {
+                        if (listener != null) {
+                            listener.onFollowClick(author.getId());
+                        }
+                    });
+                }
             } else {
                 followButton.setVisibility(View.GONE);
             }

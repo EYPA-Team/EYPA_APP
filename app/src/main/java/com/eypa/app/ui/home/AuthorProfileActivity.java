@@ -154,7 +154,12 @@ public class AuthorProfileActivity extends AppCompatActivity {
         if (base != null) {
             tvName.setText(base.getName());
             collapsingToolbarLayout.setTitle(base.getName());
-            Glide.with(this).load(base.getAvatar()).circleCrop().into(ivAvatar);
+            Glide.with(this)
+                .load(base.getAvatar())
+                .placeholder(R.drawable.ic_avatar_placeholder)
+                .error(R.drawable.ic_avatar_placeholder)
+                .circleCrop()
+                .into(ivAvatar);
             
             if (base.getLevel() != null) {
                 tvLevel.setText(base.getLevel().getName());
@@ -203,11 +208,9 @@ public class AuthorProfileActivity extends AppCompatActivity {
         AuthorInfoResponse.InteractionInfo interaction = data.getInteraction();
         if (interaction != null) {
             if (interaction.isMe()) {
-                btnAction.setText("编辑资料");
-                btnAction.setOnClickListener(v -> {
-                    Toast.makeText(this, "编辑资料功能待开发", Toast.LENGTH_SHORT).show();
-                });
+                btnAction.setVisibility(View.GONE);
             } else {
+                btnAction.setVisibility(View.VISIBLE);
                 updateFollowButton(interaction.isFollowing());
                 btnAction.setOnClickListener(v -> handleFollowAction());
             }

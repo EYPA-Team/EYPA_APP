@@ -155,7 +155,7 @@
                             android:layout_height="wrap_content"
                             android:text="关注"
                             android:minHeight="40dp"
-                            android:textSize="12sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:textColor="?attr/colorPrimary"
                             android:textStyle="bold"/>
