@@ -55,6 +55,17 @@
                         android:layout_height="match_parent"
                         android:background="#40000000" />
 
+                    <ImageButton
+                        android:id="@+id/play_button_overlay"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_play_button"
+                        android:src="@drawable/ic_play_arrow"
+                        android:visibility="gone"
+                        android:contentDescription="播放视频"
+                        tools:visibility="visible" />
+
                     <androidx.media3.ui.PlayerView
                         android:id="@+id/player_view"
                         android:layout_width="match_parent"
@@ -111,17 +122,6 @@
                         android:elevation="10dp"
                         tools:text="音量 91%"
                         tools:visibility="visible"/>
-
-                    <ImageButton
-                        android:id="@+id/play_button_overlay"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_gravity="center"
-                        android:background="@drawable/bg_play_button"
-                        android:src="@drawable/ic_play_arrow"
-                        android:visibility="gone"
-                        android:contentDescription="播放视频"
-                        tools:visibility="visible" />
                 </FrameLayout>
 
                 <androidx.appcompat.widget.Toolbar
