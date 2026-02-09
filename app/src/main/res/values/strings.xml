@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 应用名称 -->
-    <string name="app_name">EYPA Reader</string>
+    <string name="app_name">EYPA</string>
     <string name="categories">分类</string>
     <string name="tags">标签</string>
     <string name="no_content_available">暂无内容</string>
