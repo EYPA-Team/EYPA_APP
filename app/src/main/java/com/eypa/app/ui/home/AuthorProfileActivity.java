@@ -35,6 +35,7 @@ import com.eypa.app.ui.detail.ImageViewerFragment;
 import com.eypa.app.ui.widget.ZoomableImageView;
 import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.UserManager;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
@@ -70,6 +71,8 @@ public class AuthorProfileActivity extends AppCompatActivity {
     private TextView tvMedalsCount;
     private View loadingMask;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private TextView toolbarTitle;
+    private AppBarLayout appBarLayout;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
 
@@ -99,13 +102,28 @@ public class AuthorProfileActivity extends AppCompatActivity {
 
     private void initViews() {
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbarTitle = findViewById(R.id.toolbar_title);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("");
         }
 
+        appBarLayout = findViewById(R.id.app_bar);
         collapsingToolbarLayout = findViewById(R.id.toolbar_layout);
+        collapsingToolbarLayout.setTitleEnabled(false);
+        
+        appBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            if (toolbarTitle == null) return;
+            
+            int totalScrollRange = appBarLayout.getTotalScrollRange();
+            if (totalScrollRange == 0) return;
+            
+            float fraction = Math.abs(verticalOffset) / (float) totalScrollRange;
+            float alpha = Math.max(0, (fraction - 0.6f) / 0.4f);
+            toolbarTitle.setAlpha(alpha);
+        });
+
         ivCover = findViewById(R.id.iv_cover);
         ivAvatar = findViewById(R.id.iv_avatar);
         tvName = findViewById(R.id.tv_name);
@@ -207,7 +225,9 @@ public class AuthorProfileActivity extends AppCompatActivity {
         AuthorInfoResponse.BaseInfo base = data.getBase();
         if (base != null) {
             tvName.setText(base.getName());
-            collapsingToolbarLayout.setTitle(base.getName());
+            if (toolbarTitle != null) {
+                toolbarTitle.setText(base.getName());
+            }
             Glide.with(this)
                 .load(base.getAvatar())
                 .placeholder(R.drawable.ic_avatar_placeholder)

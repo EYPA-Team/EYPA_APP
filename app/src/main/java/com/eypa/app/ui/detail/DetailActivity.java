@@ -88,6 +88,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private FrameLayout mediaContainer;
     private FrameLayout fullscreenContainer;
     private Toolbar toolbar;
+    private TextView toolbarTitle;
     private AppBarLayout appBarLayout;
     private View contentTabsAndPager;
     private boolean isTitleShown = false;
@@ -242,6 +243,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
+        toolbarTitle = findViewById(R.id.toolbar_title);
         progressBar = findViewById(R.id.progress_bar);
         coverImage = findViewById(R.id.cover_image);
         playerView = findViewById(R.id.player_view);
@@ -383,18 +385,16 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     }
 
     private void setupCollapsingToolbarListener() {
+        collapsingToolbar.setTitleEnabled(false);
         appBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
-            if (Math.abs(verticalOffset) >= appBarLayout.getTotalScrollRange()) {
-                if (!isTitleShown) {
-                    collapsingToolbar.setTitle(postTitle);
-                    isTitleShown = true;
-                }
-            } else {
-                if (isTitleShown) {
-                    collapsingToolbar.setTitle("");
-                    isTitleShown = false;
-                }
-            }
+            if (toolbarTitle == null) return;
+            
+            int totalScrollRange = appBarLayout.getTotalScrollRange();
+            if (totalScrollRange == 0) return;
+            
+            float fraction = Math.abs(verticalOffset) / (float) totalScrollRange;
+            float alpha = Math.max(0, (fraction - 0.6f) / 0.4f);
+            toolbarTitle.setAlpha(alpha);
         });
     }
 
@@ -500,6 +500,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         com.eypa.app.db.HistoryManager.getInstance(this).addHistory(post);
 
         postTitle = HtmlCompat.fromHtml(post.getTitle(), HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
+        if (toolbarTitle != null) {
+            toolbarTitle.setText(postTitle);
+        }
 
         currentEpisodes.clear();
         currentEpisodes.addAll(post.getAllEpisodes());
