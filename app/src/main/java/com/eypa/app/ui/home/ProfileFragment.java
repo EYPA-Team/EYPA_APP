@@ -252,6 +252,8 @@ public class ProfileFragment extends Fragment {
                     AuthorInfoResponse.BaseInfo baseInfo = response.body().getData().getBase();
                     if (baseInfo != null) {
                         UserProfile userProfile = UserManager.getInstance(requireContext()).getUserProfile().getValue();
+                        if (userProfile == null) return;
+
                         boolean needsSave = false;
 
                         if (baseInfo.getLevel() != null) {
