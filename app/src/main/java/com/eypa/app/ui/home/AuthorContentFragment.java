@@ -162,7 +162,6 @@ public class AuthorContentFragment extends Fragment {
                             } else {
                                 if (isFirstLoad) {
                                     hideLoadingMask();
-                                    tvEmpty.setText("暂无关注信息");
                                     tvEmpty.setVisibility(View.VISIBLE);
                                 }
                             }
