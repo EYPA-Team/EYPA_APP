@@ -199,19 +199,24 @@ public class DetailViewModel extends AndroidViewModel {
     }
 
     private void loadPost(int postId) {
-        // 包含 author_info 字段，确保作者信息能正确显示
-        ApiClient.getApiService().getPostWithCustomFields(postId, "id,title,date,content,author,categories,tags,zib_other_data,view_count,like_count,comment_count,_embedded,author_info", "wp:featuredmedia,author,wp:term")
+        // 获取 Token (如果是登录用户)
+        String token = UserManager.getInstance(getApplication()).getToken();
+        com.eypa.app.model.PostDetailRequest request = new com.eypa.app.model.PostDetailRequest(postId, token);
+
+        // 调用新接口 (POST /post/detail)
+        ApiClient.getApiService().getPostDetail(request)
                 .enqueue(new Callback<ContentItem>() {
                     @Override
                     public void onResponse(Call<ContentItem> call, Response<ContentItem> response) {
-                        if (response.isSuccessful()) {
+                        if (response.isSuccessful() && response.body() != null) {
                             ContentItem post = response.body();
                             postData.setValue(post);
-                            if (post != null && post.getAuthor() != null) {
+                            // 检查关注状态
+                            if (post.getAuthor() != null) {
                                 checkFollowStatus(post.getAuthor().getId());
                             }
                         }
-                        // 只有当两个请求都结束后才停止加载动画
+                        // 停止加载动画
                         if (commentBlocks.getValue() != null || !response.isSuccessful()) {
                             isLoading.setValue(false);
                         }
@@ -223,6 +228,7 @@ public class DetailViewModel extends AndroidViewModel {
                     }
                 });
     }
+
 
     private void loadCommentsInternal(int postId, int page) {
         isCommentsLoading = true;
