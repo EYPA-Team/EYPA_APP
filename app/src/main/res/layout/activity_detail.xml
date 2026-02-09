@@ -122,6 +122,16 @@
                         android:elevation="10dp"
                         tools:text="音量 91%"
                         tools:visibility="visible"/>
+
+                    <!-- 音乐播放器布局 -->
+                    <include
+                        android:id="@+id/music_player_layout"
+                        layout="@layout/layout_music_player"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
                 </FrameLayout>
 
                 <androidx.appcompat.widget.Toolbar

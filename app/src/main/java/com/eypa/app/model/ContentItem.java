@@ -57,6 +57,24 @@ public class ContentItem {
         private String coverImage;
         @SerializedName("thumbnail_url")
         private String thumbnailUrl;
+        @SerializedName("featured_music")
+        private List<FeaturedMusic> featuredMusic;
+    }
+
+    public static class FeaturedMusic {
+        @SerializedName("name")
+        private String name;
+        @SerializedName("url")
+        private String url;
+        @SerializedName("cover")
+        private String cover;
+        @SerializedName("artist")
+        private String artist;
+
+        public String getName() { return name; }
+        public String getUrl() { return url; }
+        public String getCover() { return cover; }
+        public String getArtist() { return artist; }
     }
 
     public static class VideoEpisode {
@@ -94,6 +112,13 @@ public class ContentItem {
         public void setPlaying(boolean playing) {
             isPlaying = playing;
         }
+    }
+
+    public List<FeaturedMusic> getFeaturedMusic() {
+        if (zibOtherData != null) {
+            return zibOtherData.featuredMusic;
+        }
+        return null;
     }
 
     public List<Episode> getAllEpisodes() {

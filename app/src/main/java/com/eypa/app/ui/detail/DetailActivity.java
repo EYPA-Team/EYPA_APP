@@ -23,8 +23,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -94,7 +97,25 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private boolean isTitleShown = false;
     private String postTitle = "";
     private List<ContentItem.Episode> currentEpisodes = new ArrayList<>();
+    private List<ContentItem.FeaturedMusic> currentMusicList = new ArrayList<>();
     
+    private View musicPlayerLayout;
+    private ImageView musicCoverBg;
+    private TextView musicTitle;
+    private TextView musicArtist;
+    private ImageButton btnPrev;
+    private ImageButton btnPlayPause;
+    private ImageButton btnNext;
+    private ProgressBar musicLoading;
+    private SeekBar musicSeekBar;
+    private TextView musicCurrentTime;
+    private TextView musicTotalTime;
+    private boolean isMusicContent = false;
+    private int currentMusicIndex = 0;
+    private Handler musicProgressHandler = new Handler(Looper.getMainLooper());
+    private Runnable musicProgressRunnable;
+    private boolean isMusicSeeking = false;
+
     private View commentInputContainer;
     private EditText editComment;
     private Button btnSend;
@@ -258,6 +279,19 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         viewPager = findViewById(R.id.view_pager);
         appBarLayout = findViewById(R.id.app_bar);
         contentTabsAndPager = findViewById(R.id.content_tabs_and_pager);
+
+        musicPlayerLayout = findViewById(R.id.music_player_layout);
+        musicCoverBg = findViewById(R.id.music_cover_bg);
+        musicTitle = findViewById(R.id.music_title);
+        musicTitle.setSelected(true);
+        musicArtist = findViewById(R.id.music_artist);
+        btnPrev = findViewById(R.id.btn_prev);
+        btnPlayPause = findViewById(R.id.btn_play_pause);
+        btnNext = findViewById(R.id.btn_next);
+        musicLoading = findViewById(R.id.music_loading);
+        musicSeekBar = findViewById(R.id.music_seek_bar);
+        musicCurrentTime = findViewById(R.id.music_current_time);
+        musicTotalTime = findViewById(R.id.music_total_time);
         
         commentInputContainer = findViewById(R.id.comment_input_container);
         editComment = findViewById(R.id.edit_comment);
@@ -504,6 +538,19 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             toolbarTitle.setText(postTitle);
         }
 
+        List<ContentItem.FeaturedMusic> musicList = post.getFeaturedMusic();
+        if (musicList != null && !musicList.isEmpty()) {
+            isMusicContent = true;
+            currentMusicList.clear();
+            currentMusicList.addAll(musicList);
+            setupMusicPlayerUI();
+            
+            if (player == null) {
+                initializeMusicPlayer(currentMusicIndex, false);
+            }
+            return;
+        }
+
         currentEpisodes.clear();
         currentEpisodes.addAll(post.getAllEpisodes());
 
@@ -555,6 +602,171 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             }
         }
         invalidateOptionsMenu();
+    }
+
+    private void setupMusicPlayerUI() {
+        musicPlayerLayout.setVisibility(View.VISIBLE);
+        coverImage.setVisibility(View.GONE);
+        playButtonOverlay.setVisibility(View.GONE);
+        playerView.setVisibility(View.GONE);
+        
+        btnPrev.setOnClickListener(v -> {
+            if (currentMusicIndex > 0) {
+                currentMusicIndex--;
+                initializeMusicPlayer(currentMusicIndex, true);
+            } else {
+                Toast.makeText(this, "已经是第一首了", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        btnNext.setOnClickListener(v -> {
+            if (currentMusicIndex < currentMusicList.size() - 1) {
+                currentMusicIndex++;
+                initializeMusicPlayer(currentMusicIndex, true);
+            } else {
+                Toast.makeText(this, "已经是最后一首了", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        btnPlayPause.setOnClickListener(v -> {
+            if (player != null) {
+                if (player.isPlaying()) {
+                    player.pause();
+                } else {
+                    player.play();
+                }
+            } else {
+                initializeMusicPlayer(currentMusicIndex, true);
+            }
+        });
+
+        musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    musicCurrentTime.setText(formatTime(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isMusicSeeking = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isMusicSeeking = false;
+                if (player != null) {
+                    player.seekTo(seekBar.getProgress());
+                }
+            }
+        });
+        
+        updateMusicInfo(currentMusicIndex);
+    }
+
+    private void updateMusicInfo(int index) {
+        if (index >= 0 && index < currentMusicList.size()) {
+            ContentItem.FeaturedMusic music = currentMusicList.get(index);
+            musicTitle.setText(music.getName());
+            musicArtist.setText(music.getArtist() != null ? music.getArtist() : "未知");
+            
+            String coverUrl = music.getCover();
+            if (coverUrl != null && !coverUrl.isEmpty()) {
+                Glide.with(this)
+                        .load(coverUrl)
+                        .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.placeholder_image)
+                        .into(musicCoverBg);
+            } else {
+                ContentItem post = viewModel.getPostData().getValue();
+                String articleCover = post != null ? post.getBestImageUrl() : null;
+                Glide.with(this)
+                        .load(articleCover)
+                        .placeholder(R.drawable.placeholder_image)
+                        .into(musicCoverBg);
+            }
+        }
+    }
+
+    private void initializeMusicPlayer(int index, boolean play) {
+        if (index < 0 || index >= currentMusicList.size()) return;
+        
+        if (player != null) {
+            player.release();
+            stopMusicProgressUpdater();
+        }
+        player = new ExoPlayer.Builder(this).build();
+        
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int playbackState) {
+                if (playbackState == Player.STATE_BUFFERING) {
+                    musicLoading.setVisibility(View.VISIBLE);
+                    btnPlayPause.setVisibility(View.INVISIBLE);
+                } else {
+                    musicLoading.setVisibility(View.GONE);
+                    btnPlayPause.setVisibility(View.VISIBLE);
+                    if (playbackState == Player.STATE_READY) {
+                        long duration = player.getDuration();
+                        musicSeekBar.setMax((int) duration);
+                        musicTotalTime.setText(formatTime(duration));
+                        startMusicProgressUpdater();
+                    } else if (playbackState == Player.STATE_ENDED) {
+                        stopMusicProgressUpdater();
+                        if (currentMusicIndex < currentMusicList.size() - 1) {
+                            currentMusicIndex++;
+                            initializeMusicPlayer(currentMusicIndex, true);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                if (isPlaying) {
+                    btnPlayPause.setImageResource(R.drawable.ic_pause);
+                    startMusicProgressUpdater();
+                } else {
+                    btnPlayPause.setImageResource(R.drawable.ic_play_arrow);
+                    stopMusicProgressUpdater();
+                }
+            }
+        });
+
+        String url = currentMusicList.get(index).getUrl();
+        MediaItem mediaItem = MediaItem.fromUri(url);
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        if (play) {
+            player.play();
+        }
+        
+        updateMusicInfo(index);
+    }
+
+    private void startMusicProgressUpdater() {
+        if (musicProgressRunnable == null) {
+            musicProgressRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (player != null && player.isPlaying() && !isMusicSeeking) {
+                        long currentPosition = player.getCurrentPosition();
+                        musicSeekBar.setProgress((int) currentPosition);
+                        musicCurrentTime.setText(formatTime(currentPosition));
+                    }
+                    musicProgressHandler.postDelayed(this, 1000);
+                }
+            };
+        }
+        musicProgressHandler.removeCallbacks(musicProgressRunnable);
+        musicProgressHandler.post(musicProgressRunnable);
+    }
+
+    private void stopMusicProgressUpdater() {
+        if (musicProgressRunnable != null) {
+            musicProgressHandler.removeCallbacks(musicProgressRunnable);
+        }
     }
 
     private void setupPlayer() {
@@ -801,6 +1013,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     }
 
     private void releasePlayer() {
+        stopMusicProgressUpdater();
         if (player != null) {
             playbackPosition = player.getCurrentPosition();
             currentWindow = player.getCurrentMediaItemIndex();
@@ -811,6 +1024,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     }
 
     private void updateUiForOrientation(int orientation) {
+        if (isMusicContent) {
+            return; 
+        }
+
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             appBarLayout.setVisibility(View.GONE);
             contentTabsAndPager.setVisibility(View.GONE);
