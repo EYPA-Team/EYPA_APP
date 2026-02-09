@@ -238,6 +238,12 @@ public class DetailCommentsFragment extends Fragment {
         });
 
         reportBtn.setOnClickListener(v -> {
+            if (!Boolean.TRUE.equals(UserManager.getInstance(getContext()).isLoggedIn().getValue())) {
+                bottomSheetDialog.dismiss();
+                startActivity(new Intent(getContext(), com.eypa.app.ui.home.LoginActivity.class));
+                return;
+            }
+
             if (viewModel.getPostData().getValue() != null && comment.getAuthor() != null) {
                 int articleId = viewModel.getPostData().getValue().getId();
                 String link = "https://eqmemory.cn/" + articleId + ".html#comment-" + comment.getId();

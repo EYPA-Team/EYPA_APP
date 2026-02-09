@@ -999,6 +999,12 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_resource_actions_sheet, null);
 
         sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
+            if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                bottomSheetDialog.dismiss();
+                startActivity(new Intent(this, LoginActivity.class));
+                return;
+            }
+
             ContentItem post = viewModel.getPostData().getValue();
             if (post != null && post.getAuthor() != null) {
                 int authorId = post.getAuthor().getId();

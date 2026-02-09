@@ -381,6 +381,11 @@ public class AuthorProfileActivity extends AppCompatActivity {
         } else {
             actionReport.setVisibility(View.VISIBLE);
             actionReport.setOnClickListener(v -> {
+                if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                    bottomSheetDialog.dismiss();
+                    startActivity(new Intent(this, LoginActivity.class));
+                    return;
+                }
                 bottomSheetDialog.dismiss();
                 ReportDialogUtils.showReportDialog(this, userId, "https://eqmemory.cn/author/" + userId);
             });
