@@ -6,4 +6,5 @@
     android:layout_marginBottom="8dp"
     android:lineSpacingExtra="4dp"
     android:textColor="?android:attr/textColorPrimary"
+    android:textColorLink="@color/content_link_color"
     android:textSize="16sp" />

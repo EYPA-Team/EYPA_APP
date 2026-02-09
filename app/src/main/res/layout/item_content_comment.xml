@@ -56,6 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:textColor="?android:attr/textColorPrimary"
+                android:textColorLink="@color/content_link_color"
                 android:textSize="15sp"
                 android:lineSpacingExtra="4dp"
                 tools:text="这是一条评论内容。" />

@@ -5,6 +5,8 @@
     <color name="tag_background">#333333</color>
     <color name="quote_background">#1E1E1E</color>
     <color name="quote_text_color">#B0B0B0</color>
+
+    <color name="content_link_color">#90CAF9</color>
     
     <color name="report_dialog_background">#121212</color>
 </resources>
