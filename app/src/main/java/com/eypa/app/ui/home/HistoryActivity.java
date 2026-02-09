@@ -1,5 +1,6 @@
 package com.eypa.app.ui.home;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +32,10 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applyTheme(this);
+        SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
+        int themeId = sharedPreferences.getInt("ThemeId", R.style.Theme_EYPA_APP);
+        setTheme(themeId);
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
@@ -91,10 +96,10 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void showClearHistoryDialog() {
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("清空历史记录")
                 .setMessage("确定要清空所有历史记录吗？")
-                .setPositiveButton("确定", (dialog, which) -> {
+                .setPositiveButton("确定", (d, which) -> {
                     HistoryManager.getInstance(this).clearHistory();
                     historyList.clear();
                     adapter.notifyDataSetChanged();
@@ -102,5 +107,12 @@ public class HistoryActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("取消", null)
                 .show();
+
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(colorPrimary);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(colorPrimary);
     }
 }
