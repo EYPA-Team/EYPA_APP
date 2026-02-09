@@ -208,7 +208,7 @@
             android:minWidth="0dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:textColor="?attr/colorPrimary"
             android:textStyle="bold"/>
 
