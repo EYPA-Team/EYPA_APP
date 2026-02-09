@@ -9,6 +9,7 @@ import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.EditCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
+import com.eypa.app.model.PostDetailRequest;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.SubmitCommentRequest;
 import com.eypa.app.model.SubmitCommentResponse;
@@ -38,16 +39,30 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ContentApiService {
-    @GET("eu-json/wp/v2/posts")
+    /**
+     * [修改] 首页文章列表
+     * 变化：
+     * URL 变为 eu-json/app/v1/posts
+     * 删除了 _fields 和 _embed 参数 (后端已自动处理)
+     */
+    @GET("eu-json/app/v1/posts")
     Call<List<ContentItem>> getContentItems(
             @Query("page") int page,
             @Query("per_page") int perPage,
-            @Query("_fields") String fields,
             @Query("orderby") String orderby,
             @Query("seed") String seed,
-            @Query("_embed") String embed,
             @Query("categories") Integer categoryId
     );
+
+    /**
+     * [修改] 文章详情接口
+     * 变化：
+     * URL 变为 eu-json/app/v1/post/detail
+     * 方法变为 POST (为了传 Token)
+     * 参数变为 Body (PostDetailRequest)
+     */
+    @POST("eu-json/app/v1/post/detail")
+    Call<ContentItem> getPostDetail(@Body PostDetailRequest request);
 
     @GET("eu-json/wp/v2/categories")
     Call<List<Category>> getAllCategories(
@@ -64,13 +79,6 @@ public interface ContentApiService {
     @GET("eu-json/wp/v2/tags")
     Call<List<Tag>> getTags(
             @Query("include") String includeIds
-    );
-
-    @GET("eu-json/wp/v2/posts/{id}")
-    Call<ContentItem> getPostWithCustomFields(
-            @Path("id") int postId,
-            @Query("_fields") String fields,
-            @Query("_embed") String embed
     );
 
     @GET("eu-json/wp/v2/categories")
@@ -129,7 +137,7 @@ public interface ContentApiService {
             @Query("keyword") String query,
             @Query("page") int page
     );
-    
+
     /**
      * 获取首页轮播图
      * @return 轮播图列表
