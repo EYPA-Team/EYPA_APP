@@ -28,12 +28,12 @@ public class ReportDialogUtils {
             "色情/低俗内容",
             "政治敏感",
             "违法违规",
+            "引战",
             "其他"
     };
 
     public static void showReportDialog(Context context, int userId, String url) {
         if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
-            Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -97,7 +97,7 @@ public class ReportDialogUtils {
                         Toast.makeText(context, response.body().getMsg(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(context, "举报失败，请稍后重试", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "举报失败", Toast.LENGTH_SHORT).show();
                 }
             }
 

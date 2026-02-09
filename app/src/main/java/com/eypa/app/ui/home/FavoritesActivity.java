@@ -101,7 +101,6 @@ public class FavoritesActivity extends AppCompatActivity {
 
         String token = UserManager.getInstance(this).getToken();
         if (token == null) {
-            Toast.makeText(this, "请先登录", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
