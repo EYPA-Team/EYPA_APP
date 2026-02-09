@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="10sp"
-            tools:text="124"/>
+            android:text="点赞"/>
     </LinearLayout>
 
     <!-- 收藏 -->
