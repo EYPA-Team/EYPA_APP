@@ -26,4 +26,23 @@
     <string name="profile_favorites">收藏</string>
     <string name="profile_history">历史</string>
     <string name="profile_settings">设置</string>
+
+    <!-- 登录/注册/找回密码页面 -->
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="reset_password">重置密码</string>
+
+    <!-- 设置页面 -->
+    <string name="general_settings">通用设置</string>
+    <string name="select_theme">选择主题色</string>
+    <string name="about">关于应用</string>
+
+    <!-- 历史/收藏/徽章页面 -->
+    <string name="history">历史记录</string>
+    <string name="favorites">我的收藏</string>
+    <string name="medals">获得的徽章</string>
+    
+    <!-- 卸载信息 (HyperOS/MIUI独有) -->
+    <string name="uninstall_title">真的要卸载EYPA吗</string>
+    <string name="uninstall_content">如果你卸载了该APP，你就卸载了该APP\nTAT</string>
 </resources>
