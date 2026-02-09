@@ -50,7 +50,9 @@ import com.eypa.app.R;
 import com.eypa.app.ui.home.LoginActivity;
 import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.ThemeUtils;
+import com.eypa.app.utils.UserManager;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.user.UserProfile;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -549,6 +551,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 });
             }
         }
+        invalidateOptionsMenu();
     }
 
     private void setupPlayer() {
@@ -953,6 +956,30 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             moreItem.getIcon().setTint(android.graphics.Color.WHITE);
         }
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem moreItem = menu.findItem(R.id.action_more);
+        if (moreItem != null) {
+            ContentItem post = viewModel.getPostData().getValue();
+            UserProfile currentUser = UserManager.getInstance(this).getUserProfile().getValue();
+            boolean isMine = false;
+            
+            if (post != null && post.getAuthor() != null && currentUser != null) {
+                try {
+                    int currentUserId = Integer.parseInt(currentUser.getId());
+                    if (currentUserId == post.getAuthor().getId()) {
+                        isMine = true;
+                    }
+                } catch (NumberFormatException e) {
+                    // 不做处理
+                }
+            }
+            
+            moreItem.setVisible(!isMine);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

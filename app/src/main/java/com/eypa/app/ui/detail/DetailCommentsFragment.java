@@ -203,6 +203,7 @@ public class DetailCommentsFragment extends Fragment {
 
         View deleteBtn = sheetView.findViewById(R.id.action_delete);
         View editBtn = sheetView.findViewById(R.id.action_edit);
+        View reportBtn = sheetView.findViewById(R.id.action_report);
         
         if (isMyComment) {
             deleteBtn.setVisibility(View.VISIBLE);
@@ -223,9 +224,12 @@ public class DetailCommentsFragment extends Fragment {
                 bottomSheetDialog.dismiss();
                 viewModel.setEditComment(comment);
             });
+
+            reportBtn.setVisibility(View.GONE);
         } else {
             deleteBtn.setVisibility(View.GONE);
             editBtn.setVisibility(View.GONE);
+            reportBtn.setVisibility(View.VISIBLE);
         }
 
         sheetView.findViewById(R.id.action_copy).setOnClickListener(v -> {
@@ -233,7 +237,7 @@ public class DetailCommentsFragment extends Fragment {
             bottomSheetDialog.dismiss();
         });
 
-        sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
+        reportBtn.setOnClickListener(v -> {
             if (viewModel.getPostData().getValue() != null && comment.getAuthor() != null) {
                 int articleId = viewModel.getPostData().getValue().getId();
                 String link = "https://eqmemory.cn/" + articleId + ".html#comment-" + comment.getId();

@@ -75,13 +75,14 @@ public class ReportDialogUtils {
             }
             etDesc.setError(null);
 
-            submitReport(context, dialog, userId, reason, desc, url);
+            dialog.dismiss();
+            submitReport(context, userId, reason, desc, url);
         });
 
         dialog.show();
     }
 
-    private static void submitReport(Context context, BottomSheetDialog dialog, int userId, String reason, String desc, String url) {
+    private static void submitReport(Context context, int userId, String reason, String desc, String url) {
         String token = UserManager.getInstance(context).getToken();
         if (token == null) return;
 
@@ -92,7 +93,6 @@ public class ReportDialogUtils {
                 if (response.isSuccessful() && response.body() != null) {
                     if (response.body().isSuccess()) {
                         Toast.makeText(context, "举报成功，我们会尽快处理", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
                     } else {
                         Toast.makeText(context, response.body().getMsg(), Toast.LENGTH_SHORT).show();
                     }
