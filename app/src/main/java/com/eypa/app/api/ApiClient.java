@@ -2,12 +2,15 @@ package com.eypa.app.api;
 
 import android.util.Log;
 
+import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.Term;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -40,6 +43,11 @@ public class ApiClient {
 
             // 2. 为 Term.class 注册我们的自定义反序列化器
             gsonBuilder.registerTypeAdapter(Term.class, new TermDeserializer());
+
+            gsonBuilder.registerTypeAdapter(
+                    new TypeToken<List<ContentItem.VideoEpisode>>(){}.getType(),
+                    new VideoEpisodeListDeserializer()
+            );
 
             Gson gson = gsonBuilder.create();
 

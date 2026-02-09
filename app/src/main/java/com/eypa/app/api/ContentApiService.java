@@ -76,16 +76,6 @@ public interface ContentApiService {
     );
 
     @GET("eu-json/wp/v2/categories")
-    Call<List<Category>> getCategories(
-            @Query("include") String includeIds
-    );
-
-    @GET("eu-json/wp/v2/tags")
-    Call<List<Tag>> getTags(
-            @Query("include") String includeIds
-    );
-
-    @GET("eu-json/wp/v2/categories")
     Call<List<Category>> getCategoriesByIds(
             @Query("include") String includeIds,
             @Query("per_page") int perPage
