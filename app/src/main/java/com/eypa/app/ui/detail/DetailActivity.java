@@ -868,8 +868,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             if (playerView.getParent() != mediaContainer) {
                 ((ViewGroup) playerView.getParent()).removeView(playerView);
                 // --- 竖屏模式下，填满 XML 中定义的固定高度容器 ---
-                mediaContainer.addView(playerView, new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                params.gravity = android.view.Gravity.CENTER;
+                mediaContainer.addView(playerView, params);
             }
             
             if (tvSeekOverlay.getParent() != mediaContainer) {

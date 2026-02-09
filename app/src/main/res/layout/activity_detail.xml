@@ -38,7 +38,6 @@
                     android:id="@+id/media_container"
                     android:layout_width="match_parent"
                     android:layout_height="280dp"
-                    android:fitsSystemWindows="true"
                     app:layout_collapseMode="parallax">
 
                     <ImageView
@@ -70,6 +69,7 @@
                         android:id="@+id/player_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_gravity="center"
                         android:visibility="gone"
                         android:background="@android:color/black"
                         app:shutter_background_color="@android:color/black"
