@@ -24,6 +24,8 @@
     <color name="quote_background">#F5F5F5</color>
     <color name="quote_text_color">#666666</color>
 
+    <color name="report_dialog_background">#FFFFFF</color>
+
     <!-- 确保这些颜色名称与 themes.xml 中引用的完全一致 -->
     <color name="light_toolbar_background">#FFFFFF</color>
     <color name="light_navigation_background">#FFFFFF</color>

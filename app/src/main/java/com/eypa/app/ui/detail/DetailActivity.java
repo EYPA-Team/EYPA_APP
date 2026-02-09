@@ -48,6 +48,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
 import com.eypa.app.ui.home.LoginActivity;
+import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.model.ContentItem;
 import com.google.android.material.appbar.AppBarLayout;
@@ -971,8 +972,16 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_resource_actions_sheet, null);
 
         sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
-            Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
-            bottomSheetDialog.dismiss();
+            ContentItem post = viewModel.getPostData().getValue();
+            if (post != null && post.getAuthor() != null) {
+                int authorId = post.getAuthor().getId();
+                String url = "https://eqmemory.cn/" + post.getId() + ".html";
+                bottomSheetDialog.dismiss();
+                ReportDialogUtils.showReportDialog(this, authorId, url);
+            } else {
+                Toast.makeText(this, "无法获取文章信息", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            }
         });
 
         sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {

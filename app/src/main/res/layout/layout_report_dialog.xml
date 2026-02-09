@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/report_dialog_background">
+
+    <!-- 顶部小横条 -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="15dp"
+        android:background="@color/dialog_handle_bg"/>
+        
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="举报原因"
+        android:layout_marginBottom="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinner_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/et_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="详细描述"
+        android:padding="10dp"
+        android:textSize="14sp"
+        android:backgroundTint="@color/edit_text_tint"
+        android:layout_marginBottom="16dp"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:gravity="top"/>
+
+    <Button
+        android:id="@+id/btn_submit"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?android:attr/textColorPrimary"
+        android:text="提交举报"/>
+
+</LinearLayout>

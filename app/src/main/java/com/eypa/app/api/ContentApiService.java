@@ -27,6 +27,8 @@ import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.model.user.LoginRequest;
 import com.eypa.app.model.user.LoginResponse;
 import com.eypa.app.model.user.RegisterRequest;
+import com.eypa.app.model.user.ReportRequest;
+import com.eypa.app.model.user.ReportResponse;
 import com.eypa.app.model.user.ResetPasswordRequest;
 import com.eypa.app.model.user.SendCodeRequest;
 import com.eypa.app.model.user.TokenRequest;
@@ -257,4 +259,12 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/post/favorite")
     Call<PostActionResponse> favoritePost(@Body PostActionRequest request);
+
+    /**
+     * 举报用户/内容
+     * @param request 举报请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/user/report")
+    Call<ReportResponse> reportUser(@Body ReportRequest request);
 }

@@ -33,6 +33,7 @@ import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.ui.detail.ImageViewerFragment;
 import com.eypa.app.ui.widget.ZoomableImageView;
+import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -380,8 +381,8 @@ public class AuthorProfileActivity extends AppCompatActivity {
         } else {
             actionReport.setVisibility(View.VISIBLE);
             actionReport.setOnClickListener(v -> {
-                Toast.makeText(this, "举报功能待开发", Toast.LENGTH_SHORT).show();
                 bottomSheetDialog.dismiss();
+                ReportDialogUtils.showReportDialog(this, userId, "https://eqmemory.cn/author/" + userId);
             });
         }
 

@@ -26,6 +26,7 @@ import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.ui.detail.model.CommentBlock;
+import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.UserManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -233,8 +234,16 @@ public class DetailCommentsFragment extends Fragment {
         });
 
         sheetView.findViewById(R.id.action_report).setOnClickListener(v -> {
-            Toast.makeText(getContext(), "举报功能待开发", Toast.LENGTH_SHORT).show();
-            bottomSheetDialog.dismiss();
+            if (viewModel.getPostData().getValue() != null && comment.getAuthor() != null) {
+                int articleId = viewModel.getPostData().getValue().getId();
+                String link = "https://eqmemory.cn/" + articleId + ".html#comment-" + comment.getId();
+                int authorId = comment.getAuthor().getId();
+                bottomSheetDialog.dismiss();
+                ReportDialogUtils.showReportDialog(getContext(), authorId, link);
+            } else {
+                Toast.makeText(getContext(), "无法获取评论信息", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            }
         });
 
         sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
