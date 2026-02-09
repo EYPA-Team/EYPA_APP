@@ -314,19 +314,23 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 likeCountView.setTextColor(typedValue.data);
             }
 
+            if (post.getFavoriteCount() > 0) {
+                favoriteCountView.setText(formatCount(post.getFavoriteCount()));
+            } else {
+                favoriteCountView.setText("收藏");
+            }
+
             if (post.isFavorited()) {
                 TypedValue typedValue = new TypedValue();
                 itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
                 int themeColor = typedValue.data;
                 favoriteIcon.setColorFilter(themeColor);
                 favoriteCountView.setTextColor(themeColor);
-                favoriteCountView.setText("已收藏");
             } else {
                 favoriteIcon.clearColorFilter();
                 TypedValue typedValue = new TypedValue();
                 itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
                 favoriteCountView.setTextColor(typedValue.data);
-                favoriteCountView.setText("收藏");
             }
 
             if (shareContainer != null) {
@@ -391,6 +395,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         PostActionResponse.Data data = response.body().getData();
                         if (data != null) {
                             post.setFavorited(data.isFavorited());
+                            post.setFavoriteCount(data.getFavoriteCount());
                             bind(post);
                         }
                     } else {

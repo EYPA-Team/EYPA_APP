@@ -30,6 +30,8 @@ public class ContentItem {
     private int viewCount = 0;
     @SerializedName("like_count")
     private int likeCount = 0;
+    @SerializedName("favorite_count")
+    private int favoriteCount = 0;
     @SerializedName("comment_count")
     private int commentCount = 0;
 
@@ -204,6 +206,8 @@ public class ContentItem {
     public void setViewCount(int viewCount) { this.viewCount = viewCount; }
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+    public int getFavoriteCount() { return favoriteCount; }
+    public void setFavoriteCount(int favoriteCount) { this.favoriteCount = favoriteCount; }
     public int getCommentCount() { return commentCount; }
     public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
     public boolean isLiked() { return isLiked; }
