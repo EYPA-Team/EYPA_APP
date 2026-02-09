@@ -8,8 +8,11 @@
     android:paddingBottom="12dp">
 
     <!-- 点赞 -->
-    <LinearLayout style="@style/ActionButtonContainer">
+    <LinearLayout
+        android:id="@+id/action_like_container"
+        style="@style/ActionButtonContainer">
         <ImageView
+            android:id="@+id/action_like_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_action_like"/>
@@ -23,8 +26,11 @@
     </LinearLayout>
 
     <!-- 收藏 -->
-    <LinearLayout style="@style/ActionButtonContainer">
+    <LinearLayout
+        android:id="@+id/action_favorite_container"
+        style="@style/ActionButtonContainer">
         <ImageView
+            android:id="@+id/action_favorite_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_action_favorite"/>

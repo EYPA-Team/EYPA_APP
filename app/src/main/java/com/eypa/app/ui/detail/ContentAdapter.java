@@ -24,7 +24,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
+import com.eypa.app.api.ApiClient;
+import com.eypa.app.api.ContentApiService;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.PostActionRequest;
+import com.eypa.app.model.PostActionResponse;
+import com.eypa.app.ui.home.LoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.eypa.app.ui.detail.components.CategoryTagView;
 import com.eypa.app.ui.detail.components.StatsView;
@@ -43,6 +48,10 @@ import com.eypa.app.model.user.UserProfile;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -254,10 +263,11 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     static class InfoHeaderViewHolder extends RecyclerView.ViewHolder {
-        TextView titleView, dateView, likeCountView;
+        TextView titleView, dateView, likeCountView, favoriteCountView;
         CategoryTagView categoryView, tagsView;
         StatsView statsView;
-        LinearLayout shareContainer;
+        LinearLayout shareContainer, likeContainer, favoriteContainer;
+        ImageView likeIcon, favoriteIcon;
 
         InfoHeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -266,7 +276,15 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             categoryView = itemView.findViewById(R.id.category_container);
             tagsView = itemView.findViewById(R.id.tags_container);
             statsView = itemView.findViewById(R.id.stats_view);
+            
+            likeContainer = itemView.findViewById(R.id.action_like_container);
+            likeIcon = itemView.findViewById(R.id.action_like_icon);
             likeCountView = itemView.findViewById(R.id.action_like_count);
+            
+            favoriteContainer = itemView.findViewById(R.id.action_favorite_container);
+            favoriteIcon = itemView.findViewById(R.id.action_favorite_icon);
+            favoriteCountView = itemView.findViewById(R.id.action_favorite_count);
+            
             shareContainer = itemView.findViewById(R.id.action_share_container);
         }
 
@@ -283,9 +301,108 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 likeCountView.setText("点赞");
             }
 
+            if (post.isLiked()) {
+                TypedValue typedValue = new TypedValue();
+                itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                int themeColor = typedValue.data;
+                likeIcon.setColorFilter(themeColor);
+                likeCountView.setTextColor(themeColor);
+            } else {
+                likeIcon.clearColorFilter();
+                TypedValue typedValue = new TypedValue();
+                itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+                likeCountView.setTextColor(typedValue.data);
+            }
+
+            if (post.isFavorited()) {
+                TypedValue typedValue = new TypedValue();
+                itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                int themeColor = typedValue.data;
+                favoriteIcon.setColorFilter(themeColor);
+                favoriteCountView.setTextColor(themeColor);
+                favoriteCountView.setText("已收藏");
+            } else {
+                favoriteIcon.clearColorFilter();
+                TypedValue typedValue = new TypedValue();
+                itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+                favoriteCountView.setTextColor(typedValue.data);
+                favoriteCountView.setText("收藏");
+            }
+
             if (shareContainer != null) {
                 shareContainer.setOnClickListener(v -> showShareSheet(v.getContext(), post));
             }
+
+            if (likeContainer != null) {
+                likeContainer.setOnClickListener(v -> handleLikeAction(v.getContext(), post));
+            }
+
+            if (favoriteContainer != null) {
+                favoriteContainer.setOnClickListener(v -> handleFavoriteAction(v.getContext(), post));
+            }
+        }
+
+        private void handleLikeAction(Context context, ContentItem post) {
+            if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
+                context.startActivity(new Intent(context, LoginActivity.class));
+                return;
+            }
+
+            String token = UserManager.getInstance(context).getToken();
+            PostActionRequest request = new PostActionRequest(token, post.getId());
+            ContentApiService apiService = ApiClient.getClient().create(ContentApiService.class);
+
+            apiService.likePost(request).enqueue(new Callback<PostActionResponse>() {
+                @Override
+                public void onResponse(Call<PostActionResponse> call, Response<PostActionResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        PostActionResponse.Data data = response.body().getData();
+                        if (data != null) {
+                            post.setLiked(data.isLiked());
+                            post.setLikeCount(data.getLikeCount());
+                            bind(post);
+                        }
+                    } else {
+                        Toast.makeText(context, "操作失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<PostActionResponse> call, Throwable t) {
+                    Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void handleFavoriteAction(Context context, ContentItem post) {
+            if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
+                context.startActivity(new Intent(context, LoginActivity.class));
+                return;
+            }
+
+            String token = UserManager.getInstance(context).getToken();
+            PostActionRequest request = new PostActionRequest(token, post.getId());
+            ContentApiService apiService = ApiClient.getClient().create(ContentApiService.class);
+
+            apiService.favoritePost(request).enqueue(new Callback<PostActionResponse>() {
+                @Override
+                public void onResponse(Call<PostActionResponse> call, Response<PostActionResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        PostActionResponse.Data data = response.body().getData();
+                        if (data != null) {
+                            post.setFavorited(data.isFavorited());
+                            bind(post);
+                        }
+                    } else {
+                        Toast.makeText(context, "操作失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<PostActionResponse> call, Throwable t) {
+                    Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         private void showShareSheet(Context context, ContentItem post) {

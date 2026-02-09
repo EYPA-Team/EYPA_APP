@@ -129,7 +129,9 @@ public class AuthorContentFragment extends Fragment {
             loadingMask.setAlpha(1f);
             tvEmpty.setVisibility(View.GONE);
         } else {
-            if (type != TYPE_FANS) {
+            if (type == TYPE_FANS) {
+                fansAdapter.setLoadingFooterVisible(true);
+            } else {
                 adapter.setLoadingFooterVisible(true);
             }
         }
@@ -143,6 +145,8 @@ public class AuthorContentFragment extends Fragment {
                 public void onResponse(Call<AuthorFansResponse> call, Response<AuthorFansResponse> response) {
                     if (isAdded()) {
                         isLoading = false;
+                        fansAdapter.setLoadingFooterVisible(false);
+                        
                         if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
                             List<FanItem> items = response.body().getData();
                             if (items != null && !items.isEmpty()) {
@@ -173,6 +177,7 @@ public class AuthorContentFragment extends Fragment {
                 public void onFailure(Call<AuthorFansResponse> call, Throwable t) {
                     if (isAdded()) {
                         isLoading = false;
+                        fansAdapter.setLoadingFooterVisible(false);
                         handleError();
                         isFirstLoad = false;
                     }

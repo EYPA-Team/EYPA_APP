@@ -33,6 +33,11 @@ public class ContentItem {
     @SerializedName("comment_count")
     private int commentCount = 0;
 
+    @SerializedName("is_liked")
+    private boolean isLiked;
+    @SerializedName("is_favorited")
+    private boolean isFavorited;
+
     @SerializedName("zib_other_data")
     private ZibOtherData zibOtherData;
 
@@ -201,6 +206,10 @@ public class ContentItem {
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
     public int getCommentCount() { return commentCount; }
     public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
+    public boolean isLiked() { return isLiked; }
+    public void setLiked(boolean liked) { isLiked = liked; }
+    public boolean isFavorited() { return isFavorited; }
+    public void setFavorited(boolean favorited) { isFavorited = favorited; }
     public void setCoverImage(String url) {
         if (this.zibOtherData == null) {
             this.zibOtherData = new ZibOtherData();

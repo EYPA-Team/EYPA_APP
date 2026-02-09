@@ -9,6 +9,8 @@ import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.EditCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
 import com.eypa.app.model.LikeCommentResponse;
+import com.eypa.app.model.PostActionRequest;
+import com.eypa.app.model.PostActionResponse;
 import com.eypa.app.model.PostDetailRequest;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.model.SubmitCommentRequest;
@@ -239,4 +241,20 @@ public interface ContentApiService {
      */
     @POST("eu-json/app/v1/author/following")
     Call<AuthorFansResponse> getAuthorFans(@Body AuthorListRequest request);
+
+    /**
+     * 点赞/取消点赞文章
+     * @param request 点赞请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/post/like")
+    Call<PostActionResponse> likePost(@Body PostActionRequest request);
+
+    /**
+     * 收藏/取消收藏文章
+     * @param request 收藏请求体
+     * @return 响应
+     */
+    @POST("eu-json/app/v1/post/favorite")
+    Call<PostActionResponse> favoritePost(@Body PostActionRequest request);
 }

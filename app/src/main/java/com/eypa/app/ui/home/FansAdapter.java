@@ -33,11 +33,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FansAdapter extends RecyclerView.Adapter<FansAdapter.FanViewHolder> {
+public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_FOOTER = 1;
 
     private List<FanItem> fans = new ArrayList<>();
     private Context context;
     private OnItemClickListener listener;
+    private boolean isLoadingFooterVisible = false;
 
     public interface OnItemClickListener {
         void onItemClick(FanItem fan);
@@ -58,23 +62,53 @@ public class FansAdapter extends RecyclerView.Adapter<FansAdapter.FanViewHolder>
         notifyItemRangeInserted(start, newFans.size());
     }
 
+    public void setLoadingFooterVisible(boolean visible) {
+        if (isLoadingFooterVisible == visible) return;
+        isLoadingFooterVisible = visible;
+        if (visible) {
+            notifyItemInserted(fans.size());
+        } else {
+            notifyItemRemoved(fans.size());
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoadingFooterVisible && position == fans.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_ITEM;
+    }
+
     @NonNull
     @Override
-    public FanViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_loading_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
         View view = LayoutInflater.from(context).inflate(R.layout.item_fan, parent, false);
         return new FanViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FanViewHolder holder, int position) {
-        FanItem fan = fans.get(position);
-        holder.bind(fan);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof FanViewHolder) {
+            FanItem fan = fans.get(position);
+            ((FanViewHolder) holder).bind(fan);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return fans.size();
+        return fans.size() + (isLoadingFooterVisible ? 1 : 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        public FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     class FanViewHolder extends RecyclerView.ViewHolder {
