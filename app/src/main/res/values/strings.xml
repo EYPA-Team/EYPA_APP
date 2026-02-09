@@ -27,7 +27,7 @@
     <string name="profile_history">历史</string>
     <string name="profile_settings">设置</string>
 
-    <!-- 登录/注册/找回密码页面 -->
+    <!-- 登录/注册/重置密码页面 -->
     <string name="login">登录</string>
     <string name="register">注册</string>
     <string name="reset_password">重置密码</string>
