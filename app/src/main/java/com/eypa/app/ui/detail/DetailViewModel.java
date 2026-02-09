@@ -337,7 +337,7 @@ public class DetailViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<LikeCommentResponse> call, Response<LikeCommentResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
-                    removeCommentFromList(comment.getId());
+                    removeCommentFromList(comment);
                 }
             }
 
@@ -435,14 +435,16 @@ public class DetailViewModel extends AndroidViewModel {
         }
     }
 
-    private void removeCommentFromList(int commentId) {
+    private void removeCommentFromList(Comment comment) {
         List<CommentBlock> blocks = commentBlocks.getValue();
         if (blocks != null) {
-            commentItemRemoved.setValue(commentId);
+            commentItemRemoved.setValue(comment.getId());
+            
+            int countToRemove = 1 + calculateTotalCommentCount(comment.getChildren());
             
             Integer currentCount = totalCommentCount.getValue();
-            if (currentCount != null && currentCount > 0) {
-                totalCommentCount.setValue(currentCount - 1);
+            if (currentCount != null && currentCount >= countToRemove) {
+                totalCommentCount.setValue(currentCount - countToRemove);
             }
         }
     }
