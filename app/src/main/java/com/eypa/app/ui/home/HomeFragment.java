@@ -398,19 +398,27 @@ public class HomeFragment extends Fragment {
             progressBar.setAlpha(1f);
             errorLayout.setVisibility(View.GONE);
         } else if (currentPage > 1) {
-            adapter.setLoadingFooterVisible(true);
+            // 安全地显示加载条
+            recyclerView.post(() -> {
+                if (adapter != null) adapter.setLoadingFooterVisible(true);
+            });
         }
 
+        // 【核心修复】调用新接口 (5个参数)
+        // 删除了 "_fields..." 和 "wp:featuredmedia" 这两个参数
         ApiClient.getApiService().getContentItems(
-                currentPage, 10, "id,title,date,categories,jetpack_featured_media_url,_embedded,zib_other_data,view_count,like_count,author_info",
-                "rand", currentSeed, "wp:featuredmedia", currentCategoryId
+                currentPage,
+                10,
+                "rand",
+                currentSeed,
+                currentCategoryId
         ).enqueue(new Callback<List<ContentItem>>() {
             @Override
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
                     swipeRefreshLayout.setRefreshing(false);
                     adapter.setLoadingFooterVisible(false);
-                    
+
                     if (response.isSuccessful() && response.body() != null) {
                         retryCount = 0;
                         postList.addAll(response.body());
@@ -418,7 +426,7 @@ public class HomeFragment extends Fragment {
                                 .filter(p -> p.getCategories() != null)
                                 .flatMap(p -> p.getCategories().stream())
                                 .collect(Collectors.toSet());
-                        
+
                         if (isFirstLoad) {
                             isFirstLoad = false;
                             progressBar.animate()
@@ -432,7 +440,7 @@ public class HomeFragment extends Fragment {
                                     .setStartDelay(300)
                                     .setDuration(300)
                                     .start();
-                            
+
                             adapter.notifyDataSetChanged();
                             layoutManager.invalidateSpanAssignments();
                             fetchCategories(allCategoryIds);
