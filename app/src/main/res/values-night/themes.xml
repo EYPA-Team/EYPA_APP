@@ -55,7 +55,7 @@
     <style name="Widget.App.SearchView" parent="Widget.AppCompat.SearchView">
     </style>
 
-    <color name="dialog_divider_bg">#121212</color>
+    <color name="dialog_divider_bg">#1E1E1E</color>
     <color name="dialog_handle_bg">#424242</color>
 
 </resources>
