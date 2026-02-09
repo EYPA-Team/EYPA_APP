@@ -41,8 +41,4 @@
     <string name="history">历史记录</string>
     <string name="favorites">我的收藏</string>
     <string name="medals">获得的徽章</string>
-    
-    <!-- 卸载信息 (HyperOS/MIUI独有) -->
-    <string name="uninstall_title">真的要卸载EYPA吗</string>
-    <string name="uninstall_content">如果你卸载了该APP，你就卸载了该APP\nTAT</string>
 </resources>
