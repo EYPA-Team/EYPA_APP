@@ -153,6 +153,17 @@
             android:textSize="12sp"
             android:fontFamily="sans-serif-medium"/>
 
+        <ImageButton
+            android:id="@+id/btn_playlist"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_menu"
+            android:tint="@android:color/white"
+            android:scaleType="fitCenter"
+            android:contentDescription="播放列表"/>
+
     </LinearLayout>
 
 </FrameLayout>

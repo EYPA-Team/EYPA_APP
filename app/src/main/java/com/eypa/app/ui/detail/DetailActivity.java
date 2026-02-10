@@ -110,6 +110,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private SeekBar musicSeekBar;
     private TextView musicCurrentTime;
     private TextView musicTotalTime;
+    private ImageButton btnPlaylist;
     private boolean isMusicContent = false;
     private int currentMusicIndex = 0;
     private Handler musicProgressHandler = new Handler(Looper.getMainLooper());
@@ -292,6 +293,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         musicSeekBar = findViewById(R.id.music_seek_bar);
         musicCurrentTime = findViewById(R.id.music_current_time);
         musicTotalTime = findViewById(R.id.music_total_time);
+        btnPlaylist = findViewById(R.id.btn_playlist);
         
         commentInputContainer = findViewById(R.id.comment_input_container);
         editComment = findViewById(R.id.edit_comment);
@@ -634,6 +636,8 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             }
         });
 
+        btnPlaylist.setOnClickListener(v -> showPlaylistDialog());
+
         musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -657,6 +661,125 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         });
         
         updateMusicInfo(currentMusicIndex);
+    }
+
+    private void showPlaylistDialog() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(0, 32, 0, 0);
+
+        TypedValue typedValueBg = new TypedValue();
+        getTheme().resolveAttribute(R.attr.cardBackgroundColor, typedValueBg, true);
+        if (typedValueBg.resourceId != 0) {
+            layout.setBackgroundResource(typedValueBg.resourceId);
+        } else {
+            layout.setBackgroundColor(typedValueBg.data);
+        }
+        
+        TextView title = new TextView(this);
+        title.setText("播放列表 (" + currentMusicList.size() + ")");
+        title.setTextSize(18);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setPadding(48, 0, 48, 32);
+        
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        title.setTextColor(typedValue.data);
+        
+        layout.addView(title);
+        
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
+        recyclerView.setAdapter(new MusicPlaylistAdapter(bottomSheetDialog));
+        layout.addView(recyclerView);
+        
+        bottomSheetDialog.setContentView(layout);
+        bottomSheetDialog.show();
+    }
+
+    private class MusicPlaylistAdapter extends RecyclerView.Adapter<MusicPlaylistAdapter.ViewHolder> {
+        private BottomSheetDialog dialog;
+
+        public MusicPlaylistAdapter(BottomSheetDialog dialog) {
+            this.dialog = dialog;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            android.widget.LinearLayout itemLayout = new android.widget.LinearLayout(parent.getContext());
+            itemLayout.setOrientation(android.widget.LinearLayout.VERTICAL);
+            itemLayout.setPadding(48, 24, 48, 24);
+            itemLayout.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            
+            TypedValue outValue = new TypedValue();
+            parent.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            itemLayout.setBackgroundResource(outValue.resourceId);
+            
+            TextView tvTitle = new TextView(parent.getContext());
+            tvTitle.setTextSize(16);
+            
+            TypedValue textColor = new TypedValue();
+            parent.getContext().getTheme().resolveAttribute(android.R.attr.textColorPrimary, textColor, true);
+            tvTitle.setTextColor(textColor.data);
+            itemLayout.addView(tvTitle);
+            
+            TextView tvArtist = new TextView(parent.getContext());
+            tvArtist.setTextSize(12);
+            
+            TypedValue textSecondary = new TypedValue();
+            parent.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, textSecondary, true);
+            tvArtist.setTextColor(textSecondary.data);
+            
+            tvArtist.setPadding(0, 8, 0, 0);
+            itemLayout.addView(tvArtist);
+            
+            return new ViewHolder(itemLayout, tvTitle, tvArtist);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            ContentItem.FeaturedMusic music = currentMusicList.get(position);
+            holder.tvTitle.setText(music.getName());
+            holder.tvArtist.setText(music.getArtist() != null ? music.getArtist() : "未知");
+            
+            if (position == currentMusicIndex) {
+                TypedValue colorPrimary = new TypedValue();
+                holder.itemView.getContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, colorPrimary, true);
+                holder.tvTitle.setTextColor(colorPrimary.data);
+            } else {
+                TypedValue textColor = new TypedValue();
+                holder.itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorPrimary, textColor, true);
+                holder.tvTitle.setTextColor(textColor.data);
+            }
+            
+            holder.itemView.setOnClickListener(v -> {
+                if (currentMusicIndex != position) {
+                    currentMusicIndex = position;
+                    initializeMusicPlayer(currentMusicIndex, true);
+                    notifyDataSetChanged();
+                    dialog.dismiss();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return currentMusicList.size();
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvTitle;
+            TextView tvArtist;
+
+            ViewHolder(View itemView, TextView tvTitle, TextView tvArtist) {
+                super(itemView);
+                this.tvTitle = tvTitle;
+                this.tvArtist = tvArtist;
+            }
+        }
     }
 
     private void updateMusicInfo(int index) {
