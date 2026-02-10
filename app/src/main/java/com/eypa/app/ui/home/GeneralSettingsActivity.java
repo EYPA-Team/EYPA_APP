@@ -58,6 +58,10 @@ public class GeneralSettingsActivity extends AppCompatActivity {
             sharedPreferences.edit().putBoolean("ShowUpdateDialog", isChecked).apply();
         });
 
+        findViewById(R.id.layout_update_dialog).setOnClickListener(v -> {
+            switchUpdateDialog.toggle();
+        });
+
         SwitchCompat switchDarkModeFollowSystem = findViewById(R.id.switch_dark_mode_follow_system);
         boolean isFollowSystem = sharedPreferences.getBoolean("DarkModeFollowSystem", true);
         switchDarkModeFollowSystem.setChecked(isFollowSystem);
@@ -66,6 +70,10 @@ public class GeneralSettingsActivity extends AppCompatActivity {
             sharedPreferences.edit().putBoolean("DarkModeFollowSystem", isChecked).apply();
             ThemeUtils.applyTheme(this);
             getDelegate().applyDayNight();
+        });
+
+        findViewById(R.id.layout_dark_mode).setOnClickListener(v -> {
+            switchDarkModeFollowSystem.toggle();
         });
 
         findViewById(R.id.layout_theme_settings).setOnClickListener(v -> {
