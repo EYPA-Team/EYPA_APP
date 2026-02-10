@@ -365,13 +365,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_content), (v, insets) -> {
             int topInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-            TypedValue tv = new TypedValue();
-            int actionBarHeight = getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)
-                    ? TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics()) : 0;
-            ViewGroup.LayoutParams params = toolbar.getLayoutParams();
-            params.height = actionBarHeight + topInset;
-            toolbar.setLayoutParams(params);
-            toolbar.setPadding(0, topInset, 0, 0);
+            appBarLayout.setPadding(0, topInset, 0, 0);
             return WindowInsetsCompat.CONSUMED;
         });
         

@@ -22,7 +22,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:layout_marginTop="30dp"
         android:padding="16dp">
 
         <TextView
