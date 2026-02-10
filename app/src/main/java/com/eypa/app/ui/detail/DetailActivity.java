@@ -1244,17 +1244,28 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     protected void onStart() {
         super.onStart();
         if (Build.VERSION.SDK_INT > 23) {
-            if (playerView.getVisibility() == View.VISIBLE && player == null && currentVideoUrl != null) {
-                initializePlayer(currentVideoUrl, playWhenReady);
-            }
+            restorePlayer();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if ((Build.VERSION.SDK_INT <= 23 || player == null) && playerView.getVisibility() == View.VISIBLE && currentVideoUrl != null) {
-            initializePlayer(currentVideoUrl, playWhenReady);
+        if (Build.VERSION.SDK_INT <= 23 || player == null) {
+            restorePlayer();
+        }
+    }
+
+    private void restorePlayer() {
+        if (player == null) {
+            if (isMusicContent && !currentMusicList.isEmpty()) {
+                initializeMusicPlayer(currentMusicIndex, playWhenReady);
+                if (player != null && playbackPosition > 0) {
+                    player.seekTo(playbackPosition);
+                }
+            } else if (playerView.getVisibility() == View.VISIBLE && currentVideoUrl != null) {
+                initializePlayer(currentVideoUrl, playWhenReady);
+            }
         }
     }
 
