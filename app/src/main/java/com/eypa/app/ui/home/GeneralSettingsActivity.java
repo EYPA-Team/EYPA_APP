@@ -82,8 +82,11 @@ public class GeneralSettingsActivity extends AppCompatActivity {
         });
 
         View logoutLayout = findViewById(R.id.layout_logout);
+        View logoutDivider = findViewById(R.id.divider_logout);
         UserManager.getInstance(this).isLoggedIn().observe(this, isLoggedIn -> {
-            logoutLayout.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+            int visibility = isLoggedIn ? View.VISIBLE : View.GONE;
+            logoutLayout.setVisibility(visibility);
+            logoutDivider.setVisibility(visibility);
         });
 
         logoutLayout.setOnClickListener(v -> showLogoutConfirmation());
