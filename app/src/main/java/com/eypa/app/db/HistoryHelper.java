@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class HistoryHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "eypa_history.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public static final String TABLE_HISTORY = "history";
     public static final String COLUMN_ID = "_id";
@@ -17,17 +17,20 @@ public class HistoryHelper extends SQLiteOpenHelper {
     public static final String COLUMN_LIKE_COUNT = "like_count";
     public static final String COLUMN_PUBLISH_DATE = "publish_date";
     public static final String COLUMN_TIMESTAMP = "timestamp";
+    public static final String COLUMN_TYPE = "type";
 
     private static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_HISTORY + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            COLUMN_POST_ID + " INTEGER UNIQUE, " +
+            COLUMN_POST_ID + " INTEGER, " +
             COLUMN_TITLE + " TEXT, " +
             COLUMN_IMAGE_URL + " TEXT, " +
             COLUMN_VIEW_COUNT + " INTEGER, " +
             COLUMN_LIKE_COUNT + " INTEGER, " +
             COLUMN_PUBLISH_DATE + " TEXT, " +
-            COLUMN_TIMESTAMP + " INTEGER" +
+            COLUMN_TIMESTAMP + " INTEGER, " +
+            COLUMN_TYPE + " INTEGER DEFAULT 0, " +
+            "UNIQUE(" + COLUMN_POST_ID + ", " + COLUMN_TYPE + ")" +
             ");";
 
     public HistoryHelper(Context context) {

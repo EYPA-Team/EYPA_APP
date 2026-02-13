@@ -11,23 +11,16 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.eypa.app.R;
 import com.eypa.app.db.HistoryManager;
-import com.eypa.app.model.ContentItem;
 import com.eypa.app.utils.ThemeUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 public class HistoryActivity extends AppCompatActivity {
-
-    private HistoryAdapter adapter;
-    private List<ContentItem> historyList;
-    private TextView emptyView;
-    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,25 +39,29 @@ public class HistoryActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("历史记录");
         }
 
-        recyclerView = findViewById(R.id.recycler_view);
-        emptyView = findViewById(R.id.tv_empty);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        ViewPager2 viewPager = findViewById(R.id.view_pager);
 
-        historyList = HistoryManager.getInstance(this).getHistory();
-        adapter = new HistoryAdapter(historyList);
-        recyclerView.setAdapter(adapter);
+        viewPager.setAdapter(new FragmentStateAdapter(this) {
+            @androidx.annotation.NonNull
+            @Override
+            public androidx.fragment.app.Fragment createFragment(int position) {
+                return HistoryFragment.newInstance(position);
+            }
 
-        updateEmptyState();
-    }
+            @Override
+            public int getItemCount() {
+                return 2;
+            }
+        });
 
-    private void updateEmptyState() {
-        if (historyList.isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
-        }
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            if (position == 0) {
+                tab.setText("文章");
+            } else {
+                tab.setText("帖子");
+            }
+        }).attach();
     }
 
     @Override
@@ -101,9 +98,7 @@ public class HistoryActivity extends AppCompatActivity {
                 .setMessage("确定要清空所有历史记录吗？")
                 .setPositiveButton("确定", (d, which) -> {
                     HistoryManager.getInstance(this).clearHistory();
-                    historyList.clear();
-                    adapter.notifyDataSetChanged();
-                    updateEmptyState();
+                    recreate();
                 })
                 .setNegativeButton("取消", null)
                 .show();

@@ -40,6 +40,8 @@ public class ContentItem {
     @SerializedName("is_favorited")
     private boolean isFavorited;
 
+    private int type = 0;
+
     @SerializedName("zib_other_data")
     private ZibOtherData zibOtherData;
 
@@ -239,6 +241,10 @@ public class ContentItem {
     public void setLiked(boolean liked) { isLiked = liked; }
     public boolean isFavorited() { return isFavorited; }
     public void setFavorited(boolean favorited) { isFavorited = favorited; }
+    
+    public int getType() { return type; }
+    public void setType(int type) { this.type = type; }
+
     public void setCoverImage(String url) {
         if (this.zibOtherData == null) {
             this.zibOtherData = new ZibOtherData();

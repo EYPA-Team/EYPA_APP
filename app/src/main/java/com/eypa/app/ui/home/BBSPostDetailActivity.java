@@ -22,6 +22,8 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
+import com.eypa.app.db.HistoryManager;
+import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.bbs.BBSPost;
 import com.eypa.app.model.bbs.BBSPostDetailRequest;
 import com.eypa.app.model.bbs.BBSPostDetailResponse;
@@ -163,6 +165,20 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private void displayPost(BBSPost post) {
         if (post == null) return;
         mCurrentPost = post;
+
+        ContentItem historyItem = new ContentItem();
+        historyItem.setId(post.getId());
+        historyItem.setTitle(post.getTitle());
+        historyItem.setDate(post.getDate());
+        if (post.getStats() != null) {
+            historyItem.setViewCount(post.getStats().views);
+            historyItem.setLikeCount(post.getStats().likes);
+        }
+        if (post.getMedia() != null && post.getMedia().coverImage != null) {
+            historyItem.setCoverImage(post.getMedia().coverImage);
+        }
+        historyItem.setType(1);
+        HistoryManager.getInstance(this).addHistory(historyItem);
 
         tvTitle.setText(post.getTitle());
 
@@ -419,6 +435,10 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                     urlDrawable.setBounds(0, 0, (int)(width * scale), (int)(height * scale));
                 } else {
                     int tvWidth = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
+                    if (tvWidth <= 0) {
+                        tvWidth = textView.getResources().getDisplayMetrics().widthPixels - textView.getPaddingLeft() - textView.getPaddingRight();
+                    }
+                    
                     if (tvWidth > 0 && width > tvWidth) {
                         float scale = (float) tvWidth / width;
                         resource.setBounds(0, 0, tvWidth, (int)(height * scale));

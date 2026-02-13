@@ -35,15 +35,28 @@ public class HistoryManager {
         values.put(HistoryHelper.COLUMN_LIKE_COUNT, item.getLikeCount());
         values.put(HistoryHelper.COLUMN_PUBLISH_DATE, item.getDate());
         values.put(HistoryHelper.COLUMN_TIMESTAMP, System.currentTimeMillis());
+        values.put(HistoryHelper.COLUMN_TYPE, item.getType());
 
         db.insertWithOnConflict(HistoryHelper.TABLE_HISTORY, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
     public List<ContentItem> getHistory() {
+        return getHistory(-1);
+    }
+
+    public List<ContentItem> getHistory(int type) {
         List<ContentItem> historyList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(HistoryHelper.TABLE_HISTORY, null, null, null, null, null, HistoryHelper.COLUMN_TIMESTAMP + " DESC");
+        
+        String selection = null;
+        String[] selectionArgs = null;
+        if (type != -1) {
+            selection = HistoryHelper.COLUMN_TYPE + "=?";
+            selectionArgs = new String[]{String.valueOf(type)};
+        }
+
+        Cursor cursor = db.query(HistoryHelper.TABLE_HISTORY, null, selection, selectionArgs, null, null, HistoryHelper.COLUMN_TIMESTAMP + " DESC");
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -54,6 +67,8 @@ public class HistoryManager {
                 item.setViewCount(cursor.getInt(cursor.getColumnIndexOrThrow(HistoryHelper.COLUMN_VIEW_COUNT)));
                 item.setLikeCount(cursor.getInt(cursor.getColumnIndexOrThrow(HistoryHelper.COLUMN_LIKE_COUNT)));
                 item.setDate(cursor.getString(cursor.getColumnIndexOrThrow(HistoryHelper.COLUMN_PUBLISH_DATE)));
+                int itemType = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryHelper.COLUMN_TYPE));
+                item.setType(itemType);
                 
                 historyList.add(item);
             } while (cursor.moveToNext());
