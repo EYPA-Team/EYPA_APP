@@ -51,6 +51,8 @@ public class BBSPost {
         public String avatar;
         public Level level;
         public Vip vip;
+        @SerializedName("is_following")
+        public boolean isFollowing;
 
         public static class Level {
             public int index;

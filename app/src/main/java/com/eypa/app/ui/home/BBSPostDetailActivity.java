@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,10 @@ import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.bbs.BBSPost;
 import com.eypa.app.model.bbs.BBSPostDetailRequest;
 import com.eypa.app.model.bbs.BBSPostDetailResponse;
+import com.eypa.app.model.user.AuthorInfoRequest;
+import com.eypa.app.model.user.AuthorInfoResponse;
+import com.eypa.app.model.user.FollowRequest;
+import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.ui.detail.ImageViewerFragment;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.ThemeUtils;
@@ -73,6 +78,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private View loadingView;
     private View layoutLoginRequired;
     private View btnLogin;
+    private Button btnFollow;
     private BBSPost mCurrentPost;
 
     @Override
@@ -123,6 +129,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         loadingView = findViewById(R.id.loading_view);
         layoutLoginRequired = findViewById(R.id.layout_login_required);
         btnLogin = findViewById(R.id.btn_login);
+        btnFollow = findViewById(R.id.btn_follow);
     }
 
     private void loadDetail() {
@@ -239,6 +246,45 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             };
             ivAvatar.setOnClickListener(profileListener);
             tvAuthorName.setOnClickListener(profileListener);
+
+            boolean isMe = false;
+            UserProfile userProfile = UserManager.getInstance(this).getUserProfile().getValue();
+            if (userProfile != null && userProfile.getId() != null) {
+                try {
+                    int currentUserId = Integer.parseInt(userProfile.getId());
+                    int authorId = Integer.parseInt(post.getAuthorInfo().id);
+                    if (currentUserId == authorId) {
+                        isMe = true;
+                    }
+                } catch (NumberFormatException e) {
+                    // 不做处理
+                }
+            }
+
+            if (isMe) {
+                btnFollow.setVisibility(View.GONE);
+            } else {
+                btnFollow.setVisibility(View.VISIBLE);
+                updateFollowButtonState(post.getAuthorInfo().isFollowing);
+                
+                if (Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                    try {
+                        checkFollowStatus(Integer.parseInt(post.getAuthorInfo().id));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                btnFollow.setOnClickListener(v -> {
+                    if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                        startActivity(new android.content.Intent(this, LoginActivity.class));
+                        return;
+                    }
+                    followUser(post);
+                });
+            }
+        } else {
+            btnFollow.setVisibility(View.GONE);
         }
 
         if (post.getPlate() != null) {
@@ -271,6 +317,77 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateFollowButtonState(boolean isFollowing) {
+        if (isFollowing) {
+            btnFollow.setText("已关注");
+            btnFollow.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        } else {
+            btnFollow.setText("关注");
+            TypedValue typedValue = new TypedValue();
+            getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+            btnFollow.setTextColor(typedValue.data);
+        }
+    }
+
+    private void checkFollowStatus(int authorId) {
+        String token = UserManager.getInstance(this).getToken();
+        if (token == null) return;
+
+        AuthorInfoRequest request = new AuthorInfoRequest(authorId, token);
+        ApiClient.getApiService().getAuthorInfo(request).enqueue(new Callback<AuthorInfoResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<AuthorInfoResponse> call, @NonNull Response<AuthorInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    if (response.body().getData() != null && response.body().getData().getInteraction() != null) {
+                        boolean isFollowing = response.body().getData().getInteraction().isFollowing();
+                        if (mCurrentPost != null && mCurrentPost.getAuthorInfo() != null) {
+                            mCurrentPost.getAuthorInfo().isFollowing = isFollowing;
+                            updateFollowButtonState(isFollowing);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<AuthorInfoResponse> call, @NonNull Throwable t) {
+                // 不做处理
+            }
+        });
+    }
+
+    private void followUser(BBSPost post) {
+        if (post.getAuthorInfo() == null) return;
+
+        try {
+            int authorId = Integer.parseInt(post.getAuthorInfo().id);
+            String token = UserManager.getInstance(this).getToken();
+
+            FollowRequest request = new FollowRequest(token, authorId);
+            ApiClient.getApiService().followUser(request).enqueue(new Callback<FollowResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<FollowResponse> call, @NonNull Response<FollowResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        if (response.body().getCode() == 200) {
+                            boolean newStatus = !post.getAuthorInfo().isFollowing;
+                            post.getAuthorInfo().isFollowing = newStatus;
+                            updateFollowButtonState(newStatus);
+                        }
+                    } else {
+                        Toast.makeText(BBSPostDetailActivity.this, "操作失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<FollowResponse> call, @NonNull Throwable t) {
+                    Toast.makeText(BBSPostDetailActivity.this, "网络错误", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showActionSheet() {
@@ -360,6 +477,8 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             ssb = new SpannableStringBuilder(spanned);
         }
 
+        Linkify.addLinks(ssb, Linkify.WEB_URLS);
+
         ImageSpan[] imageSpans = ssb.getSpans(0, ssb.length(), ImageSpan.class);
         for (ImageSpan span : imageSpans) {
             int start = ssb.getSpanStart(span);
@@ -382,10 +501,9 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             }
         }
 
-        Linkify.addLinks(ssb, Linkify.WEB_URLS);
-
         textView.setText(ssb);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
+        textView.setClickable(true);
     }
 
     private String processCustomSmilies(String input) {
@@ -415,9 +533,11 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
             TextView textView = container.get();
             if (textView != null) {
+                DrawableTarget target = new DrawableTarget(urlDrawable, textView, source);
+                urlDrawable.setDrawableTarget(target);
                 Glide.with(textView.getContext())
                         .load(source)
-                        .into(new DrawableTarget(urlDrawable, textView, source));
+                        .into(target);
             }
 
             return urlDrawable;
@@ -497,6 +617,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
     private static class UrlDrawable extends BitmapDrawable {
         private Drawable drawable;
+        private Object drawableTarget;
 
         @SuppressWarnings("deprecation")
         public UrlDrawable() {
@@ -505,6 +626,10 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
         public void setDrawable(Drawable drawable) {
             this.drawable = drawable;
+        }
+
+        public void setDrawableTarget(Object target) {
+            this.drawableTarget = target;
         }
 
         @Override

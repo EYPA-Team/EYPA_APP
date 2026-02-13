@@ -38,7 +38,7 @@
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                tools:text="Author Name" />
+                tools:text="发布者" />
 
             <TextView
                 android:id="@+id/tv_level"
@@ -69,7 +69,19 @@
                 android:paddingVertical="2dp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="10sp"
-                tools:text="Plate Name" />
+                tools:text="板块" />
+
+            <Button
+                android:id="@+id/btn_follow"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackground"
+                android:text="关注"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <TextView
@@ -82,7 +94,7 @@
             android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             android:textStyle="bold"
-            tools:text="Post Title Goes Here" />
+            tools:text="标题" />
 
         <ImageView
             android:id="@+id/iv_cover"
@@ -108,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp"
-                tools:text="2023-01-01" />
+                tools:text="XXXX" />
 
             <View
                 android:layout_width="0dp"

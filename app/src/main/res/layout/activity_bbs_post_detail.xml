@@ -62,7 +62,7 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:layout_marginEnd="8dp"
-                    tools:text="Post Title" />
+                    tools:text="标题" />
 
                 <TextView
                     android:id="@+id/tv_plate"
@@ -76,7 +76,7 @@
                     android:paddingBottom="2dp"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
-                    tools:text="Plate Name" />
+                    tools:text="板块" />
 
             </com.google.android.flexbox.FlexboxLayout>
 
@@ -95,9 +95,10 @@
                     tools:ignore="ContentDescription" />
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
 
                     <TextView
@@ -107,8 +108,22 @@
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        tools:text="Author Name" />
+                        tools:text="作者" />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_follow"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:text="关注"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
             </LinearLayout>
 
@@ -126,7 +141,7 @@
                 android:lineSpacingExtra="4dp"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="16sp"
-                tools:text="Post Content..." />
+                tools:text="内容" />
 
             <LinearLayout
                 android:id="@+id/layout_login_required"
