@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:background="@drawable/bg_tag"
+                android:backgroundTint="?attr/colorPrimary"
                 android:paddingHorizontal="4dp"
                 android:paddingVertical="1dp"
                 android:textColor="@android:color/white"
@@ -64,10 +65,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tag"
-                android:backgroundTint="?attr/colorPrimary"
                 android:paddingHorizontal="6dp"
                 android:paddingVertical="2dp"
-                android:textColor="@android:color/white"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="10sp"
                 tools:text="Plate Name" />
         </LinearLayout>
