@@ -176,9 +176,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             if (post.getContent() != null && post.getContent().rendered != null) {
                 setHtmlText(tvContent, post.getContent().rendered);
                 
-                TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-                tvContent.setLinkTextColor(typedValue.data);
+                tvContent.setLinkTextColor(ContextCompat.getColor(this, R.color.content_link_color));
             }
         }
 
