@@ -69,7 +69,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     
     private int postId;
     private TextView tvTitle, tvContent, tvAuthorName, tvPlate;
-    private ImageView ivAvatar;
+    private ImageView ivAvatar, ivCover;
     private View loadingView;
     private View layoutLoginRequired;
     private View btnLogin;
@@ -119,6 +119,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         tvAuthorName = findViewById(R.id.tv_author_name);
         tvPlate = findViewById(R.id.tv_plate);
         ivAvatar = findViewById(R.id.iv_avatar);
+        ivCover = findViewById(R.id.iv_cover);
         loadingView = findViewById(R.id.loading_view);
         layoutLoginRequired = findViewById(R.id.layout_login_required);
         btnLogin = findViewById(R.id.btn_login);
@@ -179,6 +180,20 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         }
         historyItem.setType(1);
         HistoryManager.getInstance(this).addHistory(historyItem);
+
+        if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
+            ivCover.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(post.getMedia().coverImage)
+                    .into(ivCover);
+            
+            ivCover.setOnClickListener(v -> {
+                ImageViewerFragment.newInstance(post.getMedia().coverImage)
+                        .show(getSupportFragmentManager(), "image_viewer");
+            });
+        } else {
+            ivCover.setVisibility(View.GONE);
+        }
 
         tvTitle.setText(post.getTitle());
 
