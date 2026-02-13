@@ -150,7 +150,11 @@ public class TagContentActivity extends AppCompatActivity {
                         currentPage++;
 
                         if (currentPage == 2) {
-                            progressBar.setVisibility(View.GONE);
+                            progressBar.animate()
+                                    .alpha(0f)
+                                    .setDuration(200)
+                                    .withEndAction(() -> progressBar.setVisibility(View.GONE))
+                                    .start();
 
                             recyclerView.animate()
                                     .alpha(1f)

@@ -521,6 +521,7 @@ public class HomeFragment extends Fragment {
         searchRecyclerView.setVisibility(View.VISIBLE);
 
         isSearching = true;
+        searchProgressBar.setAlpha(1f);
         searchProgressBar.setVisibility(View.VISIBLE);
 
         searchRecyclerView.setAlpha(0f);
@@ -533,12 +534,18 @@ public class HomeFragment extends Fragment {
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
                     isSearching = false;
-                    searchProgressBar.setVisibility(View.GONE);
                     if (response.isSuccessful() && response.body() != null) {
                         List<ContentItem> items = response.body();
                         if (items.isEmpty()) {
+                            searchProgressBar.setVisibility(View.GONE);
                             if (searchPage == 1) searchEmptyView.setVisibility(View.VISIBLE);
                         } else {
+                            searchProgressBar.animate()
+                                    .alpha(0f)
+                                    .setDuration(200)
+                                    .withEndAction(() -> searchProgressBar.setVisibility(View.GONE))
+                                    .start();
+
                             searchResults.addAll(items);
                             searchAdapter.notifyDataSetChanged();
                             searchRecyclerView.animate()
@@ -548,6 +555,7 @@ public class HomeFragment extends Fragment {
                             fetchCategoriesForSearch(items);
                         }
                     } else {
+                        searchProgressBar.setVisibility(View.GONE);
                         Toast.makeText(requireContext(), "搜索失败", Toast.LENGTH_SHORT).show();
                     }
                 }
