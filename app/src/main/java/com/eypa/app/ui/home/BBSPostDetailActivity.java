@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.widget.NestedScrollView;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
@@ -73,8 +74,9 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     public static final String EXTRA_POST_ID = "extra_post_id";
     
     private int postId;
-    private TextView tvTitle, tvContent, tvAuthorName, tvPlate;
+    private TextView tvTitle, tvContent, tvAuthorName, tvPlate, tvToolbarTitle;
     private ImageView ivAvatar, ivCover;
+    private NestedScrollView nsvContent;
     private View loadingView;
     private View layoutLoginRequired;
     private View btnLogin;
@@ -121,15 +123,33 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         }
 
         tvTitle = findViewById(R.id.tv_title);
+        tvToolbarTitle = findViewById(R.id.tv_toolbar_title);
         tvContent = findViewById(R.id.tv_content);
         tvAuthorName = findViewById(R.id.tv_author_name);
         tvPlate = findViewById(R.id.tv_plate);
         ivAvatar = findViewById(R.id.iv_avatar);
         ivCover = findViewById(R.id.iv_cover);
+        nsvContent = findViewById(R.id.nsv_content);
         loadingView = findViewById(R.id.loading_view);
         layoutLoginRequired = findViewById(R.id.layout_login_required);
         btnLogin = findViewById(R.id.btn_login);
         btnFollow = findViewById(R.id.btn_follow);
+
+        if (nsvContent != null) {
+            nsvContent.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                int threshold = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
+                
+                if (scrollY > threshold) {
+                    if (tvToolbarTitle.getAlpha() == 0f) {
+                        tvToolbarTitle.animate().alpha(1f).setDuration(200).start();
+                    }
+                } else {
+                    if (tvToolbarTitle.getAlpha() == 1f) {
+                        tvToolbarTitle.animate().alpha(0f).setDuration(200).start();
+                    }
+                }
+            });
+        }
     }
 
     private void loadDetail() {
@@ -203,6 +223,9 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         }
 
         tvTitle.setText(post.getTitle());
+        if (tvToolbarTitle != null) {
+            tvToolbarTitle.setText(post.getTitle());
+        }
 
         boolean isProtected = false;
         if (post.getContent() != null && post.getContent().isProtected) {
