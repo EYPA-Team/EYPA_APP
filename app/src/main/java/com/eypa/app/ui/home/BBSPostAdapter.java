@@ -108,12 +108,8 @@ public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             itemHolder.tvReplies.setText(String.valueOf(post.getStats().replies));
         }
 
-        if (post.getDate() != null) {
-            String date = post.getDate();
-            if (date.contains(" ")) {
-                date = date.split(" ")[0];
-            }
-            itemHolder.tvDate.setText(date);
+        if (post.getDateHuman() != null && !post.getDateHuman().isEmpty()) {
+            itemHolder.tvDate.setText(post.getDateHuman());
         }
 
         itemHolder.itemView.setOnClickListener(v -> {

@@ -8,6 +8,8 @@ public class BBSPost {
     private Title title;
     private Content content;
     private String date;
+    @SerializedName("date_human")
+    private String dateHuman;
     private String link;
     @SerializedName("author_info")
     private AuthorInfo authorInfo;
@@ -23,6 +25,7 @@ public class BBSPost {
     public String getTitle() { return title != null ? title.rendered : ""; }
     public Content getContent() { return content; }
     public String getDate() { return date; }
+    public String getDateHuman() { return dateHuman; }
     public String getLink() { return link; }
     public AuthorInfo getAuthorInfo() { return authorInfo; }
     public Plate getPlate() { return plate; }
