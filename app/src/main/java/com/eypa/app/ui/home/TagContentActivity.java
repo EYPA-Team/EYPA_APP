@@ -83,6 +83,8 @@ public class TagContentActivity extends AppCompatActivity {
         adapter = new PostsAdapter(posts, categoryMap);
         recyclerView.setAdapter(adapter);
 
+        recyclerView.setAlpha(0f);
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -132,7 +134,6 @@ public class TagContentActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<ContentItem>> call, Response<List<ContentItem>> response) {
                 isLoading = false;
-                progressBar.setVisibility(View.GONE);
                 adapter.setLoadingFooterVisible(false);
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -140,14 +141,28 @@ public class TagContentActivity extends AppCompatActivity {
                     if (newPosts.isEmpty()) {
                         hasMore = false;
                         if (currentPage == 1) {
+                            progressBar.setVisibility(View.GONE);
                             emptyView.setVisibility(View.VISIBLE);
                         }
                     } else {
                         posts.addAll(newPosts);
                         adapter.notifyDataSetChanged();
                         currentPage++;
+
+                        if (currentPage == 2) {
+                            progressBar.setVisibility(View.GONE);
+
+                            recyclerView.animate()
+                                    .alpha(1f)
+                                    .setStartDelay(100)
+                                    .setDuration(300)
+                                    .start();
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                        }
                     }
                 } else {
+                    progressBar.setVisibility(View.GONE);
                     Toast.makeText(TagContentActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
                     if (currentPage == 1) {
                         emptyView.setVisibility(View.VISIBLE);
