@@ -308,7 +308,7 @@ public class HomeFragment extends Fragment {
 
         tabLayout.addOnTabSelectedListener(tabSelectedListener);
         
-        ApiClient.getApiService().getAllCategories(100, "count", true).enqueue(new Callback<List<Category>>() {
+        ApiClient.getApiService().getCategories(100, "count", true, null).enqueue(new Callback<List<Category>>() {
             @Override
             public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
                 if (isAdded() && response.isSuccessful() && response.body() != null) {
@@ -611,7 +611,7 @@ public class HomeFragment extends Fragment {
             return;
         }
         String ids = categoryIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-        ApiClient.getApiService().getCategoriesByIds(ids, categoryIds.size()).enqueue(new Callback<List<Category>>() {
+        ApiClient.getApiService().getCategories(categoryIds.size(), null, null, ids).enqueue(new Callback<List<Category>>() {
             @Override
             public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
                 if (isAdded()) {
@@ -657,7 +657,7 @@ public class HomeFragment extends Fragment {
         }
 
         String ids = missingIds.stream().map(String::valueOf).collect(Collectors.joining(","));
-        ApiClient.getApiService().getCategoriesByIds(ids, missingIds.size()).enqueue(new Callback<List<Category>>() {
+        ApiClient.getApiService().getCategories(missingIds.size(), null, null, ids).enqueue(new Callback<List<Category>>() {
             @Override
             public void onResponse(@NonNull Call<List<Category>> call, @NonNull Response<List<Category>> response) {
                 if (isAdded()) {
