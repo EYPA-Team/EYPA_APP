@@ -2,11 +2,14 @@ package com.eypa.app.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,11 +35,14 @@ public class ForumFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ProgressBar progressBar;
     private BBSPostAdapter adapter;
     private List<BBSPost> postList = new ArrayList<>();
     private int currentPage = 1;
     private boolean isLoading = false;
     private boolean hasMore = true;
+    private boolean isFirstLoad = true;
+    private long refreshStartTime = 0;
 
     @Nullable
     @Override
@@ -50,6 +56,7 @@ public class ForumFragment extends Fragment {
 
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recycler_view);
+        progressBar = view.findViewById(R.id.progress_bar);
 
         adapter = new BBSPostAdapter(postList, post -> {
             Intent intent = new Intent(getContext(), BBSPostDetailActivity.class);
@@ -64,9 +71,17 @@ public class ForumFragment extends Fragment {
         requireContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
         swipeRefreshLayout.setColorSchemeColors(typedValue.data);
 
+        if (isFirstLoad) {
+            recyclerView.setAlpha(0f);
+        } else {
+            recyclerView.setAlpha(1f);
+        }
+
         swipeRefreshLayout.setOnRefreshListener(() -> {
             currentPage = 1;
             hasMore = true;
+            refreshStartTime = System.currentTimeMillis();
+            recyclerView.animate().alpha(0f).setDuration(300).start();
             loadPosts();
         });
 
@@ -86,7 +101,14 @@ public class ForumFragment extends Fragment {
 
     private void loadPosts() {
         isLoading = true;
-        swipeRefreshLayout.setRefreshing(true);
+        if (isFirstLoad) {
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setAlpha(1f);
+        } else if (currentPage > 1) {
+             recyclerView.post(() -> {
+                if (adapter != null) adapter.setLoadingFooterVisible(true);
+            });
+        }
 
         ApiClient.getApiService().getBBSPosts(currentPage).enqueue(new Callback<BBSPostListResponse>() {
             @Override
@@ -94,20 +116,70 @@ public class ForumFragment extends Fragment {
                 if (isAdded()) {
                     isLoading = false;
                     swipeRefreshLayout.setRefreshing(false);
+                    adapter.setLoadingFooterVisible(false);
 
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         List<BBSPost> newData = response.body().getData();
-                        if (currentPage == 1) {
-                            postList.clear();
-                        }
-                        if (newData != null && !newData.isEmpty()) {
-                            postList.addAll(newData);
-                            adapter.notifyDataSetChanged();
+                        
+                        if (isFirstLoad) {
+                            if (currentPage == 1) {
+                                postList.clear();
+                            }
+                            if (newData != null && !newData.isEmpty()) {
+                                postList.addAll(newData);
+                                adapter.notifyDataSetChanged();
+                            } else {
+                                hasMore = false;
+                            }
+                            
+                            isFirstLoad = false;
+                            progressBar.animate()
+                                    .alpha(0f)
+                                    .setDuration(200)
+                                    .withEndAction(() -> progressBar.setVisibility(View.GONE))
+                                    .start();
+
+                            recyclerView.animate()
+                                    .alpha(1f)
+                                    .setStartDelay(300)
+                                    .setDuration(300)
+                                    .start();
                         } else {
-                            hasMore = false;
+                            if (currentPage == 1) {
+                                long elapsedTime = System.currentTimeMillis() - refreshStartTime;
+                                long remainingTime = 300 - elapsedTime;
+                                if (remainingTime < 0) remainingTime = 0;
+
+                                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                    if (isAdded()) {
+                                        postList.clear();
+                                        if (newData != null && !newData.isEmpty()) {
+                                            postList.addAll(newData);
+                                            adapter.notifyDataSetChanged();
+                                        } else {
+                                            hasMore = false;
+                                        }
+                                        recyclerView.animate().alpha(1f).setDuration(300).start();
+                                    }
+                                }, remainingTime);
+                            } else {
+                                if (newData != null && !newData.isEmpty()) {
+                                    postList.addAll(newData);
+                                    adapter.notifyDataSetChanged();
+                                } else {
+                                    hasMore = false;
+                                }
+                            }
                         }
+
                     } else {
                         Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                        if (isFirstLoad) {
+                             progressBar.setVisibility(View.GONE);
+                             recyclerView.setAlpha(1f);
+                        } else {
+                             recyclerView.animate().alpha(1f).setDuration(300).start();
+                        }
                     }
                 }
             }
@@ -117,6 +189,15 @@ public class ForumFragment extends Fragment {
                 if (isAdded()) {
                     isLoading = false;
                     swipeRefreshLayout.setRefreshing(false);
+                    adapter.setLoadingFooterVisible(false);
+                    Toast.makeText(getContext(), "网络错误", Toast.LENGTH_SHORT).show();
+                    
+                    if (isFirstLoad) {
+                         progressBar.setVisibility(View.GONE);
+                         recyclerView.setAlpha(1f);
+                    } else {
+                         recyclerView.animate().alpha(1f).setDuration(300).start();
+                    }
                 }
             }
         });

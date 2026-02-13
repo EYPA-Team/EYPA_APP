@@ -91,6 +91,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
     private void loadDetail() {
         loadingView.setVisibility(View.VISIBLE);
+        loadingView.setAlpha(1f);
         
         String token = ""; 
         if (UserManager.getInstance(this).isLoggedIn().getValue()) {
@@ -101,7 +102,12 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         ApiClient.getApiService().getBBSPostDetail(request).enqueue(new Callback<BBSPostDetailResponse>() {
             @Override
             public void onResponse(@NonNull Call<BBSPostDetailResponse> call, @NonNull Response<BBSPostDetailResponse> response) {
-                loadingView.setVisibility(View.GONE);
+                loadingView.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction(() -> loadingView.setVisibility(View.GONE))
+                        .start();
+
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     displayPost(response.body().getData());
                 } else {
@@ -111,7 +117,12 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<BBSPostDetailResponse> call, @NonNull Throwable t) {
-                loadingView.setVisibility(View.GONE);
+                loadingView.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction(() -> loadingView.setVisibility(View.GONE))
+                        .start();
+                Toast.makeText(BBSPostDetailActivity.this, "网络错误", Toast.LENGTH_SHORT).show();
             }
         });
     }

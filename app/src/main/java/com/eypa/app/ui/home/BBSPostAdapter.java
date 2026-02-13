@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -17,10 +18,14 @@ import com.eypa.app.model.bbs.BBSPost;
 
 import java.util.List;
 
-public class BBSPostAdapter extends RecyclerView.Adapter<BBSPostAdapter.ViewHolder> {
+public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int VIEW_TYPE_ITEM = 1;
+    private static final int VIEW_TYPE_LOADING = 2;
 
     private List<BBSPost> postList;
     private OnItemClickListener listener;
+    private boolean isLoadingFooterVisible = false;
 
     public interface OnItemClickListener {
         void onItemClick(BBSPost post);
@@ -31,58 +36,76 @@ public class BBSPostAdapter extends RecyclerView.Adapter<BBSPostAdapter.ViewHold
         this.listener = listener;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoadingFooterVisible && position == getItemCount() - 1) {
+            return VIEW_TYPE_LOADING;
+        }
+        return VIEW_TYPE_ITEM;
+    }
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_LOADING) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_loading_footer, parent, false);
+            return new LoadingViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_bbs_post, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof LoadingViewHolder) {
+            return;
+        }
+
+        ViewHolder itemHolder = (ViewHolder) holder;
         BBSPost post = postList.get(position);
-        Context context = holder.itemView.getContext();
+        Context context = itemHolder.itemView.getContext();
 
         if (post.getAuthorInfo() != null) {
-            holder.tvAuthorName.setText(post.getAuthorInfo().name);
+            itemHolder.tvAuthorName.setText(post.getAuthorInfo().name);
             Glide.with(context)
                     .load(post.getAuthorInfo().avatar)
                     .circleCrop()
                     .placeholder(R.drawable.ic_person)
-                    .into(holder.ivAvatar);
+                    .into(itemHolder.ivAvatar);
 
             if (post.getAuthorInfo().level != null) {
-                holder.tvLevel.setVisibility(View.VISIBLE);
-                holder.tvLevel.setText(post.getAuthorInfo().level.name);
+                itemHolder.tvLevel.setVisibility(View.VISIBLE);
+                itemHolder.tvLevel.setText(post.getAuthorInfo().level.name);
             } else {
-                holder.tvLevel.setVisibility(View.GONE);
+                itemHolder.tvLevel.setVisibility(View.GONE);
             }
         }
 
         if (post.getPlate() != null) {
-            holder.tvPlate.setVisibility(View.VISIBLE);
-            holder.tvPlate.setText(post.getPlate().name);
+            itemHolder.tvPlate.setVisibility(View.VISIBLE);
+            itemHolder.tvPlate.setText(post.getPlate().name);
         } else {
-            holder.tvPlate.setVisibility(View.GONE);
+            itemHolder.tvPlate.setVisibility(View.GONE);
         }
 
-        holder.tvTitle.setText(post.getTitle());
+        itemHolder.tvTitle.setText(post.getTitle());
 
         if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
-            holder.ivCover.setVisibility(View.VISIBLE);
+            itemHolder.ivCover.setVisibility(View.VISIBLE);
             Glide.with(context)
                     .load(post.getMedia().coverImage)
                     .centerCrop()
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .placeholder(R.drawable.placeholder_image)
-                    .into(holder.ivCover);
+                    .into(itemHolder.ivCover);
         } else {
-            holder.ivCover.setVisibility(View.GONE);
+            itemHolder.ivCover.setVisibility(View.GONE);
         }
 
         if (post.getStats() != null) {
-            holder.tvViews.setText(String.valueOf(post.getStats().views));
-            holder.tvReplies.setText(String.valueOf(post.getStats().replies));
+            itemHolder.tvViews.setText(String.valueOf(post.getStats().views));
+            itemHolder.tvReplies.setText(String.valueOf(post.getStats().replies));
         }
 
         if (post.getDate() != null) {
@@ -90,10 +113,10 @@ public class BBSPostAdapter extends RecyclerView.Adapter<BBSPostAdapter.ViewHold
             if (date.contains(" ")) {
                 date = date.split(" ")[0];
             }
-            holder.tvDate.setText(date);
+            itemHolder.tvDate.setText(date);
         }
 
-        holder.itemView.setOnClickListener(v -> {
+        itemHolder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(post);
             }
@@ -102,7 +125,14 @@ public class BBSPostAdapter extends RecyclerView.Adapter<BBSPostAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return postList.size();
+        return postList.size() + (isLoadingFooterVisible ? 1 : 0);
+    }
+
+    public void setLoadingFooterVisible(boolean visible) {
+        if (isLoadingFooterVisible != visible) {
+            isLoadingFooterVisible = visible;
+            notifyDataSetChanged();
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -120,6 +150,12 @@ public class BBSPostAdapter extends RecyclerView.Adapter<BBSPostAdapter.ViewHold
             tvDate = itemView.findViewById(R.id.tv_date);
             tvViews = itemView.findViewById(R.id.tv_views);
             tvReplies = itemView.findViewById(R.id.tv_replies);
+        }
+    }
+
+    static class LoadingViewHolder extends RecyclerView.ViewHolder {
+        public LoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
         }
     }
 }
