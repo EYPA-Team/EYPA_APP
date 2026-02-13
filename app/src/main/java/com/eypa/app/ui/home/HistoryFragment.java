@@ -84,9 +84,9 @@ public class HistoryFragment extends Fragment {
             recyclerView.setVisibility(View.GONE);
             emptyView.setVisibility(View.VISIBLE);
             if (mType == 0) {
-                emptyView.setText("暂无文章浏览历史");
+                emptyView.setText("暂无文章历史");
             } else {
-                emptyView.setText("暂无帖子浏览历史");
+                emptyView.setText("暂无帖子历史");
             }
         } else {
             recyclerView.setVisibility(View.VISIBLE);
