@@ -52,6 +52,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.eypa.app.utils.ReportDialogUtils;
+import com.eypa.app.model.user.UserProfile;
+
 public class BBSPostDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_POST_ID = "extra_post_id";
@@ -62,6 +71,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private View loadingView;
     private View layoutLoginRequired;
     private View btnLogin;
+    private BBSPost mCurrentPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +162,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
     private void displayPost(BBSPost post) {
         if (post == null) return;
+        mCurrentPost = post;
 
         tvTitle.setText(post.getTitle());
 
@@ -208,12 +219,90 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.author_profile_menu, menu);
+        MenuItem moreItem = menu.findItem(R.id.action_more);
+        if (moreItem != null && moreItem.getIcon() != null) {
+            int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            int color = (currentNightMode == Configuration.UI_MODE_NIGHT_YES) ? Color.WHITE : Color.BLACK;
+            moreItem.getIcon().setTint(color);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
+        } else if (item.getItemId() == R.id.action_more) {
+            showActionSheet();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showActionSheet() {
+        if (mCurrentPost == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_bbs_post_actions_sheet, null);
+
+        View btnReport = sheetView.findViewById(R.id.action_report);
+        View dividerReport = sheetView.findViewById(R.id.divider_report);
+
+        UserProfile currentUser = UserManager.getInstance(this).getUserProfile().getValue();
+        if (currentUser != null && mCurrentPost.getAuthorInfo() != null) {
+            try {
+                int currentUserId = Integer.parseInt(currentUser.getId());
+                int authorId = Integer.parseInt(mCurrentPost.getAuthorInfo().id);
+                if (currentUserId == authorId) {
+                    btnReport.setVisibility(View.GONE);
+                    if (dividerReport != null) {
+                        dividerReport.setVisibility(View.GONE);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // 不做处理
+            }
+        }
+
+        sheetView.findViewById(R.id.action_copy_link).setOnClickListener(v -> {
+            String link = "https://eqmemory.cn/forum-post/" + postId + ".html";
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Link", link);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(this, "链接已复制", Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+        });
+
+        btnReport.setOnClickListener(v -> {
+            if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                bottomSheetDialog.dismiss();
+                startActivity(new android.content.Intent(this, LoginActivity.class));
+                return;
+            }
+
+            if (mCurrentPost.getAuthorInfo() != null) {
+                try {
+                    int authorId = Integer.parseInt(mCurrentPost.getAuthorInfo().id);
+                    String url = "https://eqmemory.cn/forum-post/" + postId + ".html";
+                    bottomSheetDialog.dismiss();
+                    ReportDialogUtils.showReportDialog(this, authorId, url);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "无法获取作者信息", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "无法获取作者信息", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
     }
 
     private static final String SMILIE_BASE_URL = "https://eqmemory.cn/core/views/catfish/img/smilies/";
