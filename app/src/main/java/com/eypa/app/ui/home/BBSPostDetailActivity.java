@@ -60,6 +60,8 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private TextView tvTitle, tvContent, tvAuthorName, tvPlate;
     private ImageView ivAvatar;
     private View loadingView;
+    private View layoutLoginRequired;
+    private View btnLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +108,8 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         tvPlate = findViewById(R.id.tv_plate);
         ivAvatar = findViewById(R.id.iv_avatar);
         loadingView = findViewById(R.id.loading_view);
+        layoutLoginRequired = findViewById(R.id.layout_login_required);
+        btnLogin = findViewById(R.id.btn_login);
     }
 
     private void loadDetail() {
@@ -150,13 +154,32 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         if (post == null) return;
 
         tvTitle.setText(post.getTitle());
-        
-        if (post.getContent() != null && post.getContent().rendered != null) {
-            setHtmlText(tvContent, post.getContent().rendered);
-            
-            TypedValue typedValue = new TypedValue();
-            getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-            tvContent.setLinkTextColor(typedValue.data);
+
+        boolean isProtected = false;
+        if (post.getContent() != null && post.getContent().isProtected) {
+            isProtected = true;
+        }
+        if (post.getPermission() != null && !post.getPermission().canView) {
+            isProtected = true;
+        }
+
+        if (isProtected) {
+            tvContent.setVisibility(View.GONE);
+            layoutLoginRequired.setVisibility(View.VISIBLE);
+            btnLogin.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(this, LoginActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            tvContent.setVisibility(View.VISIBLE);
+            layoutLoginRequired.setVisibility(View.GONE);
+            if (post.getContent() != null && post.getContent().rendered != null) {
+                setHtmlText(tvContent, post.getContent().rendered);
+                
+                TypedValue typedValue = new TypedValue();
+                getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                tvContent.setLinkTextColor(typedValue.data);
+            }
         }
 
         if (post.getAuthorInfo() != null) {
