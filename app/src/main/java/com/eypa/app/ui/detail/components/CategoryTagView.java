@@ -34,6 +34,16 @@ public class CategoryTagView extends FlexboxLayout {
         init(context);
     }
 
+    private OnTagClickListener onTagClickListener;
+
+    public interface OnTagClickListener {
+        void onTagClick(String tagName);
+    }
+
+    public void setOnTagClickListener(OnTagClickListener listener) {
+        this.onTagClickListener = listener;
+    }
+
     public CategoryTagView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
@@ -91,6 +101,11 @@ public class CategoryTagView extends FlexboxLayout {
                 .inflate(R.layout.view_tag, this, false);
         textView.setText("#" + name);
         textView.setBackgroundResource(R.drawable.bg_tag);
+        textView.setOnClickListener(v -> {
+            if (onTagClickListener != null) {
+                onTagClickListener.onTagClick(name);
+            }
+        });
         return textView;
     }
 

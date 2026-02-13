@@ -72,6 +72,11 @@
             android:label="@string/medals" />
 
         <activity
+            android:name=".ui.home.TagContentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Eypa.NoActionBar" />
+
+        <activity
             android:name=".ui.home.LoginActivity"
             android:exported="false"
             android:label="@string/login" />

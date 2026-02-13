@@ -40,6 +40,7 @@ import com.eypa.app.ui.detail.model.ImageBlock;
 import com.eypa.app.ui.detail.model.QuoteBlock;
 import com.eypa.app.ui.detail.model.TextBlock;
 import com.eypa.app.ui.home.AuthorProfileActivity;
+import com.eypa.app.ui.home.TagContentActivity;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.TimeAgoUtils;
 import com.eypa.app.utils.UserManager;
@@ -293,6 +294,9 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             dateView.setText(TimeAgoUtils.getRelativeTime(itemView.getContext(), post.getDate()));
             categoryView.setCategories(post.getCategoriesWithNames());
             tagsView.setTags(post.getTagsWithNames());
+            tagsView.setOnTagClickListener(tagName -> {
+                TagContentActivity.start(itemView.getContext(), tagName);
+            });
             statsView.setStats(post.getViewCount(), post.getLikeCount(), post.getCommentCount());
 
             if (post.getLikeCount() > 0) {
