@@ -81,6 +81,7 @@ public class HomeFragment extends Fragment {
     private boolean isSearching = false;
     private String currentQuery = "";
     private SearchView mSearchView;
+    private Call<List<ContentItem>> currentSearchCall;
 
     // 搜索历史相关
     private LinearLayout searchHistoryLayout;
@@ -509,6 +510,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void performSearch(String query) {
+        if (currentSearchCall != null && !currentSearchCall.isCanceled()) {
+            currentSearchCall.cancel();
+        }
+
         currentQuery = query;
         searchHistoryManager.addHistory(query);
         updateSearchHistory();
@@ -527,9 +532,8 @@ public class HomeFragment extends Fragment {
         searchRecyclerView.setAlpha(0f);
 
         // --- 只传 query 和 page ---
-        ApiClient.getApiService().searchPosts(
-                currentQuery, searchPage
-        ).enqueue(new Callback<List<ContentItem>>() {
+        currentSearchCall = ApiClient.getApiService().searchPosts(currentQuery, searchPage);
+        currentSearchCall.enqueue(new Callback<List<ContentItem>>() {
             @Override
             public void onResponse(@NonNull Call<List<ContentItem>> call, @NonNull Response<List<ContentItem>> response) {
                 if (isAdded()) {
@@ -563,6 +567,9 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<List<ContentItem>> call, @NonNull Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
                 if (isAdded()) {
                     isSearching = false;
                     searchProgressBar.setVisibility(View.GONE);
