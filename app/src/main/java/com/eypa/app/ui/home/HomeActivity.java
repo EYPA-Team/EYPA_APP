@@ -27,6 +27,7 @@ public class HomeActivity extends AppCompatActivity {
     private boolean isDarkMode = false;
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
+    private ForumFragment forumFragment;
     private ShopFragment shopFragment;
     private ProfileFragment profileFragment;
     private Fragment activeFragment;
@@ -47,11 +48,13 @@ public class HomeActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag("HOME");
+            forumFragment = (ForumFragment) getSupportFragmentManager().findFragmentByTag("FORUM");
             shopFragment = (ShopFragment) getSupportFragmentManager().findFragmentByTag("SHOP");
             profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentByTag("PROFILE");
         }
 
         if (homeFragment == null) homeFragment = new HomeFragment();
+        if (forumFragment == null) forumFragment = new ForumFragment();
         if (shopFragment == null) shopFragment = new ShopFragment();
         if (profileFragment == null) profileFragment = new ProfileFragment();
 
@@ -62,9 +65,11 @@ public class HomeActivity extends AppCompatActivity {
                     .commit();
         } else {
             Fragment home = getSupportFragmentManager().findFragmentByTag("HOME");
+            Fragment forum = getSupportFragmentManager().findFragmentByTag("FORUM");
             Fragment shop = getSupportFragmentManager().findFragmentByTag("SHOP");
             Fragment profile = getSupportFragmentManager().findFragmentByTag("PROFILE");
             if (home != null && !home.isHidden()) activeFragment = home;
+            else if (forum != null && !forum.isHidden()) activeFragment = forum;
             else if (shop != null && !shop.isHidden()) activeFragment = shop;
             else if (profile != null && !profile.isHidden()) activeFragment = profile;
             else activeFragment = homeFragment;
@@ -132,6 +137,9 @@ public class HomeActivity extends AppCompatActivity {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_home) {
                 switchFragment(homeFragment, "HOME");
+                return true;
+            } else if (itemId == R.id.navigation_forum) {
+                switchFragment(forumFragment, "FORUM");
                 return true;
             } else if (itemId == R.id.navigation_shop) {
                 switchFragment(shopFragment, "SHOP");

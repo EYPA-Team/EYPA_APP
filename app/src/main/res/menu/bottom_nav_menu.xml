@@ -6,6 +6,11 @@
         android:title="@string/nav_home" />
 
     <item
+        android:id="@+id/navigation_forum"
+        android:icon="@drawable/ic_forum"
+        android:title="@string/nav_forum" />
+
+    <item
         android:id="@+id/navigation_shop"
         android:icon="@drawable/ic_shop"
         android:title="@string/nav_shop" />

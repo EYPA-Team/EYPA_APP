@@ -32,6 +32,9 @@ import com.eypa.app.model.user.ReportResponse;
 import com.eypa.app.model.user.ResetPasswordRequest;
 import com.eypa.app.model.user.SendCodeRequest;
 import com.eypa.app.model.user.TokenRequest;
+import com.eypa.app.model.bbs.BBSPostDetailRequest;
+import com.eypa.app.model.bbs.BBSPostDetailResponse;
+import com.eypa.app.model.bbs.BBSPostListResponse;
 
 import java.util.List;
 
@@ -156,4 +159,12 @@ public interface ContentApiService {
     // 举报用户/内容
     @POST("eu-json/app/v1/user/report")
     Call<ReportResponse> reportUser(@Body ReportRequest request);
+
+    // 帖子列表
+    @GET("eu-json/app/v1/bbs/posts")
+    Call<BBSPostListResponse> getBBSPosts(@Query("page") int page);
+
+    // 帖子详情
+    @POST("eu-json/app/v1/bbs/post/detail")
+    Call<BBSPostDetailResponse> getBBSPostDetail(@Body BBSPostDetailRequest request);
 }
