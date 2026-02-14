@@ -150,7 +150,7 @@
             <ImageView
                 android:layout_width="14dp"
                 android:layout_height="14dp"
-                android:src="@drawable/ic_comment"
+                android:src="@drawable/ic_comment_outline"
                 app:tint="?android:attr/textColorSecondary"
                 tools:ignore="ContentDescription" />
 
