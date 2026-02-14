@@ -61,6 +61,10 @@ public class DetailViewModel extends AndroidViewModel {
         return postData;
     }
 
+    public void setPostData(ContentItem item) {
+        this.postData.setValue(item);
+    }
+
     public LiveData<Boolean> getNavigateToLogin() {
         return navigateToLogin;
     }

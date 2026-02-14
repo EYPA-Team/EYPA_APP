@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
@@ -33,6 +35,8 @@ import com.eypa.app.model.user.AuthorInfoRequest;
 import com.eypa.app.model.user.AuthorInfoResponse;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
+import com.eypa.app.ui.detail.DetailCommentsFragment;
+import com.eypa.app.ui.detail.DetailViewModel;
 import com.eypa.app.ui.detail.ImageViewerFragment;
 import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.ThemeUtils;
@@ -65,7 +69,12 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.inputmethod.InputMethodManager;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.model.user.UserProfile;
 
@@ -82,6 +91,14 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private View btnLogin;
     private Button btnFollow;
     private BBSPost mCurrentPost;
+
+    private TabLayout tabLayout;
+    private View commentContainer;
+    private View commentInputContainer;
+    private EditText editComment;
+    private Button btnSend;
+    private DetailViewModel viewModel;
+    private boolean isCommentsFragmentAdded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +152,18 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         btnFollow = findViewById(R.id.btn_follow);
 
+        tabLayout = findViewById(R.id.tab_layout);
+        commentContainer = findViewById(R.id.comment_container);
+        commentInputContainer = findViewById(R.id.comment_input_container);
+        editComment = findViewById(R.id.edit_comment);
+        btnSend = findViewById(R.id.btn_send);
+
+        viewModel = new ViewModelProvider(this).get(DetailViewModel.class);
+
+        initTabs();
+        setupCommentInput();
+        observeViewModel();
+
         if (nsvContent != null) {
             nsvContent.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                 int threshold = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
@@ -150,6 +179,191 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void initTabs() {
+        tabLayout.addTab(tabLayout.newTab().setText("详情"));
+        tabLayout.addTab(tabLayout.newTab().setText("评论"));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    crossFade(nsvContent, commentContainer, commentInputContainer, false);
+                } else {
+                    crossFade(commentContainer, nsvContent, commentInputContainer, true);
+
+                    if (!isCommentsFragmentAdded) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.comment_container, new DetailCommentsFragment())
+                                .commit();
+                        isCommentsFragmentAdded = true;
+                    }
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    private void crossFade(View showView, View hideView, View inputView, boolean showInput) {
+        int duration = 200;
+
+        showView.setAlpha(0f);
+        showView.setVisibility(View.VISIBLE);
+
+        showView.animate()
+                .alpha(1f)
+                .setDuration(duration)
+                .setListener(null);
+
+        hideView.animate()
+                .alpha(0f)
+                .setDuration(duration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        hideView.setVisibility(View.GONE);
+                    }
+                });
+
+        if (showInput) {
+            inputView.setAlpha(0f);
+            inputView.setVisibility(View.VISIBLE);
+            inputView.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setListener(null);
+        } else {
+            inputView.animate()
+                    .alpha(0f)
+                    .setDuration(duration)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            inputView.setVisibility(View.GONE);
+                        }
+                    });
+        }
+    }
+
+    private void setupCommentInput() {
+        btnSend.setOnClickListener(v -> {
+            String content = editComment.getText().toString().trim();
+            if (content.isEmpty()) {
+                Toast.makeText(this, "请输入评论内容", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (viewModel.getEditComment().getValue() != null) {
+                viewModel.editComment(viewModel.getEditComment().getValue().getId(), content);
+            } else {
+                int parentId = -1;
+                if (viewModel.getReplyToComment().getValue() != null) {
+                    parentId = viewModel.getReplyToComment().getValue().getId();
+                }
+                viewModel.submitComment(postId, content, parentId);
+            }
+        });
+    }
+
+    private void observeViewModel() {
+        viewModel.getTotalCommentCount().observe(this, count -> {
+            TabLayout.Tab tab = tabLayout.getTabAt(1);
+            if (tab != null) {
+                tab.setText(count > 0 ? "评论 " + count : "评论");
+            }
+        });
+
+        viewModel.getNavigateToLogin().observe(this, shouldNavigate -> {
+            if (shouldNavigate) {
+                startActivity(new android.content.Intent(this, LoginActivity.class));
+                viewModel.onLoginNavigationHandled();
+            }
+        });
+
+        viewModel.getCommentItemAdded().observe(this, block -> {
+            if (block != null && editComment.getText().length() > 0) {
+                editComment.setText("");
+                editComment.setHint("说点什么吧...");
+                viewModel.setReplyToComment(null);
+                
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+            }
+        });
+
+        viewModel.getCommentItemUpdated().observe(this, commentId -> {
+            if (viewModel.getEditComment().getValue() != null && 
+                viewModel.getEditComment().getValue().getId() == commentId) {
+                
+                viewModel.setEditComment(null);
+                editComment.setText("");
+                editComment.setHint("说点什么吧...");
+                
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+                
+                Toast.makeText(this, "评论已更新", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        viewModel.getReplyToComment().observe(this, comment -> {
+            if (comment != null) {
+                if (viewModel.getEditComment().getValue() != null) {
+                    viewModel.setEditComment(null);
+                }
+                editComment.setHint("回复 @" + comment.getAuthorName() + ":");
+                editComment.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editComment, InputMethodManager.SHOW_IMPLICIT);
+                
+                TabLayout.Tab tab = tabLayout.getTabAt(1);
+                if (tab != null && !tab.isSelected()) {
+                    tab.select();
+                }
+            } else {
+                if (viewModel.getEditComment().getValue() == null) {
+                    editComment.setHint("说点什么吧...");
+                }
+            }
+        });
+
+        viewModel.getEditComment().observe(this, comment -> {
+            if (comment != null) {
+                if (viewModel.getReplyToComment().getValue() != null) {
+                    viewModel.setReplyToComment(null);
+                }
+                String content = "";
+                if (comment.getContent() != null) {
+                    if (comment.getContent().getRaw() != null) {
+                        content = comment.getContent().getRaw();
+                    } else if (comment.getContent().getRendered() != null) {
+                        content = HtmlCompat.fromHtml(comment.getContent().getRendered(), HtmlCompat.FROM_HTML_MODE_LEGACY).toString().trim();
+                    }
+                }
+                editComment.setText(content);
+                editComment.setSelection(editComment.getText().length());
+                editComment.setHint("编辑评论");
+                
+                editComment.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(editComment, InputMethodManager.SHOW_IMPLICIT);
+                
+                TabLayout.Tab tab = tabLayout.getTabAt(1);
+                if (tab != null && !tab.isSelected()) {
+                    tab.select();
+                }
+            } else {
+                if (viewModel.getReplyToComment().getValue() == null) {
+                    editComment.setHint("说点什么吧...");
+                }
+            }
+        });
     }
 
     private void loadDetail() {
@@ -207,6 +421,14 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         }
         historyItem.setType(1);
         HistoryManager.getInstance(this).addHistory(historyItem);
+        
+        ContentItem contentItem = new ContentItem();
+        contentItem.setId(post.getId());
+        contentItem.setTitle(post.getTitle());
+        contentItem.setDate(post.getDate());
+        
+        viewModel.setPostData(contentItem);
+        viewModel.refreshComments(postId);
 
         if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
             ivCover.setVisibility(View.VISIBLE);
