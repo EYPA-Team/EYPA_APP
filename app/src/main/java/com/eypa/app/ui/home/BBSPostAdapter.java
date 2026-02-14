@@ -11,6 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ReplacementSpan;
+import android.util.TypedValue;
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
@@ -89,7 +98,13 @@ public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             itemHolder.tvPlate.setVisibility(View.GONE);
         }
 
-        itemHolder.tvTitle.setText(post.getTitle());
+        if (post.getStatus() != null && post.getStatus().isSticky) {
+            SpannableStringBuilder ssb = new SpannableStringBuilder("顶 " + post.getTitle());
+            ssb.setSpan(new StickySpan(context), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            itemHolder.tvTitle.setText(ssb);
+        } else {
+            itemHolder.tvTitle.setText(post.getTitle());
+        }
 
         if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
             itemHolder.ivCover.setVisibility(View.VISIBLE);
@@ -152,6 +167,66 @@ public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     static class LoadingViewHolder extends RecyclerView.ViewHolder {
         public LoadingViewHolder(@NonNull View itemView) {
             super(itemView);
+        }
+    }
+
+    private static class StickySpan extends ReplacementSpan {
+        private final int backgroundColor;
+        private final int textColor;
+        private final float textSize;
+        private final float paddingH;
+        private final float paddingV;
+        private final float radius;
+        private final float marginEnd;
+
+        public StickySpan(Context context) {
+            TypedValue typedValue = new TypedValue();
+            context.getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+            this.backgroundColor = typedValue.data;
+            this.textColor = 0xFFFFFFFF;
+            this.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 11, context.getResources().getDisplayMetrics());
+            this.paddingH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, context.getResources().getDisplayMetrics());
+            this.paddingV = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, context.getResources().getDisplayMetrics());
+            this.radius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, context.getResources().getDisplayMetrics());
+            this.marginEnd = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
+        }
+
+        @Override
+        public int getSize(@NonNull Paint paint, CharSequence text, int start, int end, @Nullable Paint.FontMetricsInt fm) {
+            paint.setTextSize(textSize);
+            float textWidth = paint.measureText(text, start, end);
+            return (int) (textWidth + paddingH * 2 + marginEnd);
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, @NonNull Paint paint) {
+            paint.setTextSize(textSize);
+            float textWidth = paint.measureText(text, start, end);
+            Paint.FontMetrics fm = paint.getFontMetrics();
+            float textHeight = fm.descent - fm.ascent;
+
+            Paint.Style oldStyle = paint.getStyle();
+            int oldColor = paint.getColor();
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(backgroundColor);
+
+            float centerY = (bottom + top) / 2f;
+            float rectHeight = textHeight + paddingV * 2;
+            float rectTop = centerY - rectHeight / 2f;
+            float rectBottom = centerY + rectHeight / 2f;
+
+            RectF rect = new RectF(x, rectTop, x + textWidth + paddingH * 2, rectBottom);
+            canvas.drawRoundRect(rect, radius, radius, paint);
+
+            paint.setColor(textColor);
+            float baselineOffset = (textHeight / 2) - fm.descent;
+            float textY = centerY + baselineOffset;
+
+            canvas.drawText(text, start, end, x + paddingH, textY, paint);
+
+            paint.setStyle(oldStyle);
+            paint.setColor(oldColor);
         }
     }
 }

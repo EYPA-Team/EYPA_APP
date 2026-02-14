@@ -317,7 +317,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 if (viewModel.getEditComment().getValue() != null) {
                     viewModel.setEditComment(null);
                 }
-                editComment.setHint("回复 @" + comment.getAuthorName() + ":");
+                editComment.setHint("回复 " + comment.getAuthorName() + ":");
                 editComment.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(editComment, InputMethodManager.SHOW_IMPLICIT);

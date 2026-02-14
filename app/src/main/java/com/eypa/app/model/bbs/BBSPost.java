@@ -20,6 +20,7 @@ public class BBSPost {
     private Permission permission;
     @SerializedName("bbs_info")
     private BBSInfo bbsInfo;
+    private Status status;
 
     public int getId() { return id; }
     public String getTitle() { return title != null ? title.rendered : ""; }
@@ -34,6 +35,12 @@ public class BBSPost {
     public Interaction getInteraction() { return interaction; }
     public Permission getPermission() { return permission; }
     public BBSInfo getBbsInfo() { return bbsInfo; }
+    public Status getStatus() { return status; }
+
+    public static class Status {
+        @SerializedName("is_sticky")
+        public boolean isSticky;
+    }
 
     public static class Title {
         public String rendered;
