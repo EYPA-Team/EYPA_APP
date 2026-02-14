@@ -100,6 +100,11 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private DetailViewModel viewModel;
     private boolean isCommentsFragmentAdded = false;
 
+    // 初始加载状态
+    private boolean isPostLoaded = false;
+    private boolean isCommentsLoaded = false;
+    private boolean isFollowStatusChecked = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applyTheme(this);
@@ -272,6 +277,13 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     }
 
     private void observeViewModel() {
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            if (!isLoading) {
+                isCommentsLoaded = true;
+                checkLocalLoadingState();
+            }
+        });
+
         viewModel.getTotalCommentCount().observe(this, count -> {
             TabLayout.Tab tab = tabLayout.getTabAt(1);
             if (tab != null) {
@@ -368,6 +380,10 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         loadingView.setVisibility(View.VISIBLE);
         loadingView.setAlpha(1f);
         
+        isPostLoaded = false;
+        isCommentsLoaded = false;
+        isFollowStatusChecked = false;
+
         String token = ""; 
         if (UserManager.getInstance(this).isLoggedIn().getValue()) {
             token = UserManager.getInstance(this).getToken();
@@ -377,29 +393,36 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         ApiClient.getApiService().getBBSPostDetail(request).enqueue(new Callback<BBSPostDetailResponse>() {
             @Override
             public void onResponse(@NonNull Call<BBSPostDetailResponse> call, @NonNull Response<BBSPostDetailResponse> response) {
-                loadingView.animate()
-                        .alpha(0f)
-                        .setDuration(300)
-                        .withEndAction(() -> loadingView.setVisibility(View.GONE))
-                        .start();
-
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    isPostLoaded = true;
                     displayPost(response.body().getData());
+                    checkLocalLoadingState();
                 } else {
+                    hideLoadingView();
                     Toast.makeText(BBSPostDetailActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<BBSPostDetailResponse> call, @NonNull Throwable t) {
-                loadingView.animate()
-                        .alpha(0f)
-                        .setDuration(300)
-                        .withEndAction(() -> loadingView.setVisibility(View.GONE))
-                        .start();
+                hideLoadingView();
                 Toast.makeText(BBSPostDetailActivity.this, "网络错误", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void checkLocalLoadingState() {
+        if (isPostLoaded && isCommentsLoaded && isFollowStatusChecked) {
+            hideLoadingView();
+        }
+    }
+
+    private void hideLoadingView() {
+        loadingView.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction(() -> loadingView.setVisibility(View.GONE))
+                .start();
     }
 
     private void displayPost(BBSPost post) {
@@ -506,6 +529,8 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
             if (isMe) {
                 btnFollow.setVisibility(View.GONE);
+                isFollowStatusChecked = true;
+                checkLocalLoadingState();
             } else {
                 btnFollow.setVisibility(View.VISIBLE);
                 updateFollowButtonState(post.getAuthorInfo().isFollowing);
@@ -515,7 +540,12 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                         checkFollowStatus(Integer.parseInt(post.getAuthorInfo().id));
                     } catch (NumberFormatException e) {
                         e.printStackTrace();
+                        isFollowStatusChecked = true;
+                        checkLocalLoadingState();
                     }
+                } else {
+                    isFollowStatusChecked = true;
+                    checkLocalLoadingState();
                 }
 
                 btnFollow.setOnClickListener(v -> {
@@ -528,6 +558,8 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             }
         } else {
             btnFollow.setVisibility(View.GONE);
+            isFollowStatusChecked = true;
+            checkLocalLoadingState();
         }
 
         if (post.getPlate() != null) {
@@ -576,7 +608,11 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
     private void checkFollowStatus(int authorId) {
         String token = UserManager.getInstance(this).getToken();
-        if (token == null) return;
+        if (token == null) {
+            isFollowStatusChecked = true;
+            checkLocalLoadingState();
+            return;
+        }
 
         AuthorInfoRequest request = new AuthorInfoRequest(authorId, token);
         ApiClient.getApiService().getAuthorInfo(request).enqueue(new Callback<AuthorInfoResponse>() {
@@ -591,11 +627,14 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                         }
                     }
                 }
+                isFollowStatusChecked = true;
+                checkLocalLoadingState();
             }
 
             @Override
             public void onFailure(@NonNull Call<AuthorInfoResponse> call, @NonNull Throwable t) {
-                // 不做处理
+                isFollowStatusChecked = true;
+                checkLocalLoadingState();
             }
         });
     }

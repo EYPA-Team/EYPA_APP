@@ -221,6 +221,7 @@ public class DetailViewModel extends AndroidViewModel {
     public void refreshComments(int postId) {
         currentPage = 1;
         hasMoreComments = true;
+        isInitialCommentsLoading = true;
         loadCommentsInternal(postId, 1);
     }
 
