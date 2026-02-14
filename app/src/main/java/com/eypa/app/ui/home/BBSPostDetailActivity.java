@@ -560,6 +560,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 urlDrawable.setDrawableTarget(target);
                 Glide.with(textView.getContext())
                         .load(source)
+                        .placeholder(R.drawable.placeholder_image)
                         .into(target);
             }
 
@@ -634,6 +635,34 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
             @Override
             public void onLoadCleared(@Nullable Drawable placeholder) {
+            }
+
+            @Override
+            public void onLoadStarted(@Nullable Drawable placeholder) {
+                if (placeholder != null) {
+                    TextView textView = textViewRef.get();
+                    if (textView != null) {
+                        int width = placeholder.getIntrinsicWidth();
+                        int height = placeholder.getIntrinsicHeight();
+                        
+                        int tvWidth = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
+                        if (tvWidth <= 0) {
+                            tvWidth = textView.getResources().getDisplayMetrics().widthPixels - textView.getPaddingLeft() - textView.getPaddingRight();
+                        }
+                        
+                        if (tvWidth > 0 && width > tvWidth) {
+                            float scale = (float) tvWidth / width;
+                            placeholder.setBounds(0, 0, tvWidth, (int)(height * scale));
+                            urlDrawable.setBounds(0, 0, tvWidth, (int)(height * scale));
+                        } else {
+                            placeholder.setBounds(0, 0, width, height);
+                            urlDrawable.setBounds(0, 0, width, height);
+                        }
+
+                        urlDrawable.setDrawable(placeholder);
+                        textView.setText(textView.getText());
+                    }
+                }
             }
         }
     }
