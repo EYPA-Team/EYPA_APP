@@ -307,8 +307,6 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
-                
-                Toast.makeText(this, "评论已更新", Toast.LENGTH_SHORT).show();
             }
         });
 
