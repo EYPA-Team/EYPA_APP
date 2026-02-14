@@ -43,7 +43,15 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
         holder.title.setText(item.getTitle());
         holder.viewCount.setText(formatCount(item.getViewCount()));
-        holder.likeCount.setText(formatCount(item.getLikeCount()));
+        
+        if (item.getType() == 1) {
+            holder.likeCount.setText(formatCount(item.getLikeCount()));
+            holder.likeIcon.setImageResource(R.drawable.ic_comment_outline);
+        } else {
+            holder.likeCount.setText(formatCount(item.getLikeCount()));
+            holder.likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
+        }
+        
         holder.date.setText(TimeAgoUtils.getRelativeTime(holder.itemView.getContext(), item.getDate()));
 
         String imageUrl = item.getBestImageUrl();
@@ -62,9 +70,15 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
 
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
-            Intent intent = new Intent(context, DetailActivity.class);
-            intent.putExtra(DetailActivity.EXTRA_POST_ID, item.getId());
-            context.startActivity(intent);
+            if (item.getType() == 1) {
+                Intent intent = new Intent(context, BBSPostDetailActivity.class);
+                intent.putExtra(BBSPostDetailActivity.EXTRA_POST_ID, item.getId());
+                context.startActivity(intent);
+            } else {
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra(DetailActivity.EXTRA_POST_ID, item.getId());
+                context.startActivity(intent);
+            }
         });
     }
 
@@ -85,6 +99,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
         TextView title;
         TextView viewCount;
         TextView likeCount;
+        ImageView likeIcon;
         TextView date;
 
         public HistoryViewHolder(@NonNull View itemView) {
@@ -93,6 +108,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             title = itemView.findViewById(R.id.tv_title);
             viewCount = itemView.findViewById(R.id.tv_views);
             likeCount = itemView.findViewById(R.id.tv_likes);
+            likeIcon = itemView.findViewById(R.id.iv_likes_icon);
             date = itemView.findViewById(R.id.tv_date);
         }
     }

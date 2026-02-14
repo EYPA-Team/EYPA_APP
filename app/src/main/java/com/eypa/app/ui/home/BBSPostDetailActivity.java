@@ -414,7 +414,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         historyItem.setDate(post.getDate());
         if (post.getStats() != null) {
             historyItem.setViewCount(post.getStats().views);
-            historyItem.setLikeCount(post.getStats().likes);
+            historyItem.setLikeCount(post.getStats().replies);
         }
         if (post.getMedia() != null && post.getMedia().coverImage != null) {
             historyItem.setCoverImage(post.getMedia().coverImage);
