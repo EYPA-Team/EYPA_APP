@@ -53,6 +53,11 @@ public class DetailViewModel extends AndroidViewModel {
     private boolean hasMoreComments = true;
     private boolean isCommentsLoading = false;
 
+    // 初始加载状态
+    private boolean isPostLoading = false;
+    private boolean isInitialCommentsLoading = false;
+    private boolean isFollowStatusLoading = false;
+
     public DetailViewModel(@NonNull Application application) {
         super(application);
     }
@@ -103,7 +108,11 @@ public class DetailViewModel extends AndroidViewModel {
 
     public void checkFollowStatus(int authorId) {
         String token = UserManager.getInstance(getApplication()).getToken();
-        if (token == null) return;
+        if (token == null) {
+            isFollowStatusLoading = false;
+            checkAllLoaded();
+            return;
+        }
 
         com.eypa.app.model.user.AuthorInfoRequest request = new com.eypa.app.model.user.AuthorInfoRequest(authorId, token);
         ApiClient.getApiService().getAuthorInfo(request).enqueue(new Callback<com.eypa.app.model.user.AuthorInfoResponse>() {
@@ -120,11 +129,14 @@ public class DetailViewModel extends AndroidViewModel {
                         }
                     }
                 }
+                isFollowStatusLoading = false;
+                checkAllLoaded();
             }
 
             @Override
             public void onFailure(Call<com.eypa.app.model.user.AuthorInfoResponse> call, Throwable t) {
-                // 不做处理
+                isFollowStatusLoading = false;
+                checkAllLoaded();
             }
         });
     }
@@ -178,14 +190,24 @@ public class DetailViewModel extends AndroidViewModel {
 
     public void loadPostAndComments(int postId) {
         isLoading.setValue(true);
+        isPostLoading = true;
+        isInitialCommentsLoading = true;
+        isFollowStatusLoading = false;
         loadPost(postId);
         refreshComments(postId);
+    }
+
+    private void checkAllLoaded() {
+        if (!isPostLoading && !isInitialCommentsLoading && !isFollowStatusLoading) {
+            isLoading.setValue(false);
+        }
     }
 
     public void updateCommentFilter(int postId, String type, Integer onlyAuthor) {
         this.currentSortType = type;
         this.currentOnlyAuthor = onlyAuthor;
         isLoading.setValue(true);
+        isInitialCommentsLoading = true;
         refreshComments(postId);
     }
     
@@ -212,23 +234,23 @@ public class DetailViewModel extends AndroidViewModel {
                 .enqueue(new Callback<ContentItem>() {
                     @Override
                     public void onResponse(Call<ContentItem> call, Response<ContentItem> response) {
+                        isPostLoading = false;
                         if (response.isSuccessful() && response.body() != null) {
                             ContentItem post = response.body();
                             postData.setValue(post);
                             // 检查关注状态
                             if (post.getAuthor() != null) {
+                                isFollowStatusLoading = true;
                                 checkFollowStatus(post.getAuthor().getId());
                             }
                         }
-                        // 停止加载动画
-                        if (commentBlocks.getValue() != null || !response.isSuccessful()) {
-                            isLoading.setValue(false);
-                        }
+                        checkAllLoaded();
                     }
                     @Override
                     public void onFailure(Call<ContentItem> call, Throwable t) {
+                        isPostLoading = false;
                         postData.setValue(null);
-                        isLoading.setValue(false);
+                        checkAllLoaded();
                     }
                 });
     }
@@ -290,9 +312,9 @@ public class DetailViewModel extends AndroidViewModel {
                     hasMoreComments = false;
                 }
 
-                // 只有当两个请求都结束后才停止加载动画
-                if (postData.getValue() != null || !response.isSuccessful()) {
-                    isLoading.setValue(false);
+                if (page == 1) {
+                    isInitialCommentsLoading = false;
+                    checkAllLoaded();
                 }
             }
             @Override
@@ -301,8 +323,9 @@ public class DetailViewModel extends AndroidViewModel {
                 isLoadMoreLoading.setValue(false);
                 if (page == 1) {
                     commentBlocks.setValue(new ArrayList<>());
+                    isInitialCommentsLoading = false;
+                    checkAllLoaded();
                 }
-                isLoading.setValue(false);
             }
         });
     }
