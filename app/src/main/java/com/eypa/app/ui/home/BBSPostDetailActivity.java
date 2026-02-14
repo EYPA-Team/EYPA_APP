@@ -346,7 +346,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 }
                 editComment.setText(content);
                 editComment.setSelection(editComment.getText().length());
-                editComment.setHint("编辑评论");
+                editComment.setHint("编辑评论...");
                 
                 editComment.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
