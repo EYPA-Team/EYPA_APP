@@ -12,6 +12,7 @@ import com.eypa.app.model.Comment;
 import com.eypa.app.model.CommentsRequest;
 import com.eypa.app.model.CommentsResponse;
 import com.eypa.app.model.ContentItem;
+import com.eypa.app.model.bbs.BBSPost;
 import com.eypa.app.model.DeleteCommentRequest;
 import com.eypa.app.model.EditCommentRequest;
 import com.eypa.app.model.LikeCommentRequest;
@@ -34,6 +35,7 @@ import retrofit2.Response;
 public class DetailViewModel extends AndroidViewModel {
 
     private final MutableLiveData<ContentItem> postData = new MutableLiveData<>();
+    private final MutableLiveData<BBSPost> bbsPostData = new MutableLiveData<>();
     private final MutableLiveData<List<CommentBlock>> commentBlocks = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(true);
     private final MutableLiveData<Integer> totalCommentCount = new MutableLiveData<>(0);
@@ -68,6 +70,14 @@ public class DetailViewModel extends AndroidViewModel {
 
     public void setPostData(ContentItem item) {
         this.postData.setValue(item);
+    }
+
+    public LiveData<BBSPost> getBBSPostData() {
+        return bbsPostData;
+    }
+
+    public void setBBSPostData(BBSPost post) {
+        this.bbsPostData.setValue(post);
     }
 
     public LiveData<Boolean> getNavigateToLogin() {
@@ -160,6 +170,20 @@ public class DetailViewModel extends AndroidViewModel {
                             post.getAuthor().setFollowing(data.isFollowing());
                             postData.setValue(post);
                         }
+                        
+                        BBSPost bbsPost = bbsPostData.getValue();
+                        if (bbsPost != null && bbsPost.getAuthorInfo() != null) {
+                            try {
+                                int bbsAuthorId = Integer.parseInt(bbsPost.getAuthorInfo().id);
+                                if (bbsAuthorId == authorId) {
+                                    bbsPost.getAuthorInfo().isFollowing = data.isFollowing();
+                                    bbsPostData.setValue(bbsPost);
+                                }
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                         if (onSuccess != null) onSuccess.run();
                     }
                 }
@@ -239,8 +263,28 @@ public class DetailViewModel extends AndroidViewModel {
                         if (response.isSuccessful() && response.body() != null) {
                             ContentItem post = response.body();
                             postData.setValue(post);
+                            
                             // 检查关注状态
+                            boolean shouldCheckFollow = false;
                             if (post.getAuthor() != null) {
+                                com.eypa.app.model.user.UserProfile user = UserManager.getInstance(getApplication()).getUserProfile().getValue();
+                                boolean isMe = false;
+                                if (user != null && user.getId() != null) {
+                                    try {
+                                        if (Integer.parseInt(user.getId()) == post.getAuthor().getId()) {
+                                            isMe = true;
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                
+                                if (token != null && !isMe) {
+                                    shouldCheckFollow = true;
+                                }
+                            }
+
+                            if (shouldCheckFollow) {
                                 isFollowStatusLoading = true;
                                 checkFollowStatus(post.getAuthor().getId());
                             }

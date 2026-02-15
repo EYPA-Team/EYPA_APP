@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
+import androidx.core.text.HtmlCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
@@ -20,8 +21,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager2.widget.ViewPager2;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.eypa.app.R;
@@ -37,28 +40,8 @@ import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
 import com.eypa.app.ui.detail.DetailCommentsFragment;
 import com.eypa.app.ui.detail.DetailViewModel;
-import com.eypa.app.ui.detail.ImageViewerFragment;
-import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UserManager;
-import com.eypa.app.utils.VerticalImageSpan;
-
-import android.graphics.Canvas;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.BitmapDrawable;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.ImageSpan;
-import android.text.util.Linkify;
-import androidx.core.text.HtmlCompat;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
-import androidx.annotation.Nullable;
-import java.lang.ref.WeakReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,12 +52,17 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.model.user.UserProfile;
 
@@ -83,22 +71,16 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     public static final String EXTRA_POST_ID = "extra_post_id";
     
     private int postId;
-    private TextView tvTitle, tvContent, tvAuthorName, tvPlate, tvToolbarTitle;
-    private ImageView ivAvatar, ivCover;
-    private NestedScrollView nsvContent;
+    private TextView tvToolbarTitle;
     private View loadingView;
-    private View layoutLoginRequired;
-    private View btnLogin;
-    private Button btnFollow;
     private BBSPost mCurrentPost;
 
     private TabLayout tabLayout;
-    private View commentContainer;
+    private ViewPager2 viewPager;
     private View commentInputContainer;
     private EditText editComment;
     private Button btnSend;
     private DetailViewModel viewModel;
-    private boolean isCommentsFragmentAdded = false;
 
     // 初始加载状态
     private boolean isPostLoaded = false;
@@ -144,21 +126,11 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             }
         }
 
-        tvTitle = findViewById(R.id.tv_title);
         tvToolbarTitle = findViewById(R.id.tv_toolbar_title);
-        tvContent = findViewById(R.id.tv_content);
-        tvAuthorName = findViewById(R.id.tv_author_name);
-        tvPlate = findViewById(R.id.tv_plate);
-        ivAvatar = findViewById(R.id.iv_avatar);
-        ivCover = findViewById(R.id.iv_cover);
-        nsvContent = findViewById(R.id.nsv_content);
         loadingView = findViewById(R.id.loading_view);
-        layoutLoginRequired = findViewById(R.id.layout_login_required);
-        btnLogin = findViewById(R.id.btn_login);
-        btnFollow = findViewById(R.id.btn_follow);
 
         tabLayout = findViewById(R.id.tab_layout);
-        commentContainer = findViewById(R.id.comment_container);
+        viewPager = findViewById(R.id.view_pager);
         commentInputContainer = findViewById(R.id.comment_input_container);
         editComment = findViewById(R.id.edit_comment);
         btnSend = findViewById(R.id.btn_send);
@@ -168,91 +140,60 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         initTabs();
         setupCommentInput();
         observeViewModel();
-
-        if (nsvContent != null) {
-            nsvContent.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                int threshold = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
-                
-                if (scrollY > threshold) {
-                    if (tvToolbarTitle.getAlpha() == 0f) {
-                        tvToolbarTitle.animate().alpha(1f).setDuration(200).start();
-                    }
-                } else {
-                    if (tvToolbarTitle.getAlpha() == 1f) {
-                        tvToolbarTitle.animate().alpha(0f).setDuration(200).start();
-                    }
-                }
-            });
-        }
     }
 
     private void initTabs() {
-        tabLayout.addTab(tabLayout.newTab().setText("详情"));
-        tabLayout.addTab(tabLayout.newTab().setText("评论"));
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        viewPager.setAdapter(new FragmentStateAdapter(this) {
+            @NonNull
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) {
-                    crossFade(nsvContent, commentContainer, commentInputContainer, false);
+            public Fragment createFragment(int position) {
+                if (position == 0) {
+                    return new BBSPostContentFragment();
                 } else {
-                    crossFade(commentContainer, nsvContent, commentInputContainer, true);
-
-                    if (!isCommentsFragmentAdded) {
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.comment_container, new DetailCommentsFragment())
-                                .commit();
-                        isCommentsFragmentAdded = true;
-                    }
+                    return new DetailCommentsFragment();
                 }
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public int getItemCount() {
+                return 2;
+            }
+        });
 
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            if (position == 0) {
+                tab.setText("详情");
+            } else {
+                tab.setText("评论");
+            }
+        }).attach();
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 0) {
+                    commentInputContainer.setVisibility(View.GONE);
+                } else {
+                    commentInputContainer.setVisibility(View.VISIBLE);
+                    commentInputContainer.setAlpha(0f);
+                    commentInputContainer.animate().alpha(1f).setDuration(200).start();
+                }
+            }
         });
     }
 
-    private void crossFade(View showView, View hideView, View inputView, boolean showInput) {
-        int duration = 200;
-
-        showView.setAlpha(0f);
-        showView.setVisibility(View.VISIBLE);
-
-        showView.animate()
-                .alpha(1f)
-                .setDuration(duration)
-                .setListener(null);
-
-        hideView.animate()
-                .alpha(0f)
-                .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        hideView.setVisibility(View.GONE);
-                    }
-                });
-
-        if (showInput) {
-            inputView.setAlpha(0f);
-            inputView.setVisibility(View.VISIBLE);
-            inputView.animate()
-                    .alpha(1f)
-                    .setDuration(duration)
-                    .setListener(null);
+    public void onContentScroll(int scrollY) {
+        int threshold = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
+        
+        if (scrollY > threshold) {
+            if (tvToolbarTitle.getAlpha() == 0f) {
+                tvToolbarTitle.animate().alpha(1f).setDuration(200).start();
+            }
         } else {
-            inputView.animate()
-                    .alpha(0f)
-                    .setDuration(duration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            inputView.setVisibility(View.GONE);
-                        }
-                    });
+            if (tvToolbarTitle.getAlpha() == 1f) {
+                tvToolbarTitle.animate().alpha(0f).setDuration(200).start();
+            }
         }
     }
 
@@ -449,70 +390,14 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         contentItem.setDate(post.getDate());
         
         viewModel.setPostData(contentItem);
+        viewModel.setBBSPostData(post);
         viewModel.refreshComments(postId);
 
-        if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
-            ivCover.setVisibility(View.VISIBLE);
-            Glide.with(this)
-                    .load(post.getMedia().coverImage)
-                    .into(ivCover);
-            
-            ivCover.setOnClickListener(v -> {
-                ImageViewerFragment.newInstance(post.getMedia().coverImage)
-                        .show(getSupportFragmentManager(), "image_viewer");
-            });
-        } else {
-            ivCover.setVisibility(View.GONE);
-        }
-
-        tvTitle.setText(post.getTitle());
         if (tvToolbarTitle != null) {
             tvToolbarTitle.setText(post.getTitle());
         }
 
-        boolean isProtected = false;
-        if (post.getContent() != null && post.getContent().isProtected) {
-            isProtected = true;
-        }
-        if (post.getPermission() != null && !post.getPermission().canView) {
-            isProtected = true;
-        }
-
-        if (isProtected) {
-            tvContent.setVisibility(View.GONE);
-            layoutLoginRequired.setVisibility(View.VISIBLE);
-            btnLogin.setOnClickListener(v -> {
-                android.content.Intent intent = new android.content.Intent(this, LoginActivity.class);
-                startActivity(intent);
-            });
-        } else {
-            tvContent.setVisibility(View.VISIBLE);
-            layoutLoginRequired.setVisibility(View.GONE);
-            if (post.getContent() != null && post.getContent().rendered != null) {
-                setHtmlText(tvContent, post.getContent().rendered);
-                
-                tvContent.setLinkTextColor(ContextCompat.getColor(this, R.color.content_link_color));
-            }
-        }
-
         if (post.getAuthorInfo() != null) {
-            tvAuthorName.setText(post.getAuthorInfo().name);
-            Glide.with(this)
-                    .load(post.getAuthorInfo().avatar)
-                    .circleCrop()
-                    .into(ivAvatar);
-
-            View.OnClickListener profileListener = v -> {
-                try {
-                    int authorId = Integer.parseInt(post.getAuthorInfo().id);
-                    AuthorProfileActivity.start(this, authorId);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            };
-            ivAvatar.setOnClickListener(profileListener);
-            tvAuthorName.setOnClickListener(profileListener);
-
             boolean isMe = false;
             UserProfile userProfile = UserManager.getInstance(this).getUserProfile().getValue();
             if (userProfile != null && userProfile.getId() != null) {
@@ -527,46 +412,21 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 }
             }
 
-            if (isMe) {
-                btnFollow.setVisibility(View.GONE);
-                isFollowStatusChecked = true;
-                checkLocalLoadingState();
-            } else {
-                btnFollow.setVisibility(View.VISIBLE);
-                updateFollowButtonState(post.getAuthorInfo().isFollowing);
-                
-                if (Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
-                    try {
-                        checkFollowStatus(Integer.parseInt(post.getAuthorInfo().id));
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                        isFollowStatusChecked = true;
-                        checkLocalLoadingState();
-                    }
-                } else {
+            if (!isMe && Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                try {
+                    checkFollowStatus(Integer.parseInt(post.getAuthorInfo().id));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                     isFollowStatusChecked = true;
                     checkLocalLoadingState();
                 }
-
-                btnFollow.setOnClickListener(v -> {
-                    if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
-                        startActivity(new android.content.Intent(this, LoginActivity.class));
-                        return;
-                    }
-                    followUser(post);
-                });
+            } else {
+                isFollowStatusChecked = true;
+                checkLocalLoadingState();
             }
         } else {
-            btnFollow.setVisibility(View.GONE);
             isFollowStatusChecked = true;
             checkLocalLoadingState();
-        }
-
-        if (post.getPlate() != null) {
-            tvPlate.setText(post.getPlate().name);
-            tvPlate.setVisibility(View.VISIBLE);
-        } else {
-            tvPlate.setVisibility(View.GONE);
         }
     }
 
@@ -595,14 +455,9 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     }
 
     private void updateFollowButtonState(boolean isFollowing) {
-        if (isFollowing) {
-            btnFollow.setText("已关注");
-            btnFollow.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
-        } else {
-            btnFollow.setText("关注");
-            TypedValue typedValue = new TypedValue();
-            getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-            btnFollow.setTextColor(typedValue.data);
+        if (mCurrentPost != null && mCurrentPost.getAuthorInfo() != null) {
+             mCurrentPost.getAuthorInfo().isFollowing = isFollowing;
+             viewModel.setBBSPostData(mCurrentPost);
         }
     }
 
@@ -733,221 +588,5 @@ public class BBSPostDetailActivity extends AppCompatActivity {
 
         bottomSheetDialog.setContentView(sheetView);
         bottomSheetDialog.show();
-    }
-
-    private static final String SMILIE_BASE_URL = "https://eqmemory.cn/core/views/catfish/img/smilies/";
-
-    private void setHtmlText(TextView textView, String html) {
-        if (html == null) {
-            textView.setText("");
-            return;
-        }
-
-        String processedHtml = processCustomSmilies(html);
-
-        Spanned spanned = HtmlCompat.fromHtml(
-                processedHtml,
-                HtmlCompat.FROM_HTML_MODE_LEGACY,
-                new BBSGlideImageGetter(textView),
-                null
-        );
-
-        SpannableStringBuilder ssb;
-        if (spanned instanceof SpannableStringBuilder) {
-            ssb = (SpannableStringBuilder) spanned;
-        } else {
-            ssb = new SpannableStringBuilder(spanned);
-        }
-
-        Linkify.addLinks(ssb, Linkify.WEB_URLS);
-
-        ImageSpan[] imageSpans = ssb.getSpans(0, ssb.length(), ImageSpan.class);
-        for (ImageSpan span : imageSpans) {
-            int start = ssb.getSpanStart(span);
-            int end = ssb.getSpanEnd(span);
-            int flags = ssb.getSpanFlags(span);
-
-            ssb.removeSpan(span);
-            VerticalImageSpan newSpan = new VerticalImageSpan(span.getDrawable());
-            ssb.setSpan(newSpan, start, end, flags);
-
-            String source = span.getSource();
-            if (source != null) {
-                ssb.setSpan(new ClickableSpan() {
-                    @Override
-                    public void onClick(@NonNull View widget) {
-                        ImageViewerFragment.newInstance(source)
-                                .show(getSupportFragmentManager(), "image_viewer");
-                    }
-                }, start, end, flags);
-            }
-        }
-
-        textView.setText(ssb);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
-        textView.setClickable(true);
-    }
-
-    private String processCustomSmilies(String input) {
-        Pattern pattern = Pattern.compile("\\[g=(.*?)\\]");
-        Matcher matcher = pattern.matcher(input);
-
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String path = matcher.group(1);
-            String imgTag = "<img src=\"" + SMILIE_BASE_URL + path + "\" />";
-            matcher.appendReplacement(sb, imgTag);
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    private class BBSGlideImageGetter implements Html.ImageGetter {
-        private final WeakReference<TextView> container;
-
-        public BBSGlideImageGetter(TextView textView) {
-            this.container = new WeakReference<>(textView);
-        }
-
-        @Override
-        public Drawable getDrawable(String source) {
-            final UrlDrawable urlDrawable = new UrlDrawable();
-
-            TextView textView = container.get();
-            if (textView != null) {
-                DrawableTarget target = new DrawableTarget(urlDrawable, textView, source);
-                urlDrawable.setDrawableTarget(target);
-                Glide.with(textView.getContext())
-                        .load(source)
-                        .placeholder(R.drawable.placeholder_image)
-                        .into(target);
-            }
-
-            return urlDrawable;
-        }
-
-        private class DrawableTarget extends CustomTarget<Drawable> {
-            private final UrlDrawable urlDrawable;
-            private final WeakReference<TextView> textViewRef;
-            private final String source;
-
-            public DrawableTarget(UrlDrawable urlDrawable, TextView textView, String source) {
-                this.urlDrawable = urlDrawable;
-                this.textViewRef = new WeakReference<>(textView);
-                this.source = source;
-            }
-
-            @Override
-            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                TextView textView = textViewRef.get();
-                if (textView == null) return;
-
-                int width = resource.getIntrinsicWidth();
-                int height = resource.getIntrinsicHeight();
-                
-                boolean isSmilie = source != null && source.startsWith(SMILIE_BASE_URL);
-                
-                if (isSmilie) {
-                    float scale = 1.5f;
-                    resource.setBounds(0, 0, (int)(width * scale), (int)(height * scale));
-                    urlDrawable.setBounds(0, 0, (int)(width * scale), (int)(height * scale));
-                } else {
-                    int tvWidth = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
-                    if (tvWidth <= 0) {
-                        tvWidth = textView.getResources().getDisplayMetrics().widthPixels - textView.getPaddingLeft() - textView.getPaddingRight();
-                    }
-                    
-                    if (tvWidth > 0 && width > tvWidth) {
-                        float scale = (float) tvWidth / width;
-                        resource.setBounds(0, 0, tvWidth, (int)(height * scale));
-                        urlDrawable.setBounds(0, 0, tvWidth, (int)(height * scale));
-                    } else {
-                        resource.setBounds(0, 0, width, height);
-                        urlDrawable.setBounds(0, 0, width, height);
-                    }
-                }
-
-                urlDrawable.setDrawable(resource);
-
-                if (resource instanceof Animatable) {
-                    resource.setCallback(new Drawable.Callback() {
-                        @Override
-                        public void invalidateDrawable(@NonNull Drawable who) {
-                            textView.invalidate();
-                        }
-
-                        @Override
-                        public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
-                            textView.postDelayed(what, when - System.currentTimeMillis());
-                        }
-
-                        @Override
-                        public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
-                            textView.removeCallbacks(what);
-                        }
-                    });
-                    ((Animatable) resource).start();
-                }
-
-                textView.setText(textView.getText());
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder) {
-            }
-
-            @Override
-            public void onLoadStarted(@Nullable Drawable placeholder) {
-                if (placeholder != null) {
-                    TextView textView = textViewRef.get();
-                    if (textView != null) {
-                        int width = placeholder.getIntrinsicWidth();
-                        int height = placeholder.getIntrinsicHeight();
-                        
-                        int tvWidth = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
-                        if (tvWidth <= 0) {
-                            tvWidth = textView.getResources().getDisplayMetrics().widthPixels - textView.getPaddingLeft() - textView.getPaddingRight();
-                        }
-                        
-                        if (tvWidth > 0 && width > tvWidth) {
-                            float scale = (float) tvWidth / width;
-                            placeholder.setBounds(0, 0, tvWidth, (int)(height * scale));
-                            urlDrawable.setBounds(0, 0, tvWidth, (int)(height * scale));
-                        } else {
-                            placeholder.setBounds(0, 0, width, height);
-                            urlDrawable.setBounds(0, 0, width, height);
-                        }
-
-                        urlDrawable.setDrawable(placeholder);
-                        textView.setText(textView.getText());
-                    }
-                }
-            }
-        }
-    }
-
-    private static class UrlDrawable extends BitmapDrawable {
-        private Drawable drawable;
-        private Object drawableTarget;
-
-        @SuppressWarnings("deprecation")
-        public UrlDrawable() {
-            super();
-        }
-
-        public void setDrawable(Drawable drawable) {
-            this.drawable = drawable;
-        }
-
-        public void setDrawableTarget(Object target) {
-            this.drawableTarget = target;
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            if (drawable != null) {
-                drawable.draw(canvas);
-            }
-        }
     }
 }
