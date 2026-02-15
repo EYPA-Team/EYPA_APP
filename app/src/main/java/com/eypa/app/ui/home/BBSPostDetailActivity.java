@@ -172,12 +172,29 @@ public class BBSPostDetailActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                if (position == 0) {
-                    commentInputContainer.setVisibility(View.GONE);
-                } else {
+                if (position == 1) {
                     commentInputContainer.setVisibility(View.VISIBLE);
                     commentInputContainer.setAlpha(0f);
-                    commentInputContainer.animate().alpha(1f).setDuration(200).start();
+                    commentInputContainer.setTranslationY(getResources().getDisplayMetrics().density * 60);
+                    commentInputContainer.animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setDuration(300)
+                            .setListener(null)
+                            .start();
+                } else {
+                    if (commentInputContainer.getVisibility() == View.VISIBLE) {
+                        commentInputContainer.animate()
+                                .alpha(0f)
+                                .translationY(commentInputContainer.getHeight())
+                                .setDuration(300)
+                                .withEndAction(() -> commentInputContainer.setVisibility(View.GONE))
+                                .start();
+                        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (getCurrentFocus() != null) {
+                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        }
+                    }
                 }
             }
         });
