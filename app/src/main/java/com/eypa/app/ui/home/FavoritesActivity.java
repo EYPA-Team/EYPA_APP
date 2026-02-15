@@ -112,12 +112,12 @@ public class FavoritesActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<ContentItem>> call, Response<List<ContentItem>> response) {
                 isLoading = false;
-                progressBar.setVisibility(View.GONE);
                 
                 if (response.isSuccessful() && response.body() != null) {
                     List<ContentItem> newItems = response.body();
                     if (newItems.isEmpty()) {
                         isLastPage = true;
+                        progressBar.setVisibility(View.GONE);
                     } else {
                         if (currentPage == 1) {
                             favoritesList.clear();
@@ -130,7 +130,6 @@ public class FavoritesActivity extends AppCompatActivity {
 
                             recyclerView.animate()
                                     .alpha(1f)
-                                    .setStartDelay(300)
                                     .setDuration(300)
                                     .start();
                         }
