@@ -20,6 +20,7 @@ import com.eypa.app.api.ApiClient;
 import com.eypa.app.api.ContentApiService;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.utils.CategoryCacheManager;
+import com.eypa.app.utils.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,10 @@ public class TagContentActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeUtils.applyTheme(this);
+        int themeId = getSharedPreferences("AppSettings", MODE_PRIVATE).getInt("ThemeId", R.style.Theme_EYPA_APP);
+        setTheme(themeId);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tag_content);
 
