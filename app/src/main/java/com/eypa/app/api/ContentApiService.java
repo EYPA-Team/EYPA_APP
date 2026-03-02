@@ -162,7 +162,10 @@ public interface ContentApiService {
 
     // 帖子列表
     @GET("eu-json/app/v1/bbs/posts")
-    Call<BBSPostListResponse> getBBSPosts(@Query("page") int page);
+    Call<BBSPostListResponse> getBBSPosts(
+            @Query("page") int page,
+            @Query("tab") String tab
+    );
 
     // 帖子详情
     @POST("eu-json/app/v1/bbs/post/detail")

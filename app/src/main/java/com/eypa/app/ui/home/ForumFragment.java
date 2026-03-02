@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.tabs.TabLayout;
 
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
@@ -36,6 +40,9 @@ public class ForumFragment extends Fragment {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar progressBar;
+    private LinearLayout errorLayout;
+    private Button btnRetry;
+    private TabLayout tabLayout;
     private BBSPostAdapter adapter;
     private List<BBSPost> postList = new ArrayList<>();
     private int currentPage = 1;
@@ -43,6 +50,11 @@ public class ForumFragment extends Fragment {
     private boolean hasMore = true;
     private boolean isFirstLoad = true;
     private long refreshStartTime = 0;
+    private int retryCount = 0;
+    private String currentTab = "";
+
+    private final String[] tabTitles = {"最新发布", "最新回复", "最多浏览", "精华", "提问", "最多点赞", "最多评分"};
+    private final String[] tabValues = {"new", "reply", "views", "essence", "question", "like", "score"};
 
     @Nullable
     @Override
@@ -57,6 +69,18 @@ public class ForumFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recycler_view);
         progressBar = view.findViewById(R.id.progress_bar);
+        tabLayout = view.findViewById(R.id.tab_layout);
+        errorLayout = view.findViewById(R.id.error_layout);
+        btnRetry = view.findViewById(R.id.btn_retry);
+
+        btnRetry.setOnClickListener(v -> {
+            errorLayout.setVisibility(View.GONE);
+            currentPage = 1;
+            retryCount = 0;
+            loadPosts();
+        });
+
+        setupTabs();
 
         adapter = new BBSPostAdapter(postList, post -> {
             Intent intent = new Intent(getContext(), BBSPostDetailActivity.class);
@@ -82,6 +106,7 @@ public class ForumFragment extends Fragment {
             hasMore = true;
             refreshStartTime = System.currentTimeMillis();
             recyclerView.animate().alpha(0f).setDuration(300).start();
+            retryCount = 0;
             loadPosts();
         });
 
@@ -99,18 +124,53 @@ public class ForumFragment extends Fragment {
         loadPosts();
     }
 
+    private void setupTabs() {
+        for (String title : tabTitles) {
+            tabLayout.addTab(tabLayout.newTab().setText(title));
+        }
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                recyclerView.animate().alpha(0f).setDuration(300).withEndAction(() -> {
+                    int position = tab.getPosition();
+                    if (position >= 0 && position < tabValues.length) {
+                        currentTab = tabValues[position];
+                        currentPage = 1;
+                        hasMore = true;
+                        retryCount = 0;
+                        
+                        swipeRefreshLayout.setRefreshing(true);
+                        postList.clear();
+                        adapter.notifyDataSetChanged();
+                        refreshStartTime = System.currentTimeMillis();
+                        
+                        loadPosts();
+                    }
+                }).start();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
     private void loadPosts() {
         isLoading = true;
         if (isFirstLoad) {
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setAlpha(1f);
+            errorLayout.setVisibility(View.GONE);
         } else if (currentPage > 1) {
              recyclerView.post(() -> {
                 if (adapter != null) adapter.setLoadingFooterVisible(true);
             });
         }
 
-        ApiClient.getApiService().getBBSPosts(currentPage).enqueue(new Callback<BBSPostListResponse>() {
+        ApiClient.getApiService().getBBSPosts(currentPage, currentTab).enqueue(new Callback<BBSPostListResponse>() {
             @Override
             public void onResponse(@NonNull Call<BBSPostListResponse> call, @NonNull Response<BBSPostListResponse> response) {
                 if (isAdded()) {
@@ -119,19 +179,10 @@ public class ForumFragment extends Fragment {
                     adapter.setLoadingFooterVisible(false);
 
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        retryCount = 0;
                         List<BBSPost> newData = response.body().getData();
                         
                         if (isFirstLoad) {
-                            if (currentPage == 1) {
-                                postList.clear();
-                            }
-                            if (newData != null && !newData.isEmpty()) {
-                                postList.addAll(newData);
-                                adapter.notifyDataSetChanged();
-                            } else {
-                                hasMore = false;
-                            }
-                            
                             isFirstLoad = false;
                             progressBar.animate()
                                     .alpha(0f)
@@ -144,42 +195,35 @@ public class ForumFragment extends Fragment {
                                     .setStartDelay(300)
                                     .setDuration(300)
                                     .start();
-                        } else {
-                            if (currentPage == 1) {
-                                long elapsedTime = System.currentTimeMillis() - refreshStartTime;
-                                long remainingTime = 300 - elapsedTime;
-                                if (remainingTime < 0) remainingTime = 0;
+                        }
 
-                                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                    if (isAdded()) {
-                                        postList.clear();
-                                        if (newData != null && !newData.isEmpty()) {
-                                            postList.addAll(newData);
-                                            adapter.notifyDataSetChanged();
-                                        } else {
-                                            hasMore = false;
-                                        }
-                                        recyclerView.animate().alpha(1f).setDuration(300).start();
+                        if (currentPage == 1) {
+                            long elapsedTime = System.currentTimeMillis() - refreshStartTime;
+                            long remainingTime = 300 - elapsedTime;
+                            if (remainingTime < 0) remainingTime = 0;
+
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                if (isAdded()) {
+                                    postList.clear();
+                                    if (newData != null && !newData.isEmpty()) {
+                                        postList.addAll(newData);
+                                        adapter.notifyDataSetChanged();
+                                    } else {
+                                        hasMore = false;
                                     }
-                                }, remainingTime);
-                            } else {
-                                if (newData != null && !newData.isEmpty()) {
-                                    postList.addAll(newData);
-                                    adapter.notifyDataSetChanged();
-                                } else {
-                                    hasMore = false;
+                                    recyclerView.animate().alpha(1f).setDuration(300).start();
                                 }
+                            }, remainingTime);
+                        } else {
+                            if (newData != null && !newData.isEmpty()) {
+                                postList.addAll(newData);
+                                adapter.notifyDataSetChanged();
+                            } else {
+                                hasMore = false;
                             }
                         }
-
                     } else {
-                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
-                        if (isFirstLoad) {
-                             progressBar.setVisibility(View.GONE);
-                             recyclerView.setAlpha(1f);
-                        } else {
-                             recyclerView.animate().alpha(1f).setDuration(300).start();
-                        }
+                        handleLoadFailure();
                     }
                 }
             }
@@ -187,19 +231,32 @@ public class ForumFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<BBSPostListResponse> call, @NonNull Throwable t) {
                 if (isAdded()) {
-                    isLoading = false;
-                    swipeRefreshLayout.setRefreshing(false);
                     adapter.setLoadingFooterVisible(false);
-                    Toast.makeText(getContext(), "网络错误", Toast.LENGTH_SHORT).show();
-                    
-                    if (isFirstLoad) {
-                         progressBar.setVisibility(View.GONE);
-                         recyclerView.setAlpha(1f);
-                    } else {
-                         recyclerView.animate().alpha(1f).setDuration(300).start();
-                    }
+                    handleLoadFailure();
                 }
             }
         });
+    }
+
+    private void handleLoadFailure() {
+        if (isFirstLoad && retryCount < 3) {
+            retryCount++;
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isAdded()) {
+                    loadPosts();
+                }
+            }, 2000);
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
+            isLoading = false;
+            progressBar.setVisibility(View.GONE);
+            
+            if (isFirstLoad) {
+                errorLayout.setVisibility(View.VISIBLE);
+                recyclerView.setAlpha(0f);
+            } else {
+                recyclerView.animate().alpha(1f).setDuration(300).start();
+            }
+        }
     }
 }

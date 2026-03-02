@@ -486,7 +486,6 @@ public class HomeFragment extends Fragment {
     private void handleLoadFailure(String errorMsg) {
         if (isFirstLoad && retryCount < 3) {
             retryCount++;
-            Log.d("HomeFragment", "Loading failed, retrying... (" + retryCount + "/3)");
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (isAdded()) {
                     loadPosts();
@@ -505,7 +504,6 @@ public class HomeFragment extends Fragment {
             } else {
                 recyclerView.animate().alpha(1f).setDuration(300).start();
             }
-            Log.e("API_FAILURE", "Load failed: " + errorMsg);
         }
     }
 
