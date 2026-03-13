@@ -103,17 +103,31 @@
             android:maxLines="3"
             android:inputType="textMultiLine"/>
 
-        <Button
-            android:id="@+id/btn_send"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="发送"
-            android:minWidth="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"/>
+            android:layout_gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="发送"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"/>
+
+            <ProgressBar
+                android:id="@+id/send_progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="?attr/colorPrimary" />
+        </FrameLayout>
 
     </LinearLayout>
 

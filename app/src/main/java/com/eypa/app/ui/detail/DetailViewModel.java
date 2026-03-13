@@ -46,6 +46,7 @@ public class DetailViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isLoadMoreLoading = new MutableLiveData<>(false);
     private final MutableLiveData<Comment> replyToComment = new MutableLiveData<>();
     private final MutableLiveData<Comment> editComment = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> commentSubmitStatus = new MutableLiveData<>();
 
     private String currentSortType = "date";
     private Integer currentOnlyAuthor = 0;
@@ -114,6 +115,14 @@ public class DetailViewModel extends AndroidViewModel {
 
     public void setEditComment(Comment comment) {
         editComment.setValue(comment);
+    }
+
+    public LiveData<Boolean> getCommentSubmitStatus() {
+        return commentSubmitStatus;
+    }
+
+    public void clearCommentSubmitStatus() {
+        commentSubmitStatus.setValue(null);
     }
 
     public void checkFollowStatus(int authorId) {
@@ -473,6 +482,7 @@ public class DetailViewModel extends AndroidViewModel {
     public void submitComment(int postId, String content, int parentId) {
         if (UserManager.getInstance(getApplication()).getToken() == null) {
             navigateToLogin.setValue(true);
+            commentSubmitStatus.setValue(false);
             return;
         }
 
@@ -485,12 +495,15 @@ public class DetailViewModel extends AndroidViewModel {
                     if (newComment != null) {
                         addCommentToList(newComment);
                     }
+                    commentSubmitStatus.setValue(true);
+                } else {
+                    commentSubmitStatus.setValue(false);
                 }
             }
 
             @Override
             public void onFailure(Call<SubmitCommentResponse> call, Throwable t) {
-                // 不做处理
+                commentSubmitStatus.setValue(false);
             }
         });
     }
@@ -498,6 +511,7 @@ public class DetailViewModel extends AndroidViewModel {
     public void editComment(int commentId, String content) {
         if (UserManager.getInstance(getApplication()).getToken() == null) {
             navigateToLogin.setValue(true);
+            commentSubmitStatus.setValue(false);
             return;
         }
 
@@ -510,12 +524,15 @@ public class DetailViewModel extends AndroidViewModel {
                     if (updatedComment != null) {
                         updateCommentContent(updatedComment);
                     }
+                    commentSubmitStatus.setValue(true);
+                } else {
+                    commentSubmitStatus.setValue(false);
                 }
             }
 
             @Override
             public void onFailure(Call<SubmitCommentResponse> call, Throwable t) {
-                // 不做处理
+                commentSubmitStatus.setValue(false);
             }
         });
     }

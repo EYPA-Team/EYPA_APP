@@ -80,6 +80,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     private View commentInputContainer;
     private EditText editComment;
     private Button btnSend;
+    private android.widget.ProgressBar sendProgress;
     private DetailViewModel viewModel;
 
     // 初始加载状态
@@ -134,6 +135,7 @@ public class BBSPostDetailActivity extends AppCompatActivity {
         commentInputContainer = findViewById(R.id.comment_input_container);
         editComment = findViewById(R.id.edit_comment);
         btnSend = findViewById(R.id.btn_send);
+        sendProgress = findViewById(R.id.send_progress);
 
         viewModel = new ViewModelProvider(this).get(DetailViewModel.class);
 
@@ -221,6 +223,11 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "请输入评论内容", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            btnSend.animate().alpha(0f).setDuration(200).withEndAction(() -> btnSend.setVisibility(View.INVISIBLE)).start();
+            sendProgress.setAlpha(0f);
+            sendProgress.setVisibility(View.VISIBLE);
+            sendProgress.animate().alpha(1f).setDuration(200).start();
 
             if (viewModel.getEditComment().getValue() != null) {
                 viewModel.editComment(viewModel.getEditComment().getValue().getId(), content);
@@ -330,6 +337,33 @@ public class BBSPostDetailActivity extends AppCompatActivity {
                 if (viewModel.getReplyToComment().getValue() == null) {
                     editComment.setHint("说点什么吧...");
                 }
+            }
+        });
+
+        viewModel.getCommentSubmitStatus().observe(this, success -> {
+            if (success != null) {
+                sendProgress.animate().alpha(0f).setDuration(200).withEndAction(() -> sendProgress.setVisibility(View.GONE)).start();
+                btnSend.setAlpha(0f);
+                btnSend.setVisibility(View.VISIBLE);
+                btnSend.animate().alpha(1f).setDuration(200).start();
+                
+                if (success) {
+                    editComment.setText("");
+                    editComment.clearFocus();
+                    
+                    if (viewModel.getEditComment().getValue() != null) {
+                        viewModel.setEditComment(null);
+                        editComment.setHint("说点什么吧...");
+                    } else if (viewModel.getReplyToComment().getValue() != null) {
+                        viewModel.setReplyToComment(null);
+                        editComment.setHint("说点什么吧...");
+                    }
+                    
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+                }
+                
+                viewModel.clearCommentSubmitStatus();
             }
         });
     }

@@ -120,6 +120,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     private View commentInputContainer;
     private EditText editComment;
     private Button btnSend;
+    private ProgressBar sendProgress;
     private int replyToCommentId = 0;
     private int editCommentId = 0;
     
@@ -298,6 +299,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         commentInputContainer = findViewById(R.id.comment_input_container);
         editComment = findViewById(R.id.edit_comment);
         btnSend = findViewById(R.id.btn_send);
+        sendProgress = findViewById(R.id.send_progress);
         
         appBarLayout.setVisibility(View.INVISIBLE);
         contentTabsAndPager.setVisibility(View.INVISIBLE);
@@ -327,33 +329,19 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 return;
             }
             
+            btnSend.animate().alpha(0f).setDuration(200).withEndAction(() -> btnSend.setVisibility(View.INVISIBLE)).start();
+            sendProgress.setAlpha(0f);
+            sendProgress.setVisibility(View.VISIBLE);
+            sendProgress.animate().alpha(1f).setDuration(200).start();
+            
             if (editCommentId > 0) {
                 viewModel.editComment(editCommentId, content);
-                editComment.setText("");
-                editComment.clearFocus();
-                editCommentId = 0;
-                editComment.setHint("说点什么吧...");
-                viewModel.setEditComment(null);
-                
-                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
                 return;
             }
             
             if (viewModel.getPostData().getValue() != null) {
                 int postId = viewModel.getPostData().getValue().getId();
                 viewModel.submitComment(postId, content, replyToCommentId);
-                editComment.setText("");
-                editComment.clearFocus();
-                
-                if (replyToCommentId > 0) {
-                    replyToCommentId = 0;
-                    editComment.setHint("说点什么吧...");
-                    viewModel.setReplyToComment(null);
-                }
-                
-                android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
             }
         });
     }
@@ -520,6 +508,35 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
                 if (replyToCommentId == 0) {
                     editComment.setHint("说点什么吧...");
                 }
+            }
+        });
+        
+        viewModel.getCommentSubmitStatus().observe(this, success -> {
+            if (success != null) {
+                sendProgress.animate().alpha(0f).setDuration(200).withEndAction(() -> sendProgress.setVisibility(View.GONE)).start();
+                btnSend.setAlpha(0f);
+                btnSend.setVisibility(View.VISIBLE);
+                btnSend.animate().alpha(1f).setDuration(200).start();
+                
+                if (success) {
+                    editComment.setText("");
+                    editComment.clearFocus();
+                    
+                    if (editCommentId > 0) {
+                        editCommentId = 0;
+                        editComment.setHint("说点什么吧...");
+                        viewModel.setEditComment(null);
+                    } else if (replyToCommentId > 0) {
+                        replyToCommentId = 0;
+                        editComment.setHint("说点什么吧...");
+                        viewModel.setReplyToComment(null);
+                    }
+                    
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
+                }
+                
+                viewModel.clearCommentSubmitStatus();
             }
         });
     }
