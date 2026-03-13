@@ -60,6 +60,8 @@ public class BBSPost {
         public Vip vip;
         @SerializedName("is_following")
         public boolean isFollowing;
+        
+        public transient boolean isFollowLoading = false;
 
         public static class Level {
             public int index;

@@ -93,19 +93,32 @@
                         tools:text="作者" />
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/btn_follow"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:layout_marginStart="8dp"
-                    android:paddingTop="0dp"
-                    android:paddingBottom="0dp"
-                    android:text="关注"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:layout_marginStart="8dp">
+
+                    <Button
+                        android:id="@+id/btn_follow"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
+                        android:text="关注"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <ProgressBar
+                        android:id="@+id/follow_progress"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        android:indeterminateTint="?attr/colorPrimary" />
+                </FrameLayout>
 
             </LinearLayout>
 

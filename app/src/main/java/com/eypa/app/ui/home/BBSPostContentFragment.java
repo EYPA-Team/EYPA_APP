@@ -19,8 +19,11 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,6 +68,7 @@ public class BBSPostContentFragment extends Fragment {
     private View layoutLoginRequired;
     private View btnLogin;
     private Button btnFollow;
+    private ProgressBar followProgress;
     
     private DetailViewModel viewModel;
     private BBSPost mCurrentPost;
@@ -104,6 +108,7 @@ public class BBSPostContentFragment extends Fragment {
         layoutLoginRequired = view.findViewById(R.id.layout_login_required);
         btnLogin = view.findViewById(R.id.btn_login);
         btnFollow = view.findViewById(R.id.btn_follow);
+        followProgress = view.findViewById(R.id.follow_progress);
     }
 
     private void displayPost(BBSPost post) {
@@ -184,20 +189,48 @@ public class BBSPostContentFragment extends Fragment {
 
             if (isMe) {
                 btnFollow.setVisibility(View.GONE);
+                followProgress.setVisibility(View.GONE);
             } else {
-                btnFollow.setVisibility(View.VISIBLE);
-                updateFollowButtonState(post.getAuthorInfo().isFollowing);
+                if (post.getAuthorInfo().isFollowLoading) {
+                    if (btnFollow.getVisibility() == View.VISIBLE) {
+                        Animation fadeOut = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out);
+                        btnFollow.startAnimation(fadeOut);
+                        btnFollow.setVisibility(View.INVISIBLE);
+                    }
+                    if (followProgress.getVisibility() != View.VISIBLE) {
+                        Animation fadeIn = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_in_fast);
+                        followProgress.startAnimation(fadeIn);
+                        followProgress.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    if (followProgress.getVisibility() == View.VISIBLE) {
+                        Animation fadeOut = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out);
+                        followProgress.startAnimation(fadeOut);
+                        followProgress.setVisibility(View.GONE);
+                    }
+                    if (btnFollow.getVisibility() != View.VISIBLE) {
+                        Animation fadeIn = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_in_fast);
+                        btnFollow.startAnimation(fadeIn);
+                        btnFollow.setVisibility(View.VISIBLE);
+                    }
+                    updateFollowButtonState(post.getAuthorInfo().isFollowing);
+                }
 
                 btnFollow.setOnClickListener(v -> {
                     if (!Boolean.TRUE.equals(UserManager.getInstance(requireContext()).isLoggedIn().getValue())) {
                         startActivity(new android.content.Intent(requireContext(), LoginActivity.class));
                         return;
                     }
-                    followUser(post);
+                    if (!post.getAuthorInfo().isFollowLoading) {
+                        post.getAuthorInfo().isFollowLoading = true;
+                        displayPost(post);
+                        followUser(post);
+                    }
                 });
             }
         } else {
             btnFollow.setVisibility(View.GONE);
+            followProgress.setVisibility(View.GONE);
         }
 
         if (post.getPlate() != null) {
@@ -231,6 +264,7 @@ public class BBSPostContentFragment extends Fragment {
             ApiClient.getApiService().followUser(request).enqueue(new Callback<FollowResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<FollowResponse> call, @NonNull Response<FollowResponse> response) {
+                    post.getAuthorInfo().isFollowLoading = false;
                     if (response.isSuccessful() && response.body() != null) {
                         if (response.body().getCode() == 200) {
                             boolean newStatus = !post.getAuthorInfo().isFollowing;
@@ -242,11 +276,14 @@ public class BBSPostContentFragment extends Fragment {
                     } else {
                         Toast.makeText(requireContext(), "操作失败", Toast.LENGTH_SHORT).show();
                     }
+                    displayPost(post);
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<FollowResponse> call, @NonNull Throwable t) {
+                    post.getAuthorInfo().isFollowLoading = false;
                     Toast.makeText(requireContext(), "网络错误", Toast.LENGTH_SHORT).show();
+                    displayPost(post);
                 }
             });
 
