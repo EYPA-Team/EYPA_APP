@@ -356,6 +356,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         View likeContainer, shareBtn, replyBtn, moreBtn;
         ImageView likeIcon;
         TextView likeCount;
+        View likeProgress;
 
         CommentViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -369,6 +370,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             likeContainer = itemView.findViewById(R.id.action_like_container);
             likeIcon = itemView.findViewById(R.id.action_like_icon);
             likeCount = itemView.findViewById(R.id.action_like_count);
+            likeProgress = itemView.findViewById(R.id.action_like_progress);
             shareBtn = itemView.findViewById(R.id.action_share_btn);
             replyBtn = itemView.findViewById(R.id.action_reply_btn);
             moreBtn = itemView.findViewById(R.id.action_more_btn);
@@ -400,19 +402,28 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 int count = comment.getInteraction().getLikeCount();
                 likeCount.setText(count > 0 ? String.valueOf(count) : "赞");
                 
-                if (comment.getInteraction().isLiked()) {
-                    likeIcon.setImageResource(R.drawable.ic_action_like);
-                    android.util.TypedValue typedValue = new android.util.TypedValue();
-                    context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-                    likeIcon.setColorFilter(typedValue.data);
-                    likeCount.setTextColor(typedValue.data);
+                if (comment.getInteraction().isLikeLoading()) {
+                    likeIcon.setVisibility(View.INVISIBLE);
+                    likeProgress.setVisibility(View.VISIBLE);
                 } else {
-                    likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
-                    likeIcon.clearColorFilter();
-                    likeCount.setTextColor(0xFF999999);
+                    likeIcon.setVisibility(View.VISIBLE);
+                    likeProgress.setVisibility(View.GONE);
+                    if (comment.getInteraction().isLiked()) {
+                        likeIcon.setImageResource(R.drawable.ic_action_like);
+                        android.util.TypedValue typedValue = new android.util.TypedValue();
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
+                        likeIcon.setColorFilter(typedValue.data);
+                        likeCount.setTextColor(typedValue.data);
+                    } else {
+                        likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
+                        likeIcon.clearColorFilter();
+                        likeCount.setTextColor(0xFF999999);
+                    }
                 }
             } else {
                 likeCount.setText("赞");
+                likeIcon.setVisibility(View.VISIBLE);
+                likeProgress.setVisibility(View.GONE);
                 likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
                 likeIcon.clearColorFilter();
                 likeCount.setTextColor(0xFF999999);
@@ -444,7 +455,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
 
             if (listener != null) {
-                likeContainer.setOnClickListener(v -> listener.onLike(comment));
+                likeContainer.setOnClickListener(v -> {
+                    if (comment.getInteraction() != null && !comment.getInteraction().isLikeLoading()) {
+                        listener.onLike(comment);
+                    } else if (comment.getInteraction() == null) {
+                        listener.onLike(comment);
+                    }
+                });
                 shareBtn.setOnClickListener(v -> listener.onShare(comment));
                 if (replyBtn != null) {
                     replyBtn.setOnClickListener(v -> listener.onReply(comment));

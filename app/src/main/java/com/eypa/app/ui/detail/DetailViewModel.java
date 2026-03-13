@@ -392,6 +392,12 @@ public class DetailViewModel extends AndroidViewModel {
             return;
         }
 
+        if (comment.getInteraction() == null) {
+            comment.setInteraction(new Comment.Interaction());
+        }
+        comment.getInteraction().setLikeLoading(true);
+        commentItemUpdated.setValue(comment.getId());
+
         LikeCommentRequest request = new LikeCommentRequest(UserManager.getInstance(getApplication()).getToken(), comment.getId());
         ApiClient.getApiService().likeComment(request).enqueue(new Callback<LikeCommentResponse>() {
             @Override
@@ -399,14 +405,46 @@ public class DetailViewModel extends AndroidViewModel {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     LikeCommentResponse.Data data = response.body().getData();
                     updateCommentLikeStatus(comment.getId(), data.getLikeCount(), data.isLiked());
+                } else {
+                    resetCommentLikeLoadingState(comment.getId());
                 }
             }
 
             @Override
             public void onFailure(Call<LikeCommentResponse> call, Throwable t) {
-                // 不做处理
+                resetCommentLikeLoadingState(comment.getId());
             }
         });
+    }
+
+    private void resetCommentLikeLoadingState(int commentId) {
+        List<CommentBlock> blocks = commentBlocks.getValue();
+        if (blocks != null) {
+            for (CommentBlock block : blocks) {
+                if (resetCommentLikeLoadingInTree(block.getComment(), commentId)) {
+                    commentItemUpdated.setValue(commentId);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean resetCommentLikeLoadingInTree(Comment root, int targetId) {
+        if (root.getId() == targetId) {
+            if (root.getInteraction() != null) {
+                root.getInteraction().setLikeLoading(false);
+            }
+            return true;
+        }
+
+        if (root.getChildren() != null) {
+            for (Comment child : root.getChildren()) {
+                if (resetCommentLikeLoadingInTree(child, targetId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void deleteComment(Comment comment) {
@@ -551,6 +589,7 @@ public class DetailViewModel extends AndroidViewModel {
             }
             root.getInteraction().setLikeCount(likeCount);
             root.getInteraction().setLiked(isLiked);
+            root.getInteraction().setLikeLoading(false);
             return true;
         }
 

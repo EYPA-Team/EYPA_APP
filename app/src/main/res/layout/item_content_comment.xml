@@ -79,11 +79,21 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless">
-                    <ImageView
-                        android:id="@+id/action_like_icon"
+                    <FrameLayout
                         android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_thumb_up_outline"/>
+                        android:layout_height="14dp">
+                        <ImageView
+                            android:id="@+id/action_like_icon"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_thumb_up_outline"/>
+                        <ProgressBar
+                            android:id="@+id/action_like_progress"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone"
+                            android:indeterminateTint="?attr/colorPrimary" />
+                    </FrameLayout>
                     <!-- 如果后端没有评论点赞数据，可以先隐藏或显示0 -->
                     <TextView
                         android:id="@+id/action_like_count"

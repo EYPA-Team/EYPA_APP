@@ -195,27 +195,13 @@ public class Comment {
         private int likeCount;
         @SerializedName("is_liked")
         private boolean isLiked;
-        @SerializedName("reply_count")
-        private int replyCount;
+        private transient boolean isLikeLoading = false;
 
-        public int getLikeCount() {
-            return likeCount;
-        }
-
-        public boolean isLiked() {
-            return isLiked;
-        }
-
-        public int getReplyCount() {
-            return replyCount;
-        }
-
-        public void setLikeCount(int likeCount) {
-            this.likeCount = likeCount;
-        }
-
-        public void setLiked(boolean liked) {
-            isLiked = liked;
-        }
+        public int getLikeCount() { return likeCount; }
+        public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+        public boolean isLiked() { return isLiked; }
+        public void setLiked(boolean liked) { isLiked = liked; }
+        public boolean isLikeLoading() { return isLikeLoading; }
+        public void setLikeLoading(boolean likeLoading) { isLikeLoading = likeLoading; }
     }
 }
