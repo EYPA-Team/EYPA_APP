@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -244,11 +246,27 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     followProgress.setVisibility(View.GONE);
                 } else {
                     if (author.isFollowLoading()) {
-                        followButton.setVisibility(View.INVISIBLE);
-                        followProgress.setVisibility(View.VISIBLE);
+                        if (followButton.getVisibility() == View.VISIBLE) {
+                            Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                            followButton.startAnimation(fadeOut);
+                            followButton.setVisibility(View.INVISIBLE);
+                        }
+                        if (followProgress.getVisibility() != View.VISIBLE) {
+                            Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                            followProgress.startAnimation(fadeIn);
+                            followProgress.setVisibility(View.VISIBLE);
+                        }
                     } else {
-                        followButton.setVisibility(View.VISIBLE);
-                        followProgress.setVisibility(View.GONE);
+                        if (followProgress.getVisibility() == View.VISIBLE) {
+                            Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                            followProgress.startAnimation(fadeOut);
+                            followProgress.setVisibility(View.GONE);
+                        }
+                        if (followButton.getVisibility() != View.VISIBLE) {
+                            Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                            followButton.startAnimation(fadeIn);
+                            followButton.setVisibility(View.VISIBLE);
+                        }
                         if (author.isFollowing()) {
                             followButton.setText("已关注");
                             followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
@@ -321,11 +339,27 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
 
             if (post.isLikeLoading()) {
-                likeIcon.setVisibility(View.INVISIBLE);
-                likeProgress.setVisibility(View.VISIBLE);
+                if (likeIcon.getVisibility() == View.VISIBLE) {
+                    Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                    likeIcon.startAnimation(fadeOut);
+                    likeIcon.setVisibility(View.INVISIBLE);
+                }
+                if (likeProgress.getVisibility() != View.VISIBLE) {
+                    Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                    likeProgress.startAnimation(fadeIn);
+                    likeProgress.setVisibility(View.VISIBLE);
+                }
             } else {
-                likeIcon.setVisibility(View.VISIBLE);
-                likeProgress.setVisibility(View.GONE);
+                if (likeProgress.getVisibility() == View.VISIBLE) {
+                    Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                    likeProgress.startAnimation(fadeOut);
+                    likeProgress.setVisibility(View.GONE);
+                }
+                if (likeIcon.getVisibility() != View.VISIBLE) {
+                    Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                    likeIcon.startAnimation(fadeIn);
+                    likeIcon.setVisibility(View.VISIBLE);
+                }
                 if (post.isLiked()) {
                     TypedValue typedValue = new TypedValue();
                     itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
@@ -347,11 +381,27 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
 
             if (post.isFavoriteLoading()) {
-                favoriteIcon.setVisibility(View.INVISIBLE);
-                favoriteProgress.setVisibility(View.VISIBLE);
+                if (favoriteIcon.getVisibility() == View.VISIBLE) {
+                    Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                    favoriteIcon.startAnimation(fadeOut);
+                    favoriteIcon.setVisibility(View.INVISIBLE);
+                }
+                if (favoriteProgress.getVisibility() != View.VISIBLE) {
+                    Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                    favoriteProgress.startAnimation(fadeIn);
+                    favoriteProgress.setVisibility(View.VISIBLE);
+                }
             } else {
-                favoriteIcon.setVisibility(View.VISIBLE);
-                favoriteProgress.setVisibility(View.GONE);
+                if (favoriteProgress.getVisibility() == View.VISIBLE) {
+                    Animation fadeOut = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_out);
+                    favoriteProgress.startAnimation(fadeOut);
+                    favoriteProgress.setVisibility(View.GONE);
+                }
+                if (favoriteIcon.getVisibility() != View.VISIBLE) {
+                    Animation fadeIn = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.fade_in_fast);
+                    favoriteIcon.startAnimation(fadeIn);
+                    favoriteIcon.setVisibility(View.VISIBLE);
+                }
                 if (post.isFavorited()) {
                     TypedValue typedValue = new TypedValue();
                     itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);

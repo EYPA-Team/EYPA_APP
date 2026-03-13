@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -403,11 +405,27 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 likeCount.setText(count > 0 ? String.valueOf(count) : "赞");
                 
                 if (comment.getInteraction().isLikeLoading()) {
-                    likeIcon.setVisibility(View.INVISIBLE);
-                    likeProgress.setVisibility(View.VISIBLE);
+                    if (likeIcon.getVisibility() == View.VISIBLE) {
+                        Animation fadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                        likeIcon.startAnimation(fadeOut);
+                        likeIcon.setVisibility(View.INVISIBLE);
+                    }
+                    if (likeProgress.getVisibility() != View.VISIBLE) {
+                        Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in_fast);
+                        likeProgress.startAnimation(fadeIn);
+                        likeProgress.setVisibility(View.VISIBLE);
+                    }
                 } else {
-                    likeIcon.setVisibility(View.VISIBLE);
-                    likeProgress.setVisibility(View.GONE);
+                    if (likeProgress.getVisibility() == View.VISIBLE) {
+                        Animation fadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                        likeProgress.startAnimation(fadeOut);
+                        likeProgress.setVisibility(View.GONE);
+                    }
+                    if (likeIcon.getVisibility() != View.VISIBLE) {
+                        Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in_fast);
+                        likeIcon.startAnimation(fadeIn);
+                        likeIcon.setVisibility(View.VISIBLE);
+                    }
                     if (comment.getInteraction().isLiked()) {
                         likeIcon.setImageResource(R.drawable.ic_action_like);
                         android.util.TypedValue typedValue = new android.util.TypedValue();
@@ -422,8 +440,16 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 }
             } else {
                 likeCount.setText("赞");
-                likeIcon.setVisibility(View.VISIBLE);
-                likeProgress.setVisibility(View.GONE);
+                if (likeProgress.getVisibility() == View.VISIBLE) {
+                    Animation fadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                    likeProgress.startAnimation(fadeOut);
+                    likeProgress.setVisibility(View.GONE);
+                }
+                if (likeIcon.getVisibility() != View.VISIBLE) {
+                    Animation fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in_fast);
+                    likeIcon.startAnimation(fadeIn);
+                    likeIcon.setVisibility(View.VISIBLE);
+                }
                 likeIcon.setImageResource(R.drawable.ic_thumb_up_outline);
                 likeIcon.clearColorFilter();
                 likeCount.setTextColor(0xFF999999);
