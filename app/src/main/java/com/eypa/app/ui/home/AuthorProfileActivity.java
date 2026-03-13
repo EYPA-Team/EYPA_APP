@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +69,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
     private LinearLayout layoutAuth;
     private TextView tvAuthInfo;
     private Button btnAction;
+    private ProgressBar followProgress;
     private LinearLayout layoutMedals;
     private TextView tvMedalsCount;
     private View loadingMask;
@@ -133,6 +136,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
         layoutAuth = findViewById(R.id.layout_auth);
         tvAuthInfo = findViewById(R.id.tv_auth_info);
         btnAction = findViewById(R.id.btn_action);
+        followProgress = findViewById(R.id.follow_progress);
         layoutMedals = findViewById(R.id.layout_medals);
         tvMedalsCount = findViewById(R.id.tv_medals_count);
         loadingMask = findViewById(R.id.loading_mask);
@@ -315,11 +319,11 @@ public class AuthorProfileActivity extends AppCompatActivity {
         String token = UserManager.getInstance(this).getToken();
         FollowRequest request = new FollowRequest(token, userId);
         
-        btnAction.setEnabled(false);
+        setFollowLoading(true);
         apiService.followUser(request).enqueue(new Callback<FollowResponse>() {
             @Override
             public void onResponse(Call<FollowResponse> call, Response<FollowResponse> response) {
-                btnAction.setEnabled(true);
+                setFollowLoading(false);
                 if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
                     FollowResponse.Data data = response.body().getData();
                     if (data != null) {
@@ -332,10 +336,36 @@ public class AuthorProfileActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<FollowResponse> call, Throwable t) {
-                btnAction.setEnabled(true);
+                setFollowLoading(false);
                 Toast.makeText(AuthorProfileActivity.this, "网络错误", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setFollowLoading(boolean isLoading) {
+        if (isLoading) {
+            if (btnAction.getVisibility() == View.VISIBLE) {
+                Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+                btnAction.startAnimation(fadeOut);
+                btnAction.setVisibility(View.INVISIBLE);
+            }
+            if (followProgress.getVisibility() != View.VISIBLE) {
+                Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in_fast);
+                followProgress.startAnimation(fadeIn);
+                followProgress.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (followProgress.getVisibility() == View.VISIBLE) {
+                Animation fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+                followProgress.startAnimation(fadeOut);
+                followProgress.setVisibility(View.GONE);
+            }
+            if (btnAction.getVisibility() != View.VISIBLE) {
+                Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in_fast);
+                btnAction.startAnimation(fadeIn);
+                btnAction.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private void updateFollowButton(boolean isFollowing) {
