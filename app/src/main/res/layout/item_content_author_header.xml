@@ -27,12 +27,25 @@
         android:textStyle="bold"
         tools:text="作者名称" />
 
-    <Button
-        android:id="@+id/follow_button"
+    <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:text="关注"
-        android:background="?attr/selectableItemBackground"
-        android:textColor="?attr/colorPrimary"
-        android:textStyle="bold" />
+        android:layout_height="40dp">
+
+        <Button
+            android:id="@+id/follow_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="关注"
+            android:background="?attr/selectableItemBackground"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/follow_progress"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateTint="?attr/colorPrimary" />
+    </FrameLayout>
 </LinearLayout>

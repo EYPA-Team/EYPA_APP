@@ -193,6 +193,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         ImageView avatarView;
         TextView nameView;
         Button followButton;
+        View followProgress;
         OnAuthorFollowClickListener listener;
 
         AuthorHeaderViewHolder(@NonNull View itemView, OnAuthorFollowClickListener listener) {
@@ -201,6 +202,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             avatarView = itemView.findViewById(R.id.author_avatar);
             nameView = itemView.findViewById(R.id.author_name);
             followButton = itemView.findViewById(R.id.follow_button);
+            followProgress = itemView.findViewById(R.id.follow_progress);
         }
 
         void bind(ContentItem post) {
@@ -239,26 +241,36 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 if (isMe) {
                     followButton.setVisibility(View.GONE);
+                    followProgress.setVisibility(View.GONE);
                 } else {
-                    followButton.setVisibility(View.VISIBLE);
-                    if (author.isFollowing()) {
-                        followButton.setText("已关注");
-                        followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
+                    if (author.isFollowLoading()) {
+                        followButton.setVisibility(View.INVISIBLE);
+                        followProgress.setVisibility(View.VISIBLE);
                     } else {
-                        followButton.setText("关注");
-                        TypedValue typedValue = new TypedValue();
-                        itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-                        followButton.setTextColor(typedValue.data);
+                        followButton.setVisibility(View.VISIBLE);
+                        followProgress.setVisibility(View.GONE);
+                        if (author.isFollowing()) {
+                            followButton.setText("已关注");
+                            followButton.setTextColor(itemView.getResources().getColor(android.R.color.darker_gray));
+                        } else {
+                            followButton.setText("关注");
+                            TypedValue typedValue = new TypedValue();
+                            itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                            followButton.setTextColor(typedValue.data);
+                        }
                     }
 
                     followButton.setOnClickListener(v -> {
-                        if (listener != null) {
+                        if (listener != null && !author.isFollowLoading()) {
+                            author.setFollowLoading(true);
+                            bind(post);
                             listener.onFollowClick(author.getId());
                         }
                     });
                 }
             } else {
                 followButton.setVisibility(View.GONE);
+                followProgress.setVisibility(View.GONE);
             }
         }
     }
@@ -269,6 +281,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         StatsView statsView;
         LinearLayout shareContainer, likeContainer, favoriteContainer;
         ImageView likeIcon, favoriteIcon;
+        View likeProgress, favoriteProgress;
 
         InfoHeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -281,10 +294,12 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             likeContainer = itemView.findViewById(R.id.action_like_container);
             likeIcon = itemView.findViewById(R.id.action_like_icon);
             likeCountView = itemView.findViewById(R.id.action_like_count);
+            likeProgress = itemView.findViewById(R.id.action_like_progress);
             
             favoriteContainer = itemView.findViewById(R.id.action_favorite_container);
             favoriteIcon = itemView.findViewById(R.id.action_favorite_icon);
             favoriteCountView = itemView.findViewById(R.id.action_favorite_count);
+            favoriteProgress = itemView.findViewById(R.id.action_favorite_progress);
             
             shareContainer = itemView.findViewById(R.id.action_share_container);
         }
@@ -305,17 +320,24 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 likeCountView.setText("点赞");
             }
 
-            if (post.isLiked()) {
-                TypedValue typedValue = new TypedValue();
-                itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-                int themeColor = typedValue.data;
-                likeIcon.setColorFilter(themeColor);
-                likeCountView.setTextColor(themeColor);
+            if (post.isLikeLoading()) {
+                likeIcon.setVisibility(View.INVISIBLE);
+                likeProgress.setVisibility(View.VISIBLE);
             } else {
-                likeIcon.clearColorFilter();
-                TypedValue typedValue = new TypedValue();
-                itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
-                likeCountView.setTextColor(typedValue.data);
+                likeIcon.setVisibility(View.VISIBLE);
+                likeProgress.setVisibility(View.GONE);
+                if (post.isLiked()) {
+                    TypedValue typedValue = new TypedValue();
+                    itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                    int themeColor = typedValue.data;
+                    likeIcon.setColorFilter(themeColor);
+                    likeCountView.setTextColor(themeColor);
+                } else {
+                    likeIcon.clearColorFilter();
+                    TypedValue typedValue = new TypedValue();
+                    itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+                    likeCountView.setTextColor(typedValue.data);
+                }
             }
 
             if (post.getFavoriteCount() > 0) {
@@ -324,17 +346,24 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 favoriteCountView.setText("收藏");
             }
 
-            if (post.isFavorited()) {
-                TypedValue typedValue = new TypedValue();
-                itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
-                int themeColor = typedValue.data;
-                favoriteIcon.setColorFilter(themeColor);
-                favoriteCountView.setTextColor(themeColor);
+            if (post.isFavoriteLoading()) {
+                favoriteIcon.setVisibility(View.INVISIBLE);
+                favoriteProgress.setVisibility(View.VISIBLE);
             } else {
-                favoriteIcon.clearColorFilter();
-                TypedValue typedValue = new TypedValue();
-                itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
-                favoriteCountView.setTextColor(typedValue.data);
+                favoriteIcon.setVisibility(View.VISIBLE);
+                favoriteProgress.setVisibility(View.GONE);
+                if (post.isFavorited()) {
+                    TypedValue typedValue = new TypedValue();
+                    itemView.getContext().getTheme().resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
+                    int themeColor = typedValue.data;
+                    favoriteIcon.setColorFilter(themeColor);
+                    favoriteCountView.setTextColor(themeColor);
+                } else {
+                    favoriteIcon.clearColorFilter();
+                    TypedValue typedValue = new TypedValue();
+                    itemView.getContext().getTheme().resolveAttribute(android.R.attr.textColorSecondary, typedValue, true);
+                    favoriteCountView.setTextColor(typedValue.data);
+                }
             }
 
             if (shareContainer != null) {
@@ -351,10 +380,15 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void handleLikeAction(Context context, ContentItem post) {
+            if (post.isLikeLoading()) return;
+
             if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
                 context.startActivity(new Intent(context, LoginActivity.class));
                 return;
             }
+
+            post.setLikeLoading(true);
+            bind(post);
 
             String token = UserManager.getInstance(context).getToken();
             PostActionRequest request = new PostActionRequest(token, post.getId());
@@ -363,30 +397,38 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             apiService.likePost(request).enqueue(new Callback<PostActionResponse>() {
                 @Override
                 public void onResponse(Call<PostActionResponse> call, Response<PostActionResponse> response) {
+                    post.setLikeLoading(false);
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         PostActionResponse.Data data = response.body().getData();
                         if (data != null) {
                             post.setLiked(data.isLiked());
                             post.setLikeCount(data.getLikeCount());
-                            bind(post);
                         }
                     } else {
                         Toast.makeText(context, "操作失败", Toast.LENGTH_SHORT).show();
                     }
+                    bind(post);
                 }
 
                 @Override
                 public void onFailure(Call<PostActionResponse> call, Throwable t) {
+                    post.setLikeLoading(false);
                     Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show();
+                    bind(post);
                 }
             });
         }
 
         private void handleFavoriteAction(Context context, ContentItem post) {
+            if (post.isFavoriteLoading()) return;
+
             if (!UserManager.getInstance(context).isLoggedIn().getValue()) {
                 context.startActivity(new Intent(context, LoginActivity.class));
                 return;
             }
+
+            post.setFavoriteLoading(true);
+            bind(post);
 
             String token = UserManager.getInstance(context).getToken();
             PostActionRequest request = new PostActionRequest(token, post.getId());
@@ -395,21 +437,24 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             apiService.favoritePost(request).enqueue(new Callback<PostActionResponse>() {
                 @Override
                 public void onResponse(Call<PostActionResponse> call, Response<PostActionResponse> response) {
+                    post.setFavoriteLoading(false);
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         PostActionResponse.Data data = response.body().getData();
                         if (data != null) {
                             post.setFavorited(data.isFavorited());
                             post.setFavoriteCount(data.getFavoriteCount());
-                            bind(post);
                         }
                     } else {
                         Toast.makeText(context, "操作失败", Toast.LENGTH_SHORT).show();
                     }
+                    bind(post);
                 }
 
                 @Override
                 public void onFailure(Call<PostActionResponse> call, Throwable t) {
+                    post.setFavoriteLoading(false);
                     Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show();
+                    bind(post);
                 }
             });
         }

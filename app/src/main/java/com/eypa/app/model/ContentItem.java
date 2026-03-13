@@ -40,6 +40,9 @@ public class ContentItem {
     @SerializedName("is_favorited")
     private boolean isFavorited;
 
+    private transient boolean isLikeLoading = false;
+    private transient boolean isFavoriteLoading = false;
+
     private int type = 0;
 
     @SerializedName("zib_other_data")
@@ -199,12 +202,15 @@ public class ContentItem {
         @SerializedName("avatar_urls")
         private AvatarUrls avatarUrls;
         private boolean isFollowing;
+        private boolean isFollowLoading;
 
         public int getId() { return id; }
         public String getName() { return name; }
         public AvatarUrls getAvatarUrls() { return avatarUrls; }
         public boolean isFollowing() { return isFollowing; }
         public void setFollowing(boolean following) { isFollowing = following; }
+        public boolean isFollowLoading() { return isFollowLoading; }
+        public void setFollowLoading(boolean followLoading) { isFollowLoading = followLoading; }
         public static class AvatarUrls {
             @SerializedName("96")
             private String small;
@@ -242,6 +248,11 @@ public class ContentItem {
     public boolean isFavorited() { return isFavorited; }
     public void setFavorited(boolean favorited) { isFavorited = favorited; }
     
+    public boolean isLikeLoading() { return isLikeLoading; }
+    public void setLikeLoading(boolean likeLoading) { isLikeLoading = likeLoading; }
+    public boolean isFavoriteLoading() { return isFavoriteLoading; }
+    public void setFavoriteLoading(boolean favoriteLoading) { isFavoriteLoading = favoriteLoading; }
+
     public int getType() { return type; }
     public void setType(int type) { this.type = type; }
 

@@ -168,6 +168,7 @@ public class DetailViewModel extends AndroidViewModel {
                         ContentItem post = postData.getValue();
                         if (post != null && post.getAuthor() != null && post.getAuthor().getId() == authorId) {
                             post.getAuthor().setFollowing(data.isFollowing());
+                            post.getAuthor().setFollowLoading(false);
                             postData.setValue(post);
                         }
                         
@@ -186,14 +187,24 @@ public class DetailViewModel extends AndroidViewModel {
 
                         if (onSuccess != null) onSuccess.run();
                     }
+                } else {
+                    resetFollowLoadingState(authorId);
                 }
             }
 
             @Override
             public void onFailure(Call<com.eypa.app.model.user.FollowResponse> call, Throwable t) {
-                // 不做处理
+                resetFollowLoadingState(authorId);
             }
         });
+    }
+
+    private void resetFollowLoadingState(int authorId) {
+        ContentItem post = postData.getValue();
+        if (post != null && post.getAuthor() != null && post.getAuthor().getId() == authorId) {
+            post.getAuthor().setFollowLoading(false);
+            postData.setValue(post);
+        }
     }
 
     public void onLoginNavigationHandled() {

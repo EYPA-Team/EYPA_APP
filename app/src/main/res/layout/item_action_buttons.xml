@@ -11,11 +11,21 @@
     <LinearLayout
         android:id="@+id/action_like_container"
         style="@style/ActionButtonContainer">
-        <ImageView
-            android:id="@+id/action_like_icon"
+        <FrameLayout
             android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_action_like"/>
+            android:layout_height="24dp">
+            <ImageView
+                android:id="@+id/action_like_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_action_like"/>
+            <ProgressBar
+                android:id="@+id/action_like_progress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:indeterminateTint="?attr/colorPrimary" />
+        </FrameLayout>
         <TextView
             android:id="@+id/action_like_count"
             android:layout_width="wrap_content"
@@ -29,11 +39,21 @@
     <LinearLayout
         android:id="@+id/action_favorite_container"
         style="@style/ActionButtonContainer">
-        <ImageView
-            android:id="@+id/action_favorite_icon"
+        <FrameLayout
             android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_action_favorite"/>
+            android:layout_height="24dp">
+            <ImageView
+                android:id="@+id/action_favorite_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_action_favorite"/>
+            <ProgressBar
+                android:id="@+id/action_favorite_progress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:indeterminateTint="?attr/colorPrimary" />
+        </FrameLayout>
         <TextView
             android:id="@+id/action_favorite_count"
             android:layout_width="wrap_content"
