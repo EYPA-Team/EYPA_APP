@@ -154,6 +154,7 @@ public class DetailViewModel extends AndroidViewModel {
     public void followUser(int authorId, Runnable onSuccess) {
         String token = UserManager.getInstance(getApplication()).getToken();
         if (token == null) {
+            resetFollowLoadingState(authorId);
             navigateToLogin.setValue(true);
             return;
         }
