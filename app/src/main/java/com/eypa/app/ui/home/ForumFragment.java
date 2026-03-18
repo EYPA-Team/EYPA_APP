@@ -53,8 +53,8 @@ public class ForumFragment extends Fragment {
     private int retryCount = 0;
     private String currentTab = "";
 
-    private final String[] tabTitles = {"最新发布", "最新回复", "最多浏览", "精华", "提问", "最多点赞", "最多评分"};
-    private final String[] tabValues = {"new", "reply", "views", "essence", "question", "like", "score"};
+    private final String[] tabTitles = {"最新发布", "最新回复", "最多浏览", "精华", "提问", "最多点赞"};
+    private final String[] tabValues = {"new", "reply", "views", "essence", "question", "like"};
 
     @Nullable
     @Override
