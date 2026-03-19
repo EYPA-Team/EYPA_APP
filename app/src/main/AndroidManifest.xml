@@ -96,6 +96,11 @@
             android:exported="false"
             android:label="@string/reset_password" />
 
+        <activity
+            android:name=".ui.message.MessageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Eypa.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

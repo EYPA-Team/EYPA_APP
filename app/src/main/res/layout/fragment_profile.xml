@@ -174,10 +174,32 @@
                 android:textColor="?android:attr/textColorPrimary" />
         </LinearLayout>
 
-        <Space
+        <LinearLayout
+            android:id="@+id/card_messages"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_columnWeight="1" />
+            android:layout_columnWeight="1"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_message"
+                app:tint="?android:attr/textColorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="消息"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textColor="?android:attr/textColorPrimary" />
+        </LinearLayout>
 
         <Space
             android:layout_width="0dp"

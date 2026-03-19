@@ -119,6 +119,14 @@ public class ProfileFragment extends Fragment {
             startActivity(new Intent(requireContext(), HistoryActivity.class));
         });
 
+        view.findViewById(R.id.card_messages).setOnClickListener(v -> {
+            if (!UserManager.getInstance(requireContext()).isLoggedIn().getValue()) {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+            } else {
+                startActivity(new Intent(requireContext(), com.eypa.app.ui.message.MessageActivity.class));
+            }
+        });
+
         UserManager.getInstance(requireContext()).getUserProfile().observe(getViewLifecycleOwner(), this::updateProfileUI);
         
         UserManager.getInstance(requireContext()).refreshProfile();
