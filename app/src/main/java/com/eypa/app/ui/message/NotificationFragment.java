@@ -38,15 +38,6 @@ public class NotificationFragment extends Fragment {
     private boolean isLoading = false;
     private boolean hasNextPage = true;
 
-    private android.os.Handler pollHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private Runnable pollRunnable = new Runnable() {
-        @Override
-        public void run() {
-            silentRefreshData();
-            pollHandler.postDelayed(this, 10000);
-        }
-    };
-
     public static NotificationFragment newInstance(String tabType) {
         NotificationFragment fragment = new NotificationFragment();
         Bundle args = new Bundle();
@@ -117,13 +108,6 @@ public class NotificationFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshData();
-        pollHandler.postDelayed(pollRunnable, 10000);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        pollHandler.removeCallbacks(pollRunnable);
     }
 
     private void silentRefreshData() {

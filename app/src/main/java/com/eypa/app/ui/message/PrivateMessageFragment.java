@@ -36,15 +36,6 @@ public class PrivateMessageFragment extends Fragment {
     private boolean isLoading = false;
     private boolean hasNextPage = true;
 
-    private android.os.Handler pollHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private Runnable pollRunnable = new Runnable() {
-        @Override
-        public void run() {
-            silentRefreshData();
-            pollHandler.postDelayed(this, 10000);
-        }
-    };
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,19 +90,6 @@ public class PrivateMessageFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshData();
-        pollHandler.postDelayed(pollRunnable, 10000);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        pollHandler.removeCallbacks(pollRunnable);
-    }
-
-    private void silentRefreshData() {
-        currentPage = 1;
-        hasNextPage = true;
-        loadData(true, false);
     }
 
     private void refreshData() {
