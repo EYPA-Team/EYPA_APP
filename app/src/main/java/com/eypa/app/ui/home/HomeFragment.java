@@ -35,6 +35,7 @@ import com.eypa.app.model.ContentItem;
 import com.eypa.app.model.SliderItem;
 import com.eypa.app.utils.CategoryCacheManager;
 import com.eypa.app.utils.SearchHistoryManager;
+import com.eypa.app.utils.UserManager;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
