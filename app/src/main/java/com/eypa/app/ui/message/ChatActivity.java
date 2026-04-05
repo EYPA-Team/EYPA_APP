@@ -1,7 +1,12 @@
 package com.eypa.app.ui.message;
 
 import android.os.Bundle;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -20,8 +25,10 @@ import com.eypa.app.model.message.ChatRecord;
 import com.eypa.app.model.message.ChatRecordRequest;
 import com.eypa.app.model.message.ChatRecordResponse;
 import com.eypa.app.model.message.ChatSendRequest;
+import com.eypa.app.ui.home.AuthorProfileActivity;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UserManager;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.Collections;
 
@@ -283,11 +290,43 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        MenuItem moreItem = menu.findItem(R.id.action_more);
+        if (moreItem != null && moreItem.getIcon() != null) {
+            int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            int color = (currentNightMode == Configuration.UI_MODE_NIGHT_YES) ? Color.WHITE : Color.BLACK;
+            moreItem.getIcon().setTint(color);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
+        } else if (item.getItemId() == R.id.action_more) {
+            showActionSheet();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showActionSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = LayoutInflater.from(this).inflate(R.layout.layout_chat_actions_sheet, null);
+
+        sheetView.findViewById(R.id.action_view_user).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            AuthorProfileActivity.start(this, targetId);
+        });
+
+        sheetView.findViewById(R.id.action_cancel).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
     }
 }
