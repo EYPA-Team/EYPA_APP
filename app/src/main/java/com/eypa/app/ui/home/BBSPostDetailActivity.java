@@ -484,6 +484,10 @@ public class BBSPostDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.author_profile_menu, menu);
+        MenuItem messageItem = menu.findItem(R.id.action_message);
+        if (messageItem != null) {
+            messageItem.setVisible(false);
+        }
         MenuItem moreItem = menu.findItem(R.id.action_more);
         if (moreItem != null && moreItem.getIcon() != null) {
             int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;

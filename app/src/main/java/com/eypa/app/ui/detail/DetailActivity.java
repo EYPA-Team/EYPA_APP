@@ -1318,6 +1318,10 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.author_profile_menu, menu);
+        MenuItem messageItem = menu.findItem(R.id.action_message);
+        if (messageItem != null) {
+            messageItem.setVisible(false);
+        }
         MenuItem moreItem = menu.findItem(R.id.action_more);
         if (moreItem != null && moreItem.getIcon() != null) {
             moreItem.getIcon().setTint(android.graphics.Color.WHITE);
