@@ -35,6 +35,7 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private EditText etMessage;
     private android.widget.Button btnSend;
+    private android.widget.ProgressBar sendProgress;
 
     private ChatAdapter adapter;
     private ContentApiService apiService;
@@ -82,6 +83,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler_view);
         etMessage = findViewById(R.id.et_message);
         btnSend = findViewById(R.id.btn_send);
+        sendProgress = findViewById(R.id.send_progress);
 
         adapter = new ChatAdapter();
         
@@ -135,11 +137,16 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             btnSend.setEnabled(false);
+            btnSend.animate().alpha(0f).setDuration(200).withEndAction(() -> btnSend.setVisibility(android.view.View.INVISIBLE)).start();
+            sendProgress.setAlpha(0f);
+            sendProgress.setVisibility(android.view.View.VISIBLE);
+            sendProgress.animate().alpha(1f).setDuration(200).start();
+
             ChatSendRequest request = new ChatSendRequest(token, targetId, content);
             apiService.sendChatMessage(request).enqueue(new Callback<com.eypa.app.model.message.ChatSendResponse>() {
                 @Override
                 public void onResponse(Call<com.eypa.app.model.message.ChatSendResponse> call, Response<com.eypa.app.model.message.ChatSendResponse> response) {
-                    btnSend.setEnabled(true);
+                    resetSendButton();
                     if (response.isSuccessful() && response.body() != null) {
                         com.eypa.app.model.message.ChatSendResponse sendResponse = response.body();
                         if (sendResponse.getCode() == 200 && sendResponse.getData() != null) {
@@ -156,13 +163,21 @@ public class ChatActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<com.eypa.app.model.message.ChatSendResponse> call, Throwable t) {
-                    btnSend.setEnabled(true);
+                    resetSendButton();
                     Toast.makeText(ChatActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
         refreshData();
+    }
+
+    private void resetSendButton() {
+        sendProgress.animate().alpha(0f).setDuration(200).withEndAction(() -> sendProgress.setVisibility(android.view.View.GONE)).start();
+        btnSend.setAlpha(0f);
+        btnSend.setVisibility(android.view.View.VISIBLE);
+        btnSend.setEnabled(true);
+        btnSend.animate().alpha(1f).setDuration(200).start();
     }
 
     private void refreshData() {

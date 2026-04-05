@@ -80,6 +80,14 @@
                 android:textColor="?attr/colorPrimary"
                 android:textStyle="bold"/>
 
+            <ProgressBar
+                android:id="@+id/send_progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="?attr/colorPrimary" />
+
         </FrameLayout>
 
     </LinearLayout>
