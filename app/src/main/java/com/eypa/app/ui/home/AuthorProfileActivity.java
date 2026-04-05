@@ -78,6 +78,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
     private AppBarLayout appBarLayout;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
+    private String authorAvatarUrl = "";
 
     public static void start(Context context, int userId) {
         Intent intent = new Intent(context, AuthorProfileActivity.class);
@@ -229,6 +230,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
         AuthorInfoResponse.BaseInfo base = data.getBase();
         if (base != null) {
             tvName.setText(base.getName());
+            authorAvatarUrl = base.getAvatar() != null ? base.getAvatar() : "";
             if (toolbarTitle != null) {
                 toolbarTitle.setText(base.getName());
             }
@@ -387,6 +389,10 @@ public class AuthorProfileActivity extends AppCompatActivity {
         if (moreItem != null && moreItem.getIcon() != null) {
             moreItem.getIcon().setTint(android.graphics.Color.WHITE);
         }
+        MenuItem messageItem = menu.findItem(R.id.action_message);
+        if (messageItem != null && messageItem.getIcon() != null) {
+            messageItem.getIcon().setTint(android.graphics.Color.WHITE);
+        }
         return true;
     }
 
@@ -397,6 +403,17 @@ public class AuthorProfileActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.action_more) {
             showActionSheet();
+            return true;
+        } else if (item.getItemId() == R.id.action_message) {
+            if (!Boolean.TRUE.equals(UserManager.getInstance(this).isLoggedIn().getValue())) {
+                startActivity(new Intent(this, LoginActivity.class));
+                return true;
+            }
+            Intent intent = new Intent(this, com.eypa.app.ui.message.ChatActivity.class);
+            intent.putExtra("target_id", userId);
+            intent.putExtra("target_name", tvName.getText().toString());
+            intent.putExtra("target_avatar", authorAvatarUrl);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
