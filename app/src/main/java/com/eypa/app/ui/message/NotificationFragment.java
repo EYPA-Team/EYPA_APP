@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -30,6 +32,7 @@ public class NotificationFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+    private TextView tvEmpty;
     private NotificationAdapter adapter;
     private ContentApiService apiService;
 
@@ -63,6 +66,8 @@ public class NotificationFragment extends Fragment {
 
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recycler_view);
+        tvEmpty = view.findViewById(R.id.tv_empty);
+        tvEmpty.setText("暂无内容");
 
         adapter = new NotificationAdapter();
         adapter.setOnItemClickListener(new NotificationAdapter.OnItemClickListener() {
@@ -184,6 +189,13 @@ public class NotificationFragment extends Fragment {
                     if (notifResponse.getCode() == 200) {
                         if (isRefresh) {
                             adapter.setItems(notifResponse.getData());
+                            if (notifResponse.getData() == null || notifResponse.getData().isEmpty()) {
+                                tvEmpty.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else {
+                                tvEmpty.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
                         } else {
                             adapter.addItems(notifResponse.getData());
                         }
@@ -196,8 +208,14 @@ public class NotificationFragment extends Fragment {
                     } else if (getContext() != null) {
                         Toast.makeText(getContext(), notifResponse.getMsg(), Toast.LENGTH_SHORT).show();
                     }
-                } else if (getContext() != null) {
-                    Toast.makeText(getContext(), "获取通知失败", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (isRefresh) {
+                        tvEmpty.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "获取通知失败", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
@@ -206,6 +224,10 @@ public class NotificationFragment extends Fragment {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
                 adapter.setLoadingFooterVisible(false);
+                if (isRefresh && adapter.getItemCount() == 0) {
+                    tvEmpty.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                }
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }

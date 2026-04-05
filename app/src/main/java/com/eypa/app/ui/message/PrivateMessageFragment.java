@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -29,6 +31,7 @@ public class PrivateMessageFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+    private TextView tvEmpty;
     private MessageAdapter adapter;
     private ContentApiService apiService;
 
@@ -45,6 +48,8 @@ public class PrivateMessageFragment extends Fragment {
 
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recycler_view);
+        tvEmpty = view.findViewById(R.id.tv_empty);
+        tvEmpty.setText("暂无消息");
 
         adapter = new MessageAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -135,6 +140,13 @@ public class PrivateMessageFragment extends Fragment {
                     if (messageResponse.getCode() == 200) {
                         if (isRefresh) {
                             adapter.setMessages(messageResponse.getData());
+                            if (messageResponse.getData() == null || messageResponse.getData().isEmpty()) {
+                                tvEmpty.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else {
+                                tvEmpty.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
                         } else {
                             adapter.addMessages(messageResponse.getData());
                         }
@@ -147,8 +159,14 @@ public class PrivateMessageFragment extends Fragment {
                     } else if (getContext() != null) {
                         Toast.makeText(getContext(), messageResponse.getMsg(), Toast.LENGTH_SHORT).show();
                     }
-                } else if (getContext() != null) {
-                    Toast.makeText(getContext(), "获取私信失败", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (isRefresh) {
+                        tvEmpty.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "获取私信失败", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
@@ -157,6 +175,10 @@ public class PrivateMessageFragment extends Fragment {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
                 adapter.setLoadingFooterVisible(false);
+                if (isRefresh && adapter.getItemCount() == 0) {
+                    tvEmpty.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                }
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
