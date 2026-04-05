@@ -35,6 +35,15 @@ public class MessageActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean hasNextPage = true;
 
+    private android.os.Handler pollHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable pollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            silentRefreshData();
+            pollHandler.postDelayed(this, 10000);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applyTheme(this);
@@ -87,25 +96,42 @@ public class MessageActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         refreshData();
+        pollHandler.postDelayed(pollRunnable, 10000);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pollHandler.removeCallbacks(pollRunnable);
+    }
+
+    private void silentRefreshData() {
+        currentPage = 1;
+        hasNextPage = true;
+        loadData(true, false);
     }
 
     private void refreshData() {
         currentPage = 1;
         hasNextPage = true;
-        loadData(true);
+        loadData(true, true);
     }
 
     private void loadMoreData() {
         currentPage++;
-        loadData(false);
+        loadData(false, true);
     }
 
-    private void loadData(boolean isRefresh) {
+    private void loadData(boolean isRefresh, boolean showIndicator) {
         if (isLoading) return;
         isLoading = true;
-        if (isRefresh) {
+        if (isRefresh && showIndicator) {
             swipeRefreshLayout.setRefreshing(true);
         }
 
