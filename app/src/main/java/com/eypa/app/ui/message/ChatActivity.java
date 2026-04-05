@@ -2,6 +2,8 @@ package com.eypa.app.ui.message;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,67 +16,98 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.api.ContentApiService;
-import com.eypa.app.model.message.MessageRequest;
-import android.content.Intent;
-import com.eypa.app.model.message.MessageResponse;
+import com.eypa.app.model.message.ChatRecord;
+import com.eypa.app.model.message.ChatRecordRequest;
+import com.eypa.app.model.message.ChatRecordResponse;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UserManager;
+
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MessageActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private MessageAdapter adapter;
+    private EditText etMessage;
+    private ImageButton btnSend;
+
+    private ChatAdapter adapter;
     private ContentApiService apiService;
+
+    private int targetId;
+    private String targetName;
+    private String targetAvatar;
 
     private int currentPage = 1;
     private boolean isLoading = false;
     private boolean hasNextPage = true;
 
+    private void applyCustomTheme() {
+        int themeId = getSharedPreferences("AppSettings", MODE_PRIVATE).getInt("ThemeId", R.style.Theme_EYPA_APP);
+        setTheme(themeId);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applyTheme(this);
+        applyCustomTheme();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_chat);
+
+        targetId = getIntent().getIntExtra("target_id", -1);
+        targetName = getIntent().getStringExtra("target_name");
+        targetAvatar = getIntent().getStringExtra("target_avatar");
+
+        if (targetId == -1) {
+            Toast.makeText(this, "无效的用户", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("消息");
+            getSupportActionBar().setTitle(targetName != null ? targetName : "聊天");
         }
 
         apiService = ApiClient.getClient().create(ContentApiService.class);
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         recyclerView = findViewById(R.id.recycler_view);
+        etMessage = findViewById(R.id.et_message);
+        btnSend = findViewById(R.id.btn_send);
 
-        adapter = new MessageAdapter();
+        adapter = new ChatAdapter();
+        
+        String myAvatar = "";
+        if (UserManager.getInstance(this).getUserProfile().getValue() != null) {
+            myAvatar = UserManager.getInstance(this).getUserProfile().getValue().getAvatar();
+        }
+        adapter.setAvatars(targetAvatar, myAvatar);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
-        adapter.setOnItemClickListener(item -> {
-            Intent intent = new Intent(this, ChatActivity.class);
-            if (item.getTargetUser() != null) {
-                intent.putExtra("target_id", item.getTargetUser().getId());
-                intent.putExtra("target_name", item.getTargetUser().getName());
-                intent.putExtra("target_avatar", item.getTargetUser().getAvatar());
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            if (hasNextPage && !isLoading) {
+                loadMoreData();
+            } else {
+                swipeRefreshLayout.setRefreshing(false);
             }
-            startActivity(intent);
         });
-
-        swipeRefreshLayout.setOnRefreshListener(this::refreshData);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0) {
+                if (dy < 0) {
                     int visibleItemCount = layoutManager.getChildCount();
                     int totalItemCount = layoutManager.getItemCount();
                     int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
@@ -86,6 +119,14 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 }
             }
+        });
+
+        btnSend.setOnClickListener(v -> {
+            String content = etMessage.getText().toString().trim();
+            if (content.isEmpty()) {
+                return;
+            }
+            Toast.makeText(ChatActivity.this, "发送消息接口未配置", Toast.LENGTH_SHORT).show();
         });
 
         refreshData();
@@ -105,6 +146,7 @@ public class MessageActivity extends AppCompatActivity {
     private void loadData(boolean isRefresh) {
         if (isLoading) return;
         isLoading = true;
+        
         if (isRefresh) {
             swipeRefreshLayout.setRefreshing(true);
         }
@@ -118,40 +160,43 @@ public class MessageActivity extends AppCompatActivity {
             return;
         }
 
-        MessageRequest request = new MessageRequest(token, currentPage);
-        apiService.getMessages(request).enqueue(new Callback<MessageResponse>() {
+        ChatRecordRequest request = new ChatRecordRequest(token, targetId, currentPage);
+        apiService.getChatRecords(request).enqueue(new Callback<ChatRecordResponse>() {
             @Override
-            public void onResponse(Call<MessageResponse> call, Response<MessageResponse> response) {
+            public void onResponse(Call<ChatRecordResponse> call, Response<ChatRecordResponse> response) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    MessageResponse messageResponse = response.body();
-                    if (messageResponse.getCode() == 200) {
-                        if (isRefresh) {
-                            adapter.setMessages(messageResponse.getData());
-                        } else {
-                            adapter.addMessages(messageResponse.getData());
+                    ChatRecordResponse chatResponse = response.body();
+                    if (chatResponse.getCode() == 200) {
+                        if (chatResponse.getData() != null) {
+                            Collections.reverse(chatResponse.getData());
+                            if (isRefresh) {
+                                adapter.setRecords(chatResponse.getData());
+                            } else {
+                                adapter.addRecords(chatResponse.getData());
+                            }
                         }
 
-                        if (messageResponse.getPagination() != null) {
-                            hasNextPage = messageResponse.getPagination().isHasNext();
+                        if (chatResponse.getPagination() != null) {
+                            hasNextPage = chatResponse.getPagination().isHasNext();
                         } else {
                             hasNextPage = false;
                         }
                     } else {
-                        Toast.makeText(MessageActivity.this, messageResponse.getMsg(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChatActivity.this, chatResponse.getMsg(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(MessageActivity.this, "获取消息失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChatActivity.this, "获取聊天记录失败", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<MessageResponse> call, Throwable t) {
+            public void onFailure(Call<ChatRecordResponse> call, Throwable t) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(MessageActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

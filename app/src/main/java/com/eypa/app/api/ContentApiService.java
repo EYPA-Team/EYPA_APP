@@ -35,6 +35,8 @@ import com.eypa.app.model.user.TokenRequest;
 import com.eypa.app.model.bbs.BBSPostDetailRequest;
 import com.eypa.app.model.bbs.BBSPostDetailResponse;
 import com.eypa.app.model.bbs.BBSPostListResponse;
+import com.eypa.app.model.message.ChatRecordRequest;
+import com.eypa.app.model.message.ChatRecordResponse;
 import com.eypa.app.model.message.MessageRequest;
 import com.eypa.app.model.message.MessageResponse;
 
@@ -176,4 +178,8 @@ public interface ContentApiService {
     // 消息列表
     @POST("eu-json/app/v1/message/private/users")
     Call<MessageResponse> getMessages(@Body MessageRequest request);
+
+    // 聊天记录
+    @POST("eu-json/app/v1/message/private/records")
+    Call<ChatRecordResponse> getChatRecords(@Body ChatRecordRequest request);
 }

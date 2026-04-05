@@ -101,6 +101,11 @@
             android:exported="false"
             android:theme="@style/Theme.Eypa.NoActionBar" />
 
+        <activity
+            android:name=".ui.message.ChatActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Eypa.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
