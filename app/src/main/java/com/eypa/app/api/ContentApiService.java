@@ -43,6 +43,8 @@ import com.eypa.app.model.message.ChatSendRequest;
 import com.eypa.app.model.message.ChatSendResponse;
 import com.eypa.app.model.message.NotificationRequest;
 import com.eypa.app.model.message.NotificationResponse;
+import com.eypa.app.model.message.MessageCountRequest;
+import com.eypa.app.model.message.MessageCountResponse;
 
 import java.util.List;
 
@@ -194,4 +196,8 @@ public interface ContentApiService {
     // 系统消息/通知列表
     @POST("eu-json/app/v1/message/lists")
     Call<NotificationResponse> getNotificationList(@Body NotificationRequest request);
+
+    // 获取未读消息数量
+    @POST("eu-json/app/v1/message/counts")
+    Call<MessageCountResponse> getMessageCounts(@Body MessageCountRequest request);
 }

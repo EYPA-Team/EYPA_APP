@@ -6,6 +6,7 @@
         android:id="@+id/action_message"
         android:icon="@drawable/ic_message"
         android:title="消息"
+        app:actionLayout="@layout/layout_menu_item_message"
         app:showAsAction="always" />
 
     <item

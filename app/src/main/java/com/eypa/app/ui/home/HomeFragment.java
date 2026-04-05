@@ -84,6 +84,9 @@ public class HomeFragment extends Fragment {
     private SearchView mSearchView;
     private Call<List<ContentItem>> currentSearchCall;
 
+    // 消息相关
+    private View mRedDotView;
+
     // 搜索历史相关
     private LinearLayout searchHistoryLayout;
     private RecyclerView historyRecyclerView;
@@ -112,6 +115,39 @@ public class HomeFragment extends Fragment {
         initViews(view);
         loadPosts();
         loadSlider();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchMessageCount();
+    }
+
+    private void fetchMessageCount() {
+        if (mRedDotView == null) return;
+        if (UserManager.getInstance(requireContext()).isLoggedIn().getValue() != Boolean.TRUE) {
+            mRedDotView.setVisibility(View.GONE);
+            return;
+        }
+
+        String token = UserManager.getInstance(requireContext()).getToken();
+        ApiClient.getApiService().getMessageCounts(new com.eypa.app.model.message.MessageCountRequest(token))
+                .enqueue(new Callback<com.eypa.app.model.message.MessageCountResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<com.eypa.app.model.message.MessageCountResponse> call, @NonNull Response<com.eypa.app.model.message.MessageCountResponse> response) {
+                        if (isAdded() && response.isSuccessful() && response.body() != null) {
+                            if (response.body().getCode() == 200 && response.body().getData() != null) {
+                                int count = response.body().getData().getAll();
+                                mRedDotView.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<com.eypa.app.model.message.MessageCountResponse> call, @NonNull Throwable t) {
+                        // 不做处理
+                    }
+                });
     }
 
     private void initViews(View view) {
@@ -698,6 +734,21 @@ public class HomeFragment extends Fragment {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         MenuItem messageItem = menu.findItem(R.id.action_message);
         
+        View messageActionView = messageItem.getActionView();
+        if (messageActionView != null) {
+            messageActionView.setOnClickListener(v -> {
+                if (UserManager.getInstance(requireContext()).isLoggedIn().getValue() == Boolean.TRUE) {
+                    android.content.Intent intent = new android.content.Intent(requireContext(), com.eypa.app.ui.message.MessageActivity.class);
+                    startActivity(intent);
+                } else {
+                    android.content.Intent intent = new android.content.Intent(requireContext(), LoginActivity.class);
+                    startActivity(intent);
+                }
+            });
+            mRedDotView = messageActionView.findViewById(R.id.v_red_dot);
+            fetchMessageCount();
+        }
+        
         mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint("搜索文章...");
 
@@ -771,16 +822,6 @@ public class HomeFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_message) {
-            if (UserManager.getInstance(requireContext()).isLoggedIn().getValue() == Boolean.TRUE) {
-                android.content.Intent intent = new android.content.Intent(requireContext(), com.eypa.app.ui.message.MessageActivity.class);
-                startActivity(intent);
-            } else {
-                android.content.Intent intent = new android.content.Intent(requireContext(), LoginActivity.class);
-                startActivity(intent);
-            }
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
