@@ -45,6 +45,8 @@ import com.eypa.app.model.message.NotificationRequest;
 import com.eypa.app.model.message.NotificationResponse;
 import com.eypa.app.model.message.MessageCountRequest;
 import com.eypa.app.model.message.MessageCountResponse;
+import com.eypa.app.model.message.MessageReadRequest;
+import com.eypa.app.model.message.MessageReadResponse;
 
 import java.util.List;
 
@@ -200,4 +202,8 @@ public interface ContentApiService {
     // 获取未读消息数量
     @POST("eu-json/app/v1/message/counts")
     Call<MessageCountResponse> getMessageCounts(@Body MessageCountRequest request);
+
+    // 标记消息为已读
+    @POST("eu-json/app/v1/message/read")
+    Call<MessageReadResponse> markMessageRead(@Body MessageReadRequest request);
 }

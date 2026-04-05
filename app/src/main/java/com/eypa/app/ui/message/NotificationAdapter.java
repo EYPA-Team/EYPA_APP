@@ -31,6 +31,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public interface OnItemClickListener {
         void onItemClick(NotificationItem item);
+        void onMarkReadClick(NotificationItem item);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -132,6 +133,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 itemHolder.tvContent.setVisibility(View.GONE);
             }
 
+            if (!item.isRead()) {
+                itemHolder.btnMarkRead.setVisibility(View.VISIBLE);
+                itemHolder.btnMarkRead.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onMarkReadClick(item);
+                    }
+                });
+            } else {
+                itemHolder.btnMarkRead.setVisibility(View.GONE);
+                itemHolder.btnMarkRead.setOnClickListener(null);
+            }
+
             itemHolder.itemView.setOnClickListener(v -> {
                 if (expandedIds.contains(item.getId())) {
                     expandedIds.remove(item.getId());
@@ -165,6 +178,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         TextView tvDate;
         TextView tvTitle;
         TextView tvContent;
+        TextView btnMarkRead;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -174,6 +188,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tvDate = itemView.findViewById(R.id.tv_date);
             tvTitle = itemView.findViewById(R.id.tv_title);
             tvContent = itemView.findViewById(R.id.tv_content);
+            btnMarkRead = itemView.findViewById(R.id.btn_mark_read);
         }
     }
 }

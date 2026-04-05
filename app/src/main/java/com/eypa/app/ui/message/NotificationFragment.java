@@ -74,6 +74,18 @@ public class NotificationFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
 
         adapter = new NotificationAdapter();
+        adapter.setOnItemClickListener(new NotificationAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(com.eypa.app.model.message.NotificationItem item) {
+                // 不做处理
+            }
+
+            @Override
+            public void onMarkReadClick(com.eypa.app.model.message.NotificationItem item) {
+                markAsRead(item.getId());
+            }
+        });
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -124,6 +136,31 @@ public class NotificationFragment extends Fragment {
         currentPage = 1;
         hasNextPage = true;
         loadData(true, true);
+    }
+
+    private void markAsRead(String msgId) {
+        if (getContext() == null) return;
+        String token = UserManager.getInstance(getContext()).getToken();
+        if (token == null || token.isEmpty()) return;
+
+        com.eypa.app.model.message.MessageReadRequest request = new com.eypa.app.model.message.MessageReadRequest(token, msgId);
+        apiService.markMessageRead(request).enqueue(new Callback<com.eypa.app.model.message.MessageReadResponse>() {
+            @Override
+            public void onResponse(Call<com.eypa.app.model.message.MessageReadResponse> call, Response<com.eypa.app.model.message.MessageReadResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCode() == 200) {
+                    silentRefreshData();
+                } else if (getContext() != null) {
+                    Toast.makeText(getContext(), response.body() != null ? response.body().getMsg() : "标记已读失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.eypa.app.model.message.MessageReadResponse> call, Throwable t) {
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "网络错误", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void loadMoreData() {
