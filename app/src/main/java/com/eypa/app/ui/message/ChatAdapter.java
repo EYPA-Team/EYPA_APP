@@ -20,10 +20,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_LEFT = 0;
     private static final int TYPE_RIGHT = 1;
+    private static final int TYPE_FOOTER = 2;
 
     private List<ChatRecord> chatRecords = new ArrayList<>();
     private String targetAvatar;
     private String myAvatar;
+    private boolean isLoadingFooterVisible = false;
 
     public void setAvatars(String targetAvatar, String myAvatar) {
         this.targetAvatar = targetAvatar;
@@ -46,8 +48,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemInserted(0);
     }
 
+    public void setLoadingFooterVisible(boolean visible) {
+        if (this.isLoadingFooterVisible != visible) {
+            this.isLoadingFooterVisible = visible;
+            if (visible) {
+                notifyItemInserted(chatRecords.size());
+            } else {
+                notifyItemRemoved(chatRecords.size());
+            }
+        }
+    }
+
     @Override
     public int getItemViewType(int position) {
+        if (isLoadingFooterVisible && position == chatRecords.size()) {
+            return TYPE_FOOTER;
+        }
         ChatRecord record = chatRecords.get(position);
         return record.isMe() ? TYPE_RIGHT : TYPE_LEFT;
     }
@@ -55,6 +71,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
         if (viewType == TYPE_RIGHT) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_right, parent, false);
             return new RightViewHolder(view);
@@ -77,6 +97,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == TYPE_FOOTER) {
+            return;
+        }
+
         ChatRecord record = chatRecords.get(position);
 
         boolean showTime = true;
@@ -98,7 +122,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return chatRecords.size();
+        return chatRecords.size() + (isLoadingFooterVisible ? 1 : 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        public FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     static class LeftViewHolder extends RecyclerView.ViewHolder {

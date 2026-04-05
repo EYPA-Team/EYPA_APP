@@ -128,8 +128,11 @@ public class PrivateMessageFragment extends Fragment {
     private void loadData(boolean isRefresh, boolean showIndicator) {
         if (isLoading) return;
         isLoading = true;
+        
         if (isRefresh && showIndicator) {
             swipeRefreshLayout.setRefreshing(true);
+        } else if (!isRefresh && showIndicator) {
+            adapter.setLoadingFooterVisible(true);
         }
 
         if (getContext() == null) return;
@@ -137,6 +140,7 @@ public class PrivateMessageFragment extends Fragment {
         if (token == null || token.isEmpty()) {
             isLoading = false;
             swipeRefreshLayout.setRefreshing(false);
+            adapter.setLoadingFooterVisible(false);
             return;
         }
 
@@ -146,6 +150,7 @@ public class PrivateMessageFragment extends Fragment {
             public void onResponse(Call<MessageResponse> call, Response<MessageResponse> response) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
+                adapter.setLoadingFooterVisible(false);
 
                 if (response.isSuccessful() && response.body() != null) {
                     MessageResponse messageResponse = response.body();
@@ -173,6 +178,7 @@ public class PrivateMessageFragment extends Fragment {
             public void onFailure(Call<MessageResponse> call, Throwable t) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
+                adapter.setLoadingFooterVisible(false);
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }

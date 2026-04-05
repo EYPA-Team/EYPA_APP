@@ -16,10 +16,14 @@ import com.eypa.app.model.message.MessageItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
+public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_FOOTER = 1;
 
     private List<MessageItem> messageList = new ArrayList<>();
     private OnItemClickListener listener;
+    private boolean isLoadingFooterVisible = false;
 
     public interface OnItemClickListener {
         void onItemClick(MessageItem item);
@@ -35,32 +39,66 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     public void addMessages(List<MessageItem> messages) {
-        int startPosition = this.messageList.size();
-        this.messageList.addAll(messages);
-        notifyItemRangeInserted(startPosition, messages.size());
+        if (messages != null && !messages.isEmpty()) {
+            int startPosition = this.messageList.size();
+            this.messageList.addAll(messages);
+            notifyItemRangeInserted(startPosition, messages.size());
+        }
+    }
+
+    public void setLoadingFooterVisible(boolean visible) {
+        if (this.isLoadingFooterVisible != visible) {
+            this.isLoadingFooterVisible = visible;
+            if (visible) {
+                notifyItemInserted(messageList.size());
+            } else {
+                notifyItemRemoved(messageList.size());
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoadingFooterVisible && position == messageList.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_ITEM;
     }
 
     @NonNull
     @Override
-    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message, parent, false);
         return new MessageViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        MessageItem item = messageList.get(position);
-        holder.bind(item);
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(item);
-            }
-        });
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == TYPE_ITEM) {
+            MessageItem item = messageList.get(position);
+            MessageViewHolder messageHolder = (MessageViewHolder) holder;
+            messageHolder.bind(item);
+            messageHolder.itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return messageList.size();
+        return messageList.size() + (isLoadingFooterVisible ? 1 : 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        public FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {

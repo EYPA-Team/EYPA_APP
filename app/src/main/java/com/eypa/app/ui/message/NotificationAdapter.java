@@ -19,11 +19,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
+public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_ITEM = 0;
+    private static final int TYPE_FOOTER = 1;
 
     private List<NotificationItem> items = new ArrayList<>();
     private Set<String> expandedIds = new HashSet<>();
     private OnItemClickListener listener;
+    private boolean isLoadingFooterVisible = false;
 
     public interface OnItemClickListener {
         void onItemClick(NotificationItem item);
@@ -49,77 +53,109 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         }
     }
 
+    public void setLoadingFooterVisible(boolean visible) {
+        if (this.isLoadingFooterVisible != visible) {
+            this.isLoadingFooterVisible = visible;
+            if (visible) {
+                notifyItemInserted(items.size());
+            } else {
+                notifyItemRemoved(items.size());
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (isLoadingFooterVisible && position == items.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_ITEM;
+    }
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_FOOTER) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        NotificationItem item = items.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == TYPE_ITEM) {
+            NotificationItem item = items.get(position);
+            ViewHolder itemHolder = (ViewHolder) holder;
 
-        if (item.getSender() != null) {
-            holder.tvSenderName.setText(item.getSender().getName());
-            Glide.with(holder.itemView.getContext())
-                    .load(item.getSender().getAvatar())
-                    .placeholder(R.drawable.ic_avatar_placeholder)
-                    .circleCrop()
-                    .into(holder.ivAvatar);
-        } else {
-            holder.tvSenderName.setText("系统通知");
-            holder.ivAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
-        }
-
-        if (item.getTypeText() != null && !item.getTypeText().isEmpty()) {
-            holder.tvTypeText.setVisibility(View.VISIBLE);
-            holder.tvTypeText.setText(item.getTypeText());
-        } else {
-            holder.tvTypeText.setVisibility(View.GONE);
-        }
-
-        holder.tvDate.setText(item.getDateHuman());
-
-        if (item.getTitle() != null && !item.getTitle().isEmpty()) {
-            holder.tvTitle.setVisibility(View.VISIBLE);
-            holder.tvTitle.setText(item.getTitle());
-        } else {
-            holder.tvTitle.setVisibility(View.GONE);
-        }
-
-        if (item.getContent() != null && !item.getContent().isEmpty()) {
-            holder.tvContent.setVisibility(View.VISIBLE);
-            holder.tvContent.setText(Html.fromHtml(item.getContent(), Html.FROM_HTML_MODE_COMPACT));
-            
-            if (expandedIds.contains(item.getId())) {
-                holder.tvContent.setMaxLines(Integer.MAX_VALUE);
-                holder.tvContent.setEllipsize(null);
+            if (item.getSender() != null) {
+                itemHolder.tvSenderName.setText(item.getSender().getName());
+                Glide.with(itemHolder.itemView.getContext())
+                        .load(item.getSender().getAvatar())
+                        .placeholder(R.drawable.ic_avatar_placeholder)
+                        .circleCrop()
+                        .into(itemHolder.ivAvatar);
             } else {
-                holder.tvContent.setMaxLines(3);
-                holder.tvContent.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                itemHolder.tvSenderName.setText("系统通知");
+                itemHolder.ivAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
             }
-        } else {
-            holder.tvContent.setVisibility(View.GONE);
-        }
 
-        holder.itemView.setOnClickListener(v -> {
-            if (expandedIds.contains(item.getId())) {
-                expandedIds.remove(item.getId());
+            if (item.getTypeText() != null && !item.getTypeText().isEmpty()) {
+                itemHolder.tvTypeText.setVisibility(View.VISIBLE);
+                itemHolder.tvTypeText.setText(item.getTypeText());
             } else {
-                expandedIds.add(item.getId());
+                itemHolder.tvTypeText.setVisibility(View.GONE);
             }
-            notifyItemChanged(position);
-            
-            if (listener != null) {
-                listener.onItemClick(item);
+
+            itemHolder.tvDate.setText(item.getDateHuman());
+
+            if (item.getTitle() != null && !item.getTitle().isEmpty()) {
+                itemHolder.tvTitle.setVisibility(View.VISIBLE);
+                itemHolder.tvTitle.setText(item.getTitle());
+            } else {
+                itemHolder.tvTitle.setVisibility(View.GONE);
             }
-        });
+
+            if (item.getContent() != null && !item.getContent().isEmpty()) {
+                itemHolder.tvContent.setVisibility(View.VISIBLE);
+                itemHolder.tvContent.setText(Html.fromHtml(item.getContent(), Html.FROM_HTML_MODE_COMPACT));
+                
+                if (expandedIds.contains(item.getId())) {
+                    itemHolder.tvContent.setMaxLines(Integer.MAX_VALUE);
+                    itemHolder.tvContent.setEllipsize(null);
+                } else {
+                    itemHolder.tvContent.setMaxLines(3);
+                    itemHolder.tvContent.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                }
+            } else {
+                itemHolder.tvContent.setVisibility(View.GONE);
+            }
+
+            itemHolder.itemView.setOnClickListener(v -> {
+                if (expandedIds.contains(item.getId())) {
+                    expandedIds.remove(item.getId());
+                } else {
+                    expandedIds.add(item.getId());
+                }
+                notifyItemChanged(position);
+                
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items.size() + (isLoadingFooterVisible ? 1 : 0);
+    }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        public FooterViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

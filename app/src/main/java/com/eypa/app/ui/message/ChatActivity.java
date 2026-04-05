@@ -225,11 +225,16 @@ public class ChatActivity extends AppCompatActivity {
         if (isLoading) return;
         isLoading = true;
 
+        if (!isRefresh && showIndicator) {
+            adapter.setLoadingFooterVisible(true);
+        }
+
         String token = UserManager.getInstance(this).getToken();
         if (token == null || token.isEmpty()) {
             Toast.makeText(this, "请先登录", Toast.LENGTH_SHORT).show();
             isLoading = false;
             swipeRefreshLayout.setRefreshing(false);
+            adapter.setLoadingFooterVisible(false);
             finish();
             return;
         }
@@ -240,6 +245,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onResponse(Call<ChatRecordResponse> call, Response<ChatRecordResponse> response) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
+                adapter.setLoadingFooterVisible(false);
 
                 if (response.isSuccessful() && response.body() != null) {
                     ChatRecordResponse chatResponse = response.body();
@@ -270,6 +276,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onFailure(Call<ChatRecordResponse> call, Throwable t) {
                 isLoading = false;
                 swipeRefreshLayout.setRefreshing(false);
+                adapter.setLoadingFooterVisible(false);
                 Toast.makeText(ChatActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
