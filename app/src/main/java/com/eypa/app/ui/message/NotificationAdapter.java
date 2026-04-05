@@ -140,9 +140,15 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         listener.onMarkReadClick(item);
                     }
                 });
+                if (itemHolder.vUnreadDot != null) {
+                    itemHolder.vUnreadDot.setVisibility(View.VISIBLE);
+                }
             } else {
                 itemHolder.btnMarkRead.setVisibility(View.GONE);
                 itemHolder.btnMarkRead.setOnClickListener(null);
+                if (itemHolder.vUnreadDot != null) {
+                    itemHolder.vUnreadDot.setVisibility(View.GONE);
+                }
             }
 
             itemHolder.itemView.setOnClickListener(v -> {
@@ -173,6 +179,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivAvatar;
+        View vUnreadDot;
         TextView tvSenderName;
         TextView tvTypeText;
         TextView tvDate;
@@ -183,6 +190,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ViewHolder(View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
+            vUnreadDot = itemView.findViewById(R.id.v_unread_dot);
             tvSenderName = itemView.findViewById(R.id.tv_sender_name);
             tvTypeText = itemView.findViewById(R.id.tv_type_text);
             tvDate = itemView.findViewById(R.id.tv_date);
