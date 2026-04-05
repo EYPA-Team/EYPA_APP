@@ -19,6 +19,7 @@ import com.eypa.app.api.ContentApiService;
 import com.eypa.app.model.message.ChatRecord;
 import com.eypa.app.model.message.ChatRecordRequest;
 import com.eypa.app.model.message.ChatRecordResponse;
+import com.eypa.app.model.message.ChatSendRequest;
 import com.eypa.app.utils.ThemeUtils;
 import com.eypa.app.utils.UserManager;
 
@@ -126,7 +127,39 @@ public class ChatActivity extends AppCompatActivity {
             if (content.isEmpty()) {
                 return;
             }
-            Toast.makeText(ChatActivity.this, "发送消息接口未配置", Toast.LENGTH_SHORT).show();
+            
+            String token = UserManager.getInstance(ChatActivity.this).getToken();
+            if (token == null || token.isEmpty()) {
+                Toast.makeText(ChatActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            btnSend.setEnabled(false);
+            ChatSendRequest request = new ChatSendRequest(token, targetId, content);
+            apiService.sendChatMessage(request).enqueue(new Callback<com.eypa.app.model.message.ChatSendResponse>() {
+                @Override
+                public void onResponse(Call<com.eypa.app.model.message.ChatSendResponse> call, Response<com.eypa.app.model.message.ChatSendResponse> response) {
+                    btnSend.setEnabled(true);
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.eypa.app.model.message.ChatSendResponse sendResponse = response.body();
+                        if (sendResponse.getCode() == 200 && sendResponse.getData() != null) {
+                            etMessage.setText("");
+                            adapter.addRecordToBottom(sendResponse.getData());
+                            recyclerView.scrollToPosition(0);
+                        } else {
+                            Toast.makeText(ChatActivity.this, sendResponse.getMsg(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(ChatActivity.this, "发送失败", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<com.eypa.app.model.message.ChatSendResponse> call, Throwable t) {
+                    btnSend.setEnabled(true);
+                    Toast.makeText(ChatActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         refreshData();

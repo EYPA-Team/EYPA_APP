@@ -39,6 +39,8 @@ import com.eypa.app.model.message.ChatRecordRequest;
 import com.eypa.app.model.message.ChatRecordResponse;
 import com.eypa.app.model.message.MessageRequest;
 import com.eypa.app.model.message.MessageResponse;
+import com.eypa.app.model.message.ChatSendRequest;
+import com.eypa.app.model.message.ChatSendResponse;
 
 import java.util.List;
 
@@ -182,4 +184,8 @@ public interface ContentApiService {
     // 聊天记录
     @POST("eu-json/app/v1/message/private/records")
     Call<ChatRecordResponse> getChatRecords(@Body ChatRecordRequest request);
+
+    // 发送私信
+    @POST("eu-json/app/v1/message/private/send")
+    Call<ChatSendResponse> sendChatMessage(@Body ChatSendRequest request);
 }

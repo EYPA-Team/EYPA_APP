@@ -41,6 +41,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemRangeInserted(start, records.size());
     }
 
+    public void addRecordToBottom(ChatRecord record) {
+        this.chatRecords.add(0, record);
+        notifyItemInserted(0);
+    }
+
     @Override
     public int getItemViewType(int position) {
         ChatRecord record = chatRecords.get(position);
