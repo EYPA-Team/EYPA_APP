@@ -695,6 +695,7 @@ public class HomeFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.home_menu, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
+        MenuItem messageItem = menu.findItem(R.id.action_message);
         
         mSearchView = (SearchView) searchItem.getActionView();
         mSearchView.setQueryHint("搜索文章...");
@@ -769,6 +770,16 @@ public class HomeFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_message) {
+            if (UserManager.getInstance(requireContext()).isLoggedIn().getValue() == Boolean.TRUE) {
+                android.content.Intent intent = new android.content.Intent(requireContext(), com.eypa.app.ui.message.MessageActivity.class);
+                startActivity(intent);
+            } else {
+                android.content.Intent intent = new android.content.Intent(requireContext(), LoginActivity.class);
+                startActivity(intent);
+            }
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

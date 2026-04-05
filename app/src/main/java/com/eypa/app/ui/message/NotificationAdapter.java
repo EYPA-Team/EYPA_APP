@@ -103,8 +103,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.tvContent.setVisibility(View.GONE);
         }
 
-        holder.vUnread.setVisibility(item.isRead() ? View.GONE : View.VISIBLE);
-
         holder.itemView.setOnClickListener(v -> {
             if (expandedIds.contains(item.getId())) {
                 expandedIds.remove(item.getId());
@@ -126,7 +124,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivAvatar;
-        View vUnread;
         TextView tvSenderName;
         TextView tvTypeText;
         TextView tvDate;
@@ -136,7 +133,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         ViewHolder(View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
-            vUnread = itemView.findViewById(R.id.v_unread);
             tvSenderName = itemView.findViewById(R.id.tv_sender_name);
             tvTypeText = itemView.findViewById(R.id.tv_type_text);
             tvDate = itemView.findViewById(R.id.tv_date);
