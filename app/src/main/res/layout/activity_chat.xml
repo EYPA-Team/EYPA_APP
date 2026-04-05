@@ -44,7 +44,7 @@
         android:id="@+id/layout_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="?android:attr/colorBackground"
         android:elevation="4dp"
         android:orientation="horizontal"
         android:padding="8dp"
@@ -55,22 +55,32 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/bg_comment_section"
             android:hint="输入消息..."
-            android:maxLines="4"
-            android:minHeight="40dp"
-            android:padding="8dp"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:padding="10dp"
+            android:textSize="14sp"
+            android:backgroundTint="@color/edit_text_tint"
+            android:layout_marginEnd="8dp"
+            android:maxLines="3"
+            android:inputType="textMultiLine"/>
 
-        <ImageButton
-            android:id="@+id/btn_send"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:layout_gravity="bottom"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_play_arrow"
-            app:tint="?attr/colorPrimary" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="发送"
+                android:minWidth="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"/>
+
+        </FrameLayout>
 
     </LinearLayout>
 

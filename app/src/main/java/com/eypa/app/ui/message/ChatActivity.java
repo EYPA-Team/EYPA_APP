@@ -33,7 +33,7 @@ public class ChatActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private EditText etMessage;
-    private ImageButton btnSend;
+    private android.widget.Button btnSend;
 
     private ChatAdapter adapter;
     private ContentApiService apiService;
