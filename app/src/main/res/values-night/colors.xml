@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="placeholder_color">#333333</color>
-
+    <color name="chat_bubble_left_bg">#2D2D2D</color>
     <color name="tag_background">#333333</color>
     <color name="quote_background">#1E1E1E</color>
     <color name="quote_text_color">#B0B0B0</color>
-
     <color name="content_link_color">#90CAF9</color>
 </resources>
