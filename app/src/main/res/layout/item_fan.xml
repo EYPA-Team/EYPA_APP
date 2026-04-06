@@ -23,7 +23,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
         app:layout_constraintStart_toEndOf="@id/iv_avatar"
-        app:layout_constraintEnd_toStartOf="@id/btn_follow"
+        app:layout_constraintEnd_toStartOf="@id/fl_follow"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -74,18 +74,31 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_follow"
+    <FrameLayout
+        android:id="@+id/fl_follow"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="关注"
-        android:minHeight="40dp"
-        android:textSize="14sp"
-        android:background="@android:color/transparent"
-        android:textColor="?attr/colorPrimary"
-        android:textStyle="bold"
+        android:layout_height="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btn_follow"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="关注"
+            android:textSize="14sp"
+            android:background="@android:color/transparent"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"/>
+
+        <ProgressBar
+            android:id="@+id/pb_follow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateTint="?attr/colorPrimary" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

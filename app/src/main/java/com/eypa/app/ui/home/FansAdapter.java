@@ -24,6 +24,7 @@ import com.eypa.app.model.user.FanItem;
 import com.eypa.app.model.user.FollowRequest;
 import com.eypa.app.model.user.FollowResponse;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import com.eypa.app.utils.UserManager;
 
 import java.util.ArrayList;
@@ -117,6 +118,7 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView tvLevel;
         TextView tvDesc;
         Button btnFollow;
+        ProgressBar pbFollow;
 
         public FanViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -125,6 +127,7 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvLevel = itemView.findViewById(R.id.tv_level);
             tvDesc = itemView.findViewById(R.id.tv_desc);
             btnFollow = itemView.findViewById(R.id.btn_follow);
+            pbFollow = itemView.findViewById(R.id.pb_follow);
 
             itemView.setOnClickListener(v -> {
                 if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
@@ -134,6 +137,12 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         void bind(FanItem fan) {
+            btnFollow.animate().cancel();
+            btnFollow.setAlpha(1f);
+            btnFollow.setVisibility(View.VISIBLE);
+            btnFollow.setEnabled(true);
+            pbFollow.setVisibility(View.GONE);
+
             tvName.setText(fan.getName());
             tvDesc.setText(fan.getDesc());
 
@@ -184,6 +193,9 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void toggleFollow(FanItem fan) {
             btnFollow.setEnabled(false);
+            btnFollow.animate().alpha(0f).setDuration(200).withEndAction(() -> btnFollow.setVisibility(View.INVISIBLE)).start();
+            pbFollow.setVisibility(View.VISIBLE);
+            
             ContentApiService apiService = ApiClient.getClient().create(ContentApiService.class);
             String token = UserManager.getInstance(context).getToken();
             
@@ -193,6 +205,10 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } catch (NumberFormatException e) {
                 Toast.makeText(context, "无效的用户ID", Toast.LENGTH_SHORT).show();
                 btnFollow.setEnabled(true);
+                btnFollow.animate().cancel();
+                btnFollow.setAlpha(1f);
+                btnFollow.setVisibility(View.VISIBLE);
+                pbFollow.setVisibility(View.GONE);
                 return;
             }
 
@@ -201,7 +217,11 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onResponse(Call<FollowResponse> call, Response<FollowResponse> response) {
                     btnFollow.setEnabled(true);
-            if (response.isSuccessful() && response.body() != null) {
+                    btnFollow.setVisibility(View.VISIBLE);
+                    btnFollow.animate().alpha(1f).setDuration(200).start();
+                    pbFollow.setVisibility(View.GONE);
+                    
+                    if (response.isSuccessful() && response.body() != null) {
                         if (response.body().getCode() == 200) {
                             boolean newStatus = !fan.isFollowing();
                             fan.setFollowing(newStatus);
@@ -213,6 +233,9 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onFailure(Call<FollowResponse> call, Throwable t) {
                     btnFollow.setEnabled(true);
+                    btnFollow.setVisibility(View.VISIBLE);
+                    btnFollow.animate().alpha(1f).setDuration(200).start();
+                    pbFollow.setVisibility(View.GONE);
                 }
             });
         }
