@@ -10,8 +10,8 @@ android {
         applicationId "com.eypa.app"
         minSdk 27
         targetSdk 34
-        versionCode 7
-        versionName "0.5.0209B"
+        versionCode 8
+        versionName "0.5.0406B"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
