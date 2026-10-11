@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
 
@@ -42,7 +42,7 @@ public class AuthorView extends LinearLayout {
 
         // 加载作者头像
         if (author.getAvatarUrls() != null && author.getAvatarUrls().getMedium() != null) {
-            Glide.with(getContext())
+            MediaImages.with(getContext())
                     .load(author.getAvatarUrls().getMedium())
                     .circleCrop()
                     .placeholder(R.drawable.ic_person)

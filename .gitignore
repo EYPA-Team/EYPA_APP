@@ -34,3 +34,7 @@ google-services.json
 
 # Visual Studio Code
 .vscode/
+
+# Local build, diagnostic and publishing artifacts
+artifacts/
+*.signing.json

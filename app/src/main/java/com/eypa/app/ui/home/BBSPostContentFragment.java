@@ -35,10 +35,11 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.eypa.app.R;
+import com.eypa.app.utils.HtmlUtils;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.model.bbs.BBSPost;
 import com.eypa.app.model.user.FollowRequest;
@@ -117,7 +118,7 @@ public class BBSPostContentFragment extends Fragment {
 
         if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
             ivCover.setVisibility(View.VISIBLE);
-            Glide.with(this)
+            MediaImages.with(this)
                     .load(post.getMedia().coverImage)
                     .into(ivCover);
             
@@ -157,7 +158,7 @@ public class BBSPostContentFragment extends Fragment {
 
         if (post.getAuthorInfo() != null) {
             tvAuthorName.setText(post.getAuthorInfo().name);
-            Glide.with(this)
+            MediaImages.with(this)
                     .load(post.getAuthorInfo().avatar)
                     .circleCrop()
                     .into(ivAvatar);
@@ -300,7 +301,7 @@ public class BBSPostContentFragment extends Fragment {
             return;
         }
 
-        String processedHtml = processCustomSmilies(html);
+        String processedHtml = processCustomSmilies(HtmlUtils.restoreMediaImages(html));
 
         Spanned spanned = HtmlCompat.fromHtml(
                 processedHtml,
@@ -374,7 +375,7 @@ public class BBSPostContentFragment extends Fragment {
             if (textView != null) {
                 DrawableTarget target = new DrawableTarget(urlDrawable, textView, source);
                 urlDrawable.setDrawableTarget(target);
-                Glide.with(textView.getContext())
+                MediaImages.with(textView.getContext())
                         .load(source)
                         .placeholder(R.drawable.placeholder_image)
                         .into(target);

@@ -24,8 +24,9 @@ import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
+import com.eypa.app.utils.ResourceDownloads;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.api.ContentApiService;
 import com.eypa.app.model.ContentItem;
@@ -216,7 +217,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
 
             if (author != null && author.getAvatarUrls() != null && author.getAvatarUrls().getMedium() != null) {
-                Glide.with(itemView.getContext()).load(author.getAvatarUrls().getMedium()).circleCrop().placeholder(R.drawable.ic_person).into(avatarView);
+                MediaImages.with(itemView.getContext()).load(author.getAvatarUrls().getMedium()).circleCrop().placeholder(R.drawable.ic_person).into(avatarView);
             } else {
                 avatarView.setImageResource(R.drawable.ic_person);
             }
@@ -577,7 +578,7 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         ImageView imageView;
         ImageViewHolder(@NonNull ImageView itemView) { super(itemView); this.imageView = itemView; }
         void bind(ImageBlock block) {
-            Glide.with(itemView.getContext()).load(block.getImageUrl()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(imageView);
+            MediaImages.with(itemView.getContext()).load(block.getImageUrl()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(imageView);
             imageView.setOnClickListener(v -> {
                 Context context = itemView.getContext();
                 if (context instanceof AppCompatActivity) {
@@ -606,6 +607,12 @@ public class ContentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 String url = block.getDownloadUrl();
                 if (url != null && !url.trim().isEmpty()) {
                     try {
+                        if (ResourceDownloads.isManaged(itemView.getContext(), url)) {
+                            downloadButton.setEnabled(false);
+                            ResourceDownloads.save(itemView.getContext(), url, block.getFileName(), false,
+                                    () -> downloadButton.setEnabled(true));
+                            return;
+                        }
                         itemView.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
                     } catch (Exception e) {
                         Toast.makeText(itemView.getContext(), "无法打开链接", Toast.LENGTH_SHORT).show();

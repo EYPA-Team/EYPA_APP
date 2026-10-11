@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.message.NotificationItem;
 
@@ -92,7 +92,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             if (item.getSender() != null) {
                 itemHolder.tvSenderName.setText(item.getSender().getName());
-                Glide.with(itemHolder.itemView.getContext())
+                MediaImages.with(itemHolder.itemView.getContext())
                         .load(item.getSender().getAvatar())
                         .placeholder(R.drawable.ic_avatar_placeholder)
                         .circleCrop()

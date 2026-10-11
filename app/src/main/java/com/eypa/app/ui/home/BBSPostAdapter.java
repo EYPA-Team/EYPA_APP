@@ -20,7 +20,7 @@ import android.text.style.ReplacementSpan;
 import android.util.TypedValue;
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
 import com.eypa.app.model.bbs.BBSPost;
@@ -77,7 +77,7 @@ public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         if (post.getAuthorInfo() != null) {
             itemHolder.tvAuthorName.setText(post.getAuthorInfo().name);
-            Glide.with(context)
+            MediaImages.with(context)
                     .load(post.getAuthorInfo().avatar)
                     .circleCrop()
                     .placeholder(R.drawable.ic_person)
@@ -108,7 +108,7 @@ public class BBSPostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         if (post.getMedia() != null && post.getMedia().coverImage != null && !post.getMedia().coverImage.isEmpty()) {
             itemHolder.ivCover.setVisibility(View.VISIBLE);
-            Glide.with(context)
+            MediaImages.with(context)
                     .load(post.getMedia().coverImage)
                     .centerCrop()
                     .transition(DrawableTransitionOptions.withCrossFade())

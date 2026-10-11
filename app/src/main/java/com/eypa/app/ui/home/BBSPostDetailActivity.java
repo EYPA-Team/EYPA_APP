@@ -26,7 +26,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.db.HistoryManager;

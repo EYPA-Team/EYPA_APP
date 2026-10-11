@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
@@ -146,7 +146,7 @@ public class FansAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvName.setText(fan.getName());
             tvDesc.setText(fan.getDesc());
 
-            Glide.with(context)
+            MediaImages.with(context)
                     .load(fan.getAvatar())
                     .transform(new CircleCrop())
                     .placeholder(R.drawable.ic_avatar_placeholder)

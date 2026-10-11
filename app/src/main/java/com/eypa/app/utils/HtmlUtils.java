@@ -9,6 +9,9 @@ import android.text.util.Linkify;
 import android.widget.TextView;
 
 import androidx.core.text.HtmlCompat;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +32,7 @@ public class HtmlUtils {
         }
 
         // 1. 处理自定义表情标签 [g=xxx/yyy.gif]
-        String processedHtml = processCustomSmilies(html);
+        String processedHtml = processCustomSmilies(restoreMediaImages(html));
 
         // 2. 使用 GlideImageGetter 解析 img 标签得到初步的 Spanned
         Spanned spanned = HtmlCompat.fromHtml(
@@ -76,6 +79,17 @@ public class HtmlUtils {
         }
         // 仅仅做基础的 HTML 标签解析（如 <b>, <i> 等）
         return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY);
+    }
+
+    /** Restore the V3 deferred URL before Android's HTML parser reads img.src. */
+    public static String restoreMediaImages(String html) {
+        if (html == null || !html.contains("data-eu-r2-src")) return html;
+        Document document = Jsoup.parseBodyFragment(html);
+        for (Element image : document.select("img[data-eu-r2-src]")) {
+            String source = image.attr("data-eu-r2-src");
+            if (!source.isEmpty()) image.attr("src", source);
+        }
+        return document.body().html();
     }
 
     /**

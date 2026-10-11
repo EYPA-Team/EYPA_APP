@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.api.ContentApiService;
@@ -170,7 +170,7 @@ public class ProfileFragment extends Fragment {
             tvDesc.setText(user.getDesc() != null ? user.getDesc() : "暂无简介");
             
             if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-                Glide.with(this)
+                MediaImages.with(this)
                     .load(user.getAvatar())
                     .circleCrop()
                     .placeholder(R.drawable.ic_person)

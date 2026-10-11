@@ -2,6 +2,7 @@ package com.eypa.app.ui.widget;
 
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -125,7 +126,7 @@ public class ZoomableImageView extends AppCompatImageView implements View.OnTouc
         viewWidth = MeasureSpec.getSize(widthMeasureSpec);
         viewHeight = MeasureSpec.getSize(heightMeasureSpec);
         
-        if (oldMeasuredHeight == viewWidth && oldMeasuredHeight == viewHeight
+        if (oldMeasuredWidth == viewWidth && oldMeasuredHeight == viewHeight
                 || viewWidth == 0 || viewHeight == 0)
             return;
         oldMeasuredHeight = viewHeight;
@@ -134,7 +135,7 @@ public class ZoomableImageView extends AppCompatImageView implements View.OnTouc
         if (saveScale == 1) {
             float scale;
 
-            if (getDrawable() == null || getDrawable().getIntrinsicWidth() == 0 || getDrawable().getIntrinsicHeight() == 0)
+            if (getDrawable() == null || getDrawable().getIntrinsicWidth() <= 0 || getDrawable().getIntrinsicHeight() <= 0)
                 return;
             int bmWidth = getDrawable().getIntrinsicWidth();
             int bmHeight = getDrawable().getIntrinsicHeight();
@@ -156,6 +157,21 @@ public class ZoomableImageView extends AppCompatImageView implements View.OnTouc
             setImageMatrix(matrix);
         }
         fixTrans();
+    }
+
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        super.setImageDrawable(drawable);
+        // Glide replaces a placeholder after the view has already been measured.
+        // Refit the new drawable even when the view's width/height stay the same.
+        if (matrix != null) {
+            matrix.reset();
+            mSaveScale = 1f;
+            oldMeasuredWidth = 0;
+            oldMeasuredHeight = 0;
+            setImageMatrix(matrix);
+            requestLayout();
+        }
     }
 
     @Override

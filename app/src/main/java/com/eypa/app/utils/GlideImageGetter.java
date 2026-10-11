@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -32,7 +32,7 @@ public class GlideImageGetter implements Html.ImageGetter {
         TextView textView = container.get();
         if (textView != null) {
             // 关键修改：移除 .asBitmap()，直接加载 Drawable
-            Glide.with(textView.getContext())
+            MediaImages.with(textView.getContext())
                     .load(source)
                     .into(new DrawableTarget(urlDrawable, textView));
         }

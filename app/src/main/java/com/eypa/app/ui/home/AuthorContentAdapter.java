@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
 import com.eypa.app.ui.detail.DetailActivity;
@@ -60,7 +60,7 @@ public class AuthorContentAdapter extends RecyclerView.Adapter<RecyclerView.View
             itemHolder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
             
             if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(itemHolder.itemView.getContext())
+                MediaImages.with(itemHolder.itemView.getContext())
                         .load(imageUrl)
                         .centerCrop()
                         .placeholder(R.drawable.placeholder_image_small)

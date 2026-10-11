@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
@@ -129,7 +129,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             circularProgressDrawable.setColorSchemeColors(colorPrimary);
             circularProgressDrawable.start();
 
-            Glide.with(postHolder.itemView.getContext())
+            MediaImages.with(postHolder.itemView.getContext())
                     .load(imageUrl)
                     .placeholder(circularProgressDrawable)
                     .error(R.drawable.placeholder_image)
@@ -251,7 +251,7 @@ public class PostsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             holder.title.setText(item.getTitle());
             holder.desc.setText(item.getDesc());
             
-            Glide.with(holder.itemView.getContext())
+            MediaImages.with(holder.itemView.getContext())
                     .load(item.getImage())
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)

@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.message.ChatRecord;
 
@@ -149,7 +149,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTime.setVisibility(showTime ? View.VISIBLE : View.GONE);
 
             if (avatarUrl != null && !avatarUrl.isEmpty()) {
-                Glide.with(itemView.getContext())
+                MediaImages.with(itemView.getContext())
                         .load(avatarUrl)
                         .circleCrop()
                         .placeholder(R.drawable.ic_person)
@@ -179,7 +179,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tvTime.setVisibility(showTime ? View.VISIBLE : View.GONE);
 
             if (avatarUrl != null && !avatarUrl.isEmpty()) {
-                Glide.with(itemView.getContext())
+                MediaImages.with(itemView.getContext())
                         .load(avatarUrl)
                         .circleCrop()
                         .placeholder(R.drawable.ic_person)

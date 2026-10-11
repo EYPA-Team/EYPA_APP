@@ -15,7 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.user.AuthorInfoResponse;
 
@@ -97,7 +97,7 @@ public class MedalsActivity extends AppCompatActivity {
             
              if (medal.getIcon() != null && !medal.getIcon().isEmpty()) {
                  if (medal.getIcon().toLowerCase().endsWith(".svg")) {
-                     Glide.with(holder.itemView.getContext())
+                     MediaImages.with(holder.itemView.getContext())
                              .as(android.graphics.drawable.PictureDrawable.class)
                              .load(medal.getIcon())
                              .placeholder(R.drawable.ic_medal)
@@ -105,7 +105,7 @@ public class MedalsActivity extends AppCompatActivity {
                              .listener(new com.eypa.app.utils.svg.SvgSoftwareLayerSetter())
                              .into(holder.ivIcon);
                  } else {
-                     Glide.with(holder.itemView.getContext())
+                     MediaImages.with(holder.itemView.getContext())
                              .load(medal.getIcon())
                              .placeholder(R.drawable.ic_medal)
                              .error(R.drawable.ic_medal)

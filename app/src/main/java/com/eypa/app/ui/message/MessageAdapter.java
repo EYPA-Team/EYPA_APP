@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.message.MessageItem;
 
@@ -120,7 +120,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public void bind(MessageItem item) {
             if (item.getTargetUser() != null) {
                 tvName.setText(item.getTargetUser().getName());
-                Glide.with(itemView.getContext())
+                MediaImages.with(itemView.getContext())
                         .load(item.getTargetUser().getAvatar())
                         .circleCrop()
                         .placeholder(R.drawable.ic_person)

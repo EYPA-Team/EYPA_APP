@@ -13,7 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.user.UserProfile;
 import com.eypa.app.utils.ThemeUtils;
@@ -117,7 +117,7 @@ public class HomeActivity extends AppCompatActivity {
         if (user != null && user.getAvatar() != null && !user.getAvatar().isEmpty()) {
             toolbarAvatar.setPadding(0, 0, 0, 0);
             toolbarAvatar.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Glide.with(this)
+            MediaImages.with(this)
                     .load(user.getAvatar())
                     .circleCrop()
                     .placeholder(R.drawable.ic_person)

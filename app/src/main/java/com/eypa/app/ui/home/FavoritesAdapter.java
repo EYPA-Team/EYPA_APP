@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.eypa.app.R;
 import com.eypa.app.model.ContentItem;
@@ -50,7 +50,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         holder.coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(holder.itemView.getContext())
+            MediaImages.with(holder.itemView.getContext())
                     .load(imageUrl)
                     .centerCrop()
                     .placeholder(R.drawable.placeholder_image_small)

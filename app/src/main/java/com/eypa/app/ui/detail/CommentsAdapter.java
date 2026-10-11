@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.model.Comment;
 import com.eypa.app.ui.detail.model.CommentBlock;
@@ -391,7 +391,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 contentView.setText("");
             }
 
-            Glide.with(context).load(comment.getAvatarUrl()).circleCrop()
+            MediaImages.with(context).load(comment.getAvatarUrl()).circleCrop()
                     .placeholder(R.drawable.ic_person).error(R.drawable.ic_person).into(avatarView);
 
             avatarView.setOnClickListener(v -> {

@@ -93,7 +93,10 @@ public class ContentParser {
         Elements images = element.select("img");
         if (!images.isEmpty()) {
             for (Element img : images) {
-                String imageUrl = img.attr("data-src");
+                String imageUrl = img.attr("data-eu-r2-src");
+                if (TextUtils.isEmpty(imageUrl)) {
+                    imageUrl = img.attr("data-src");
+                }
                 if (TextUtils.isEmpty(imageUrl)) {
                     imageUrl = img.attr("src");
                 }

@@ -43,13 +43,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
+import com.eypa.app.api.ResourceClient;
 import com.eypa.app.ui.home.LoginActivity;
 import com.eypa.app.utils.ReportDialogUtils;
 import com.eypa.app.utils.ThemeUtils;
@@ -65,6 +68,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.ArrayList;
 import java.util.List;
 
+@androidx.annotation.OptIn(markerClass = UnstableApi.class)
 public class DetailActivity extends AppCompatActivity implements DetailContentFragment.OnEpisodeInteractionListener {
 
     public static final String EXTRA_POST_ID = "post_id";
@@ -580,7 +584,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
         String imageUrl = post.getBestImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
             coverImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Glide.with(this)
+            MediaImages.with(this)
                     .load(imageUrl)
                     .error(R.drawable.placeholder_image)
                     .into(coverImage);
@@ -773,8 +777,9 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             }
             
             holder.itemView.setOnClickListener(v -> {
-                if (currentMusicIndex != position) {
-                    currentMusicIndex = position;
+                int selectedPosition = holder.getBindingAdapterPosition();
+                if (selectedPosition != RecyclerView.NO_POSITION && currentMusicIndex != selectedPosition) {
+                    currentMusicIndex = selectedPosition;
                     initializeMusicPlayer(currentMusicIndex, true);
                     notifyDataSetChanged();
                     dialog.dismiss();
@@ -807,7 +812,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             
             String coverUrl = music.getCover();
             if (coverUrl != null && !coverUrl.isEmpty()) {
-                Glide.with(this)
+                MediaImages.with(this)
                         .load(coverUrl)
                         .placeholder(R.drawable.placeholder_image)
                         .error(R.drawable.placeholder_image)
@@ -815,7 +820,7 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             } else {
                 ContentItem post = viewModel.getPostData().getValue();
                 String articleCover = post != null ? post.getBestImageUrl() : null;
-                Glide.with(this)
+                MediaImages.with(this)
                         .load(articleCover)
                         .placeholder(R.drawable.placeholder_image)
                         .into(musicCoverBg);
@@ -830,9 +835,18 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
             player.release();
             stopMusicProgressUpdater();
         }
-        player = new ExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(ResourceClient.mediaSourceFactory(this)).build();
         
         player.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                musicLoading.setVisibility(View.GONE);
+                btnPlayPause.setVisibility(View.VISIBLE);
+                stopMusicProgressUpdater();
+                Toast.makeText(DetailActivity.this, "音频播放失败，请检查登录状态和资源权限", Toast.LENGTH_LONG).show();
+            }
+
             @Override
             public void onPlaybackStateChanged(int playbackState) {
                 if (playbackState == Player.STATE_BUFFERING) {
@@ -1092,9 +1106,15 @@ public class DetailActivity extends AppCompatActivity implements DetailContentFr
 
     private void initializePlayer(String videoUrl, boolean startPlayback) {
         if (player != null) player.release();
-        player = new ExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(ResourceClient.mediaSourceFactory(this)).build();
 
         player.addListener(new Player.Listener() {
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                Toast.makeText(DetailActivity.this, "视频播放失败，请检查登录状态和资源权限", Toast.LENGTH_LONG).show();
+            }
+
             @Override
             public void onPlaybackStateChanged(int playbackState) {
                 if (playbackState == Player.STATE_READY || playbackState == Player.STATE_BUFFERING) {

@@ -24,7 +24,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.eypa.app.utils.MediaImages;
 import com.eypa.app.R;
 import com.eypa.app.api.ApiClient;
 import com.eypa.app.api.ContentApiService;
@@ -234,7 +234,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
             if (toolbarTitle != null) {
                 toolbarTitle.setText(base.getName());
             }
-            Glide.with(this)
+            MediaImages.with(this)
                 .load(base.getAvatar())
                 .placeholder(R.drawable.ic_avatar_placeholder)
                 .error(R.drawable.ic_avatar_placeholder)
@@ -271,7 +271,7 @@ public class AuthorProfileActivity extends AppCompatActivity {
 
         AuthorInfoResponse.ProfileInfo profile = data.getProfile();
         if (profile != null) {
-            Glide.with(this).load(profile.getCover()).into(ivCover);
+            MediaImages.with(this).load(profile.getCover()).into(ivCover);
             
             ivCover.setOnClickListener(v -> {
                 if (profile.getCover() != null && !profile.getCover().isEmpty()) {
